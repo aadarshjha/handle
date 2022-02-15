@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import os 
 
-def plot_training_validation(train_loss, train_acc, experiment_name):
+def plot_training_validation(train_loss, train_acc, val_loss, val_acc, experiment_name):
 
     # plot the train_loss vs validation_loss in a 5 subplots
     fig, axs = plt.subplots(2, 3)
 
     axs[0,0].plot(train_loss[0], label='train_loss')
+    axs[0,0].plot(val_loss[0], label='val_loss')
     axs[0,0].set_title('Fold 1')
 
     # set the x axis as epoch and y axis as loss
@@ -14,6 +15,7 @@ def plot_training_validation(train_loss, train_acc, experiment_name):
     axs[0,0].set_ylabel('Loss')
 
     axs[0,1].plot(train_loss[1], label='train_loss')
+    axs[0,0].plot(val_loss[1], label='val_loss')
     axs[0,1].set_title('Fold 2')
 
     axs[0,1].set_xlabel('Epoch')
@@ -59,12 +61,14 @@ def plot_training_validation(train_loss, train_acc, experiment_name):
     fig, axs = plt.subplots(2, 3)
 
     axs[0,0].plot(train_acc[0], label='train_acc')
+    axs[0,0].plot(val_acc[0], label='val_acc')
     axs[0,0].set_title('Fold 1')
 
     axs[0,0].set_xlabel('Epoch')
     axs[0,0].set_ylabel('Accuracy')
 
     axs[0,1].plot(train_acc[1], label='train_acc')
+    axs[0,0].plot(val_acc[2], label='val_acc')
     axs[0,1].set_title('Fold 2')
 
     axs[0,1].set_xlabel('Epoch')

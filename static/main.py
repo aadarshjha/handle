@@ -123,7 +123,8 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         scores = model.evaluate(X[test], y[test], verbose=verbose)
 
         # save the predictions from the model.evaluate
-        predictions = model.predict(X_test)
+        y_prob = model.predict(X_test)
+        predictions = y_prob.argmax(axis=-1)
 
         # compute the precision, recall, f1 score, and accuracy
         precision = precision_score(y_test, predictions, average='weighted')
@@ -139,9 +140,6 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
         # cache the predictions for micro use 
         predictions_cache.append(predictions)
-
-        # one score where you precision score, recall score, f1 score, and accuracy score => macrpo 
-        # predictions, vs truth array pass that into metrics. => micro
 
         # save the training loss and accuracy 
         train_loss.append(history.history['loss'])
@@ -161,6 +159,8 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         print("Recall: ", recall)
         print("F1: ", f1)
         print("Accuracy: ", accuracy)
+
+        print("\n")
 
         model_cache.append(model)
 
@@ -220,6 +220,8 @@ def execute_testing(model_cache, X, y, experiment_name='exper1'):
         temp_obj = {"Test loss": scores[0], "Test accuracy": scores[1], "Confusion matrix": cur_cfx, "Recall": recall, "Precision": precision, "F1": f1}
         JSON_data["Fold {}".format(counter)] = temp_obj
 
+        # print()
+
         counter += 1 
 
     # average the test loss and test accuracy across all folds and save into JSON
@@ -270,11 +272,11 @@ if __name__ == "__main__":
     X, y = augment_data(imagepaths)
 
     # execute the training pipeline
-    model_cache, train_loss, train_acc, _,_,_,_,_,_,_ = execute_training(X, y, hyperparameters["EXPERIMENT_NAME"], 
+    model_cache, train_loss, train_acc, val_loss, val_acc,_,_,_,_,_ = execute_training(X, y, hyperparameters["EXPERIMENT_NAME"], 
         hyperparameters["CONFIG"]["NUM_FOLDS"], hyperparameters["CONFIG"]["EPOCHS"], 
         hyperparameters["CONFIG"]["BATCH_SIZE"], hyperparameters["CONFIG"]["VERBOSE"], 
         hyperparameters["CONFIG"]["OPTIMIZER"], hyperparameters["CONFIG"]["LOSS"])
 
-    # plot_training_validation(train_loss, train_acc, hyperparameters["EXPERIMENT_NAME"])
+    plot_training_validation(train_loss, train_acc, val_loss, val_acc, hyperparameters["EXPERIMENT_NAME"])
 
     # execute_testing(model_cache, X, y, hyperparameters["EXPERIMENT_NAME"])
