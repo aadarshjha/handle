@@ -15,6 +15,8 @@ from keras.layers import Dense, Flatten
 import json
 
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+gpus= tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(gpus[0], True)
 
 # custom plotting
 from plot import * 

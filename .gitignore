@@ -2,3 +2,4 @@
 data/leapGestRecog
 static/test.py
 data/leapGestRecog.zip
+static/__pycache__
