@@ -94,10 +94,7 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
     train_loss = [] 
     train_acc = []
-
-    validation_loss = [] 
-    validation_acc = []
-
+    
     # train across folds
     for train, test in kfold.split(X, y):
 
@@ -106,7 +103,7 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
         # add output to the string buffer: 
         print("For Fold: " + str(fold_no))
-        
+
         history = model.fit(X[train], y[train], batch_size=batch_size, epochs=epochs, verbose=verbose)
         scores = model.evaluate(X[test], y[test], verbose=verbose)
 
@@ -114,17 +111,13 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         train_loss.append(history.history['loss'])
         train_acc.append(history.history['accuracy'])
 
-        # save the validation loss and accuracy
-        validation_loss.append(history.history['val_loss'])
-        validation_acc.append(history.history['val_accuracy'])
-
         # print the test loss and test accuracy
         print("Test loss: ", scores[0])
         print("Test accuracy: ", scores[1])
 
         fold_no += 1
 
-    return model_cache, train_loss, train_acc, validation_loss, validation_acc
+    return model_cache, train_loss, train_acc
     
 def execute_testing(model_cache, X, y, experiment_name='exper1'):
 
@@ -228,6 +221,6 @@ if __name__ == "__main__":
         hyperparameters["CONFIG"]["BATCH_SIZE"], hyperparameters["CONFIG"]["VERBOSE"], 
         hyperparameters["CONFIG"]["OPTIMIZER"], hyperparameters["CONFIG"]["LOSS"])
 
-    plot_training_validation(train_loss, train_acc, validation_loss, validation_acc, hyperparameters["EXPERIMENT_NAME"])
+    plot_training_validation(train_loss, train_acc, hyperparameters["EXPERIMENT_NAME"])
 
     execute_testing(model_cache, X, y, hyperparameters["EXPERIMENT_NAME"])
