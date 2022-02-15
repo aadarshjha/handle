@@ -176,7 +176,7 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
         fold_no += 1
 
-    return model_cache, train_loss, train_acc, val_loss, val_acc, predictions_cache, precision_history, recall_history, f1_history, accuracy_history
+    return model_cache, train_loss, train_acc, val_loss, val_acc, predictions_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history
     
 def execute_micro_macro_metrics(model_cache, X, y, experiment_name='exper1'):
 
@@ -291,7 +291,8 @@ if __name__ == "__main__":
     X, y = augment_data(imagepaths)
 
     # execute the training pipeline
-    model_cache, train_loss, train_acc, val_loss, val_acc,_,_,_,_,_ = execute_training(X, y, hyperparameters["EXPERIMENT_NAME"], 
+    model_cache, train_loss, train_acc, val_loss, val_acc, predictions_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history = \
+        execute_training(X, y, hyperparameters["EXPERIMENT_NAME"], 
         hyperparameters["CONFIG"]["NUM_FOLDS"], hyperparameters["CONFIG"]["EPOCHS"], 
         hyperparameters["CONFIG"]["BATCH_SIZE"], hyperparameters["CONFIG"]["VERBOSE"], 
         hyperparameters["CONFIG"]["OPTIMIZER"], hyperparameters["CONFIG"]["LOSS"])
