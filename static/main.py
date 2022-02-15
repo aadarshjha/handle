@@ -8,10 +8,11 @@ import sys
 import yaml
 import pandas as pd
 from sklearn.model_selection import KFold
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers import Dense, Flatten
+import json
 
 # custom plotting
 from plot import * 
@@ -120,7 +121,15 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
     
 def execute_testing(model_cache, X, y, experiment_name='exper1'):
 
+    # cache data into a JSON
+    JSON_data = {}  
+
+    loss_history = []
+    acc_history = []
     confusion_history = [] 
+    recall_history = [] 
+    precision_history = []
+    f1_history = [] 
 
     # test all models in the model_cache array on the entire dataset
     counter = 1
@@ -129,29 +138,52 @@ def execute_testing(model_cache, X, y, experiment_name='exper1'):
         print("Fold: " + str(counter))
         print("Test loss: " + str(scores[0]))
         print("Test accuracy: " + str(scores[1]))
-        print("\n")
-        counter += 1 
+
+        loss_history.append(scores[0])
+        acc_history.append(scores[1])
 
         # create confusion matrix and store in confusion_history
-        confusion_history.append(confusion_matrix(y, model.predict_classes(X)))
-    
+        cur_cfx = confusion_matrix(y, model.predict_classes(X))
+        confusion_history.append(cur_cfx)
+
+
+        # compute precision score, recall score, and f1 score
+        recall = recall_score(y, model.predict_classes(X))
+        precision = precision_score(y, model.predict_classes(X))
+        f1 = f1_score(y, model.predict_classes(X))
+
+        print("Recall: ", recall)
+        print("Precision: ", precision)
+        print("F1: ", f1)
+
+        recall_history.append(recall)
+        precision_history.append(precision)
+        f1_history.append(f1)
+
+        temp_obj = {"Test loss": scores[0], "Test accuracy": scores[1], "Confusion matrix": cur_cfx, "Recall": recall, "Precision": precision, "F1": f1}
+        JSON_data["Fold {}".format(counter)] = temp_obj
+
+        counter += 1 
+
+    # average the test loss and test accuracy across all folds and save into JSON
+    JSON_data["Average"] = {"Test loss": np.mean(loss_history), "Test accuracy": np.mean(acc_history), "Confusion Matrix": np.mean(confusion_history, axis=0), "Recall": np.mean(recall_history), "Precision": np.mean(precision_history), "F1": np.mean(f1_history)}
+
     # take the average of the confusion matrices
     confusion_matrix = np.mean(confusion_history, axis=0)
 
     # save the confusion matrix as an image 
     plt.imshow(confusion_matrix, cmap='binary')
-    plt.savefig("logs/confusion_matrix_" + str(experiment_name) + ".png")
+    plt.savefig("logs/" + experiment_name + "/confusion_matrix_" + str(experiment_name) + ".png")
 
+    # save the JSON_data to a file
+    with open("logs/" + experiment_name + "/" + experiment_name + "_data.json", 'w') as outfile:
+        json.dump(JSON_data, outfile)
 
 def extract_hyperparameters(filename): 
     hyperparams = None 
-
     with open("experiments/{}.yaml".format(filename), "r") as f: 
         hyperparameters = yaml.load(f, Loader=yaml.FullLoader)
-
     return hyperparameters
-
-
 
 if __name__ == "__main__":
 
@@ -174,5 +206,3 @@ if __name__ == "__main__":
     plot_training_validation(train_loss, train_acc, validation_loss, validation_acc, hyperparameters["EXPERIMENT_NAME"])
 
     execute_testing(model_cache, X, y, hyperparameters["EXPERIMENT_NAME"])
-
-    plot_and_save_testing()

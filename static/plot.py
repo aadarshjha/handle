@@ -9,21 +9,37 @@ def plot_training_validation(train_loss, train_acc, validation_loss, validation_
     axs[0,0].plot(validation_loss[0], label='validation_loss')
     axs[0,0].set_title('Fold 1')
 
+    # set the x axis as epoch and y axis as loss
+    axs[0,0].set_xlabel('Epoch')
+    axs[0,0].set_ylabel('Loss')
+
     axs[0,1].plot(train_loss[1], label='train_loss')
     axs[0,1].plot(validation_loss[1], label='validation_loss')
     axs[0,1].set_title('Fold 2')
+
+    axs[0,1].set_xlabel('Epoch')
+    axs[0,1].set_ylabel('Loss')
 
     axs[0,2].plot(train_loss[2], label='train_loss')
     axs[0,2].plot(validation_loss[2], label='validation_loss')
     axs[0,2].set_title('Fold 3')
 
+    axs[0,2].set_xlabel('Epoch')
+    axs[0,2].set_ylabel('Loss')
+
     axs[1,0].plot(train_loss[3], label='train_loss')
     axs[1,0].plot(validation_loss[3], label='validation_loss')
     axs[1,0].set_title('Fold 4')
 
+    axs[1,0].set_xlabel('Epoch')
+    axs[1,0].set_ylabel('Loss')
+
     axs[1,1].plot(train_loss[4], label='train_loss')
     axs[1,1].plot(validation_loss[4], label='validation_loss')
     axs[1,1].set_title('Fold 5')
+
+    axs[1,1].set_xlabel('Epoch')
+    axs[1,1].set_ylabel('Loss')
 
     # remove the subplot at the bottom right
     fig.delaxes(axs[1,2])
@@ -39,7 +55,7 @@ def plot_training_validation(train_loss, train_acc, validation_loss, validation_
 
     # save the image
 
-    plt.savefig("logs/training_loss_" + experiment_name + ".png")
+    plt.savefig("logs/" + experiment_name + "/training_loss_" + experiment_name + ".png")
 
     # clear the plot
     plt.clf()
@@ -51,21 +67,37 @@ def plot_training_validation(train_loss, train_acc, validation_loss, validation_
     axs[0,0].plot(validation_acc[0], label='validation_acc')
     axs[0,0].set_title('Fold 1')
 
+    axs[0,0].set_xlabel('Epoch')
+    axs[0,0].set_ylabel('Accuracy')
+
     axs[0,1].plot(train_acc[1], label='train_acc')
     axs[0,1].plot(validation_acc[1], label='validation_acc')
     axs[0,1].set_title('Fold 2')
+
+    axs[0,1].set_xlabel('Epoch')
+    axs[0,1].set_ylabel('Accuracy')
 
     axs[0,2].plot(train_acc[2], label='train_acc')
     axs[0,2].plot(validation_acc[2], label='validation_acc')
     axs[0,2].set_title('Fold 3')
 
+    axs[0,2].set_xlabel('Epoch')
+    axs[0,2].set_xlabel('Accuracy')
+
+
     axs[1,0].plot(train_acc[3], label='train_acc')
     axs[1,0].plot(validation_acc[3], label='validation_acc')
     axs[1,0].set_title('Fold 4')
 
+    axs[1,0].set_xlabel('Epoch')
+    axs[1,0].set_xlabel('Accuracy')
+
     axs[1,1].plot(train_acc[4], label='train_acc')
     axs[1,1].plot(validation_acc[4], label='validation_acc')
     axs[1,1].set_title('Fold 5')
+
+    axs[1,1].set_xlabel('Epoch')
+    axs[1,1].set_xlabel('Accuracy')
 
     # remove the subplot at the bottom right
     fig.delaxes(axs[1,2])
@@ -81,7 +113,7 @@ def plot_training_validation(train_loss, train_acc, validation_loss, validation_
 
     # save the image
 
-    plt.savefig("logs/training_acc_" + experiment_name + ".png")
+    plt.savefig("logs/" + experiment_name + "/training_acc_" + experiment_name + ".png")
 
     # clear the plot
     plt.clf()
