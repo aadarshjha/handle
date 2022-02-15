@@ -1,4 +1,5 @@
-import matplotlib as plt 
+import matplotlib.pyplot as plt
+import os 
 
 def plot_training_validation(train_loss, train_acc, validation_loss, validation_acc, experiment_name):
 
@@ -53,8 +54,7 @@ def plot_training_validation(train_loss, train_acc, validation_loss, validation_
     # increase the width of the image
     fig.set_size_inches(20, 10)
 
-    # save the image
-
+    # save the image and create folder if it doesn't exist
     plt.savefig("logs/" + experiment_name + "/training_loss_" + experiment_name + ".png")
 
     # clear the plot

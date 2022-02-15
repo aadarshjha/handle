@@ -208,6 +208,9 @@ if __name__ == "__main__":
     filename = sys.argv[1]
     hyperparameters = extract_hyperparameters(filename)
 
+    if not os.path.exists('logs/' + hyperparameters["EXPERIMENT_NAME"]):
+        os.makedirs('logs/' + hyperparameters["EXPERIMENT_NAME"])
+
     # read the data
     imagepaths = read_data()
 
