@@ -15,7 +15,7 @@ def plot_training_validation(train_loss, train_acc, val_loss, val_acc, experimen
     axs[0,0].set_ylabel('Loss')
 
     axs[0,1].plot(train_loss[1], label='train_loss')
-    axs[0,0].plot(val_loss[1], label='val_loss')
+    axs[0,1].plot(val_loss[1], label='val_loss')
     axs[0,1].set_title('Fold 2')
 
     axs[0,1].set_xlabel('Epoch')
@@ -68,7 +68,7 @@ def plot_training_validation(train_loss, train_acc, val_loss, val_acc, experimen
     axs[0,0].set_ylabel('Accuracy')
 
     axs[0,1].plot(train_acc[1], label='train_acc')
-    axs[0,0].plot(val_acc[2], label='val_acc')
+    axs[0,1].plot(val_acc[1], label='val_acc')
     axs[0,1].set_title('Fold 2')
 
     axs[0,1].set_xlabel('Epoch')
