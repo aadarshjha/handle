@@ -1,4 +1,9 @@
 # set up the hyperparams with YAML
 EXPERIMENT_NAME: 'exper1'
 CONFIG: 
-  
+  NUM_FOLDS: 5
+  EPOCHS: 10
+  BATCH_SIZE: 32
+  VERBOSE: 'false'
+  OPTIMIZER: 'adam'
+  LOSS: 'sparse_categorical_crossentropy'

@@ -1,0 +1,87 @@
+import matplotlib as plt 
+
+def plot_training_validation(train_loss, train_acc, validation_loss, validation_acc, experiment_name):
+
+    # plot the train_loss vs validation_loss in a 5 subplots
+    fig, axs = plt.subplots(2, 3)
+
+    axs[0,0].plot(train_loss[0], label='train_loss')
+    axs[0,0].plot(validation_loss[0], label='validation_loss')
+    axs[0,0].set_title('Fold 1')
+
+    axs[0,1].plot(train_loss[1], label='train_loss')
+    axs[0,1].plot(validation_loss[1], label='validation_loss')
+    axs[0,1].set_title('Fold 2')
+
+    axs[0,2].plot(train_loss[2], label='train_loss')
+    axs[0,2].plot(validation_loss[2], label='validation_loss')
+    axs[0,2].set_title('Fold 3')
+
+    axs[1,0].plot(train_loss[3], label='train_loss')
+    axs[1,0].plot(validation_loss[3], label='validation_loss')
+    axs[1,0].set_title('Fold 4')
+
+    axs[1,1].plot(train_loss[4], label='train_loss')
+    axs[1,1].plot(validation_loss[4], label='validation_loss')
+    axs[1,1].set_title('Fold 5')
+
+    # remove the subplot at the bottom right
+    fig.delaxes(axs[1,2])
+
+    # increase the spacing between subplots
+    fig.tight_layout(pad=2.0)
+
+    # make the graphs look nice
+    plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
+
+    # increase the width of the image
+    fig.set_size_inches(20, 10)
+
+    # save the image
+
+    plt.savefig("logs/training_loss_" + experiment_name + ".png")
+
+    # clear the plot
+    plt.clf()
+
+    # do the same thing with train_acc and validation_acc
+    fig, axs = plt.subplots(2, 3)
+
+    axs[0,0].plot(train_acc[0], label='train_acc')
+    axs[0,0].plot(validation_acc[0], label='validation_acc')
+    axs[0,0].set_title('Fold 1')
+
+    axs[0,1].plot(train_acc[1], label='train_acc')
+    axs[0,1].plot(validation_acc[1], label='validation_acc')
+    axs[0,1].set_title('Fold 2')
+
+    axs[0,2].plot(train_acc[2], label='train_acc')
+    axs[0,2].plot(validation_acc[2], label='validation_acc')
+    axs[0,2].set_title('Fold 3')
+
+    axs[1,0].plot(train_acc[3], label='train_acc')
+    axs[1,0].plot(validation_acc[3], label='validation_acc')
+    axs[1,0].set_title('Fold 4')
+
+    axs[1,1].plot(train_acc[4], label='train_acc')
+    axs[1,1].plot(validation_acc[4], label='validation_acc')
+    axs[1,1].set_title('Fold 5')
+
+    # remove the subplot at the bottom right
+    fig.delaxes(axs[1,2])
+
+    # increase the spacing between subplots
+    fig.tight_layout(pad=2.0)
+
+    # make the graphs look nice
+    plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
+
+    # increase the width of the image
+    fig.set_size_inches(20, 10)
+
+    # save the image
+
+    plt.savefig("logs/training_acc_" + experiment_name + ".png")
+
+    # clear the plot
+    plt.clf()
