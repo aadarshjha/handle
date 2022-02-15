@@ -14,6 +14,8 @@ from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers import Dense, Flatten
 import json
 
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
 # custom plotting
 from plot import * 
 
@@ -97,9 +99,6 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
     # train across folds
     for train, test in kfold.split(X, y):
 
-        print("Fold: ", fold_no)
-        fold_no += 1
-
         model = create_model()
         model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])  
 
@@ -117,14 +116,7 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         validation_loss.append(scores[0])
         validation_acc.append(scores[1])
 
-        # print the train loss and accuracy
-        print("Train loss: ", history.history['loss'])
-        print("Train accuracy: ", history.history['accuracy'])
-
-        # print the test loss and accuracy
-        print("Test loss: ", scores[0])
-        print("Test accuracy: ", scores[1])
-
+        fold_no += 1
 
     return model_cache, train_loss, train_acc, validation_loss, validation_acc
     
