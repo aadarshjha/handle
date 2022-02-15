@@ -101,6 +101,7 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
     recall_history = []
     f1_history = []
     accuracy_history = []
+    cfx_history = [] 
 
     # train across folds
     for train, test in kfold.split(X, y):
@@ -133,6 +134,12 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         f1 = f1_score(y_test, predictions, average='weighted')
         accuracy = accuracy_score(y_test, predictions)
 
+        # create a confusion matrix
+        cfx = confusion_matrix(y_test, predictions)
+        cfx_history.append(cfx)
+        
+
+
         # cache the above
         precision_history.append(precision)
         recall_history.append(recall)
@@ -160,6 +167,8 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         print("Recall: ", recall)
         print("F1: ", f1)
         print("Accuracy: ", accuracy)
+        # print the confusion matrix
+        print("Confusion Matrix", cfx)
 
         print("\n")
 
@@ -169,7 +178,7 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
     return model_cache, train_loss, train_acc, val_loss, val_acc, predictions_cache, precision_history, recall_history, f1_history, accuracy_history
     
-def execute_testing(model_cache, X, y, experiment_name='exper1'):
+def execute_micro_macro_metrics(model_cache, X, y, experiment_name='exper1'):
 
     # save all the models in the model_cache
     epoch_counter = 1 
@@ -187,43 +196,52 @@ def execute_testing(model_cache, X, y, experiment_name='exper1'):
     precision_history = []
     f1_history = [] 
 
-    # test all models in the model_cache array on the entire dataset
-    counter = 1
-    for model in model_cache:
-        scores = model.evaluate(X, y, verbose=0)
-        print("Fold: " + str(counter))
-        print("Test loss: " + str(scores[0]))
-        print("Test accuracy: " + str(scores[1]))
+    # compute mean of the history of metrics: 
 
-        loss_history.append(scores[0])
-        acc_history.append(scores[1])
 
-        predict_x=model.predict(X) 
-        classes_x=np.argmax(predict_x,axis=1)
+    # now, compute metrics for macro: 
 
-        # create confusion matrix and store in confusion_history
-        cur_cfx = confusion_matrix(y, classes_x)
-        confusion_history.append(cur_cfx)
 
-        # compute precision score, recall score, and f1 score
-        recall = recall_score(y, classes_x)
-        precision = precision_score(y, classes_x)
-        f1 = f1_score(y, classes_x)
+    # compute the cfx matrix: 
 
-        print("Recall: ", recall)
-        print("Precision: ", precision)
-        print("F1: ", f1)
 
-        recall_history.append(recall)
-        precision_history.append(precision)
-        f1_history.append(f1)
+    # # test all models in the model_cache array on the entire dataset
+    # counter = 1
+    # for model in model_cache:
+    #     scores = model.evaluate(X, y, verbose=0)
+    #     print("Fold: " + str(counter))
+    #     print("Test loss: " + str(scores[0]))
+    #     print("Test accuracy: " + str(scores[1]))
 
-        temp_obj = {"Test loss": scores[0], "Test accuracy": scores[1], "Confusion matrix": cur_cfx, "Recall": recall, "Precision": precision, "F1": f1}
-        JSON_data["Fold {}".format(counter)] = temp_obj
+    #     loss_history.append(scores[0])
+    #     acc_history.append(scores[1])
 
-        # print()
+    #     predict_x=model.predict(X) 
+    #     classes_x=np.argmax(predict_x,axis=1)
 
-        counter += 1 
+    #     # create confusion matrix and store in confusion_history
+    #     cur_cfx = confusion_matrix(y, classes_x)
+    #     confusion_history.append(cur_cfx)
+
+    #     # compute precision score, recall score, and f1 score
+    #     recall = recall_score(y, classes_x)
+    #     precision = precision_score(y, classes_x)
+    #     f1 = f1_score(y, classes_x)
+
+    #     print("Recall: ", recall)
+    #     print("Precision: ", precision)
+    #     print("F1: ", f1)
+
+    #     recall_history.append(recall)
+    #     precision_history.append(precision)
+    #     f1_history.append(f1)
+
+    #     temp_obj = {"Test loss": scores[0], "Test accuracy": scores[1], "Confusion matrix": cur_cfx, "Recall": recall, "Precision": precision, "F1": f1}
+    #     JSON_data["Fold {}".format(counter)] = temp_obj
+
+    #     # print()
+
+    #     counter += 1 
 
     # average the test loss and test accuracy across all folds and save into JSON
     JSON_data["Average"] = {"Test loss": np.mean(loss_history), "Test accuracy": np.mean(acc_history), "Confusion Matrix": np.mean(confusion_history, axis=0), "Recall": np.mean(recall_history), "Precision": np.mean(precision_history), "F1": np.mean(f1_history)}
@@ -280,4 +298,4 @@ if __name__ == "__main__":
 
     plot_training_validation(train_loss, train_acc, val_loss, val_acc, hyperparameters["EXPERIMENT_NAME"])
 
-    # execute_testing(model_cache, X, y, hyperparameters["EXPERIMENT_NAME"])
+    # execute_micro_macro_metrics(model_cache, X, y, hyperparameters["EXPERIMENT_NAME"])
