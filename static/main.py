@@ -74,10 +74,6 @@ def create_model(mode="CNN"):
         model.add(Flatten())
         model.add(Dense(128, activation='relu'))
         model.add(Dense(10, activation='softmax'))
-    if mode == "ResNet": 
-        model = keras.applications.resnet.ResNet50(include_top=True, weights='imagenet', input_tensor=None, input_shape=(120, 320, 1), pooling=None, classes=10)
-        # but also pass for now 
-        return None 
     else: 
         # throw an error to the user 
         raise Exception("Invalid model type")
@@ -99,6 +95,9 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
     train_loss = [] 
     train_acc = []
 
+    val_loss = [] 
+    val_acc = [] 
+
     # train across folds
     for train, test in kfold.split(X, y):
 
@@ -108,12 +107,39 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         # add output to the string buffer: 
         print("For Fold: " + str(fold_no))
 
-        history = model.fit(X[train], y[train], batch_size=batch_size, epochs=epochs, verbose=verbose)
+        # split the testing data into testing and validation 50-50
+
+        # split test into half
+        test_len = len(test)
+        test_len_half = int(test_len/2)
+        test_half_one = test[:test_len_half]
+        test_half_two = test[test_len_half:]
+
+        X_val, X_test = X[test_half_one], X[test_half_two]
+        y_val, y_test = y[test_half_one], y[test_half_two]
+
+        print(X_val.shape, X_test.shape)
+        print(y_val.shape, y_test.shape)
+
+        history = model.fit(X[train], y[train], batch_size=batch_size, epochs=epochs, verbose=verbose, validation_data=(X_val, y_val))
         scores = model.evaluate(X[test], y[test], verbose=verbose)
+
+        # save the predictions 
+        # predictions = model.predict(X_test)
+
+        # one score where you precision score, recall score, f1 score, and accuracy score => macrpo 
+        # predictions, vs truth array pass that into metrics. => micro
 
         # save the training loss and accuracy 
         train_loss.append(history.history['loss'])
         train_acc.append(history.history['accuracy'])
+
+        # save the validation loss and accuracy
+        val_loss.append(history.history['val_loss'])
+        val_acc.append(history.history['val_accuracy'])
+
+        # save the predictions, etc. 
+        
 
         # print the test loss and test accuracy
         print("Test loss: ", scores[0])
@@ -154,14 +180,17 @@ def execute_testing(model_cache, X, y, experiment_name='exper1'):
         loss_history.append(scores[0])
         acc_history.append(scores[1])
 
+        predict_x=model.predict(X) 
+        classes_x=np.argmax(predict_x,axis=1)
+
         # create confusion matrix and store in confusion_history
-        cur_cfx = confusion_matrix(y, model.predict_classes(X))
+        cur_cfx = confusion_matrix(y, classes_x)
         confusion_history.append(cur_cfx)
 
         # compute precision score, recall score, and f1 score
-        recall = recall_score(y, model.predict_classes(X))
-        precision = precision_score(y, model.predict_classes(X))
-        f1 = f1_score(y, model.predict_classes(X))
+        recall = recall_score(y, classes_x)
+        precision = precision_score(y, classes_x)
+        f1 = f1_score(y, classes_x)
 
         print("Recall: ", recall)
         print("Precision: ", precision)
@@ -180,7 +209,7 @@ def execute_testing(model_cache, X, y, experiment_name='exper1'):
     JSON_data["Average"] = {"Test loss": np.mean(loss_history), "Test accuracy": np.mean(acc_history), "Confusion Matrix": np.mean(confusion_history, axis=0), "Recall": np.mean(recall_history), "Precision": np.mean(precision_history), "F1": np.mean(f1_history)}
 
     # take the average of the confusion matrices
-    confusion_matrix = np.mean(confusion_history, axis=0)
+    # confusion_matrix = np.mean(confusion_history, axis=0)
 
     # # plot the confusion matrix
     # plt.figure()
