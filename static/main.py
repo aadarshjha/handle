@@ -114,13 +114,9 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         train_loss.append(history.history['loss'])
         train_acc.append(history.history['accuracy'])
 
-        # save the testing loss and accuracy
-        validation_loss.append(scores[0])
-        validation_acc.append(scores[1])
-
-        # # print the train loss and train accuracy 
-        # print("Train loss: ", history.history['loss'])
-        # print("Train accuracy: ", history.history['accuracy'])
+        # save the validation loss and accuracy
+        validation_loss.append(history.history['val_loss'])
+        validation_acc.append(history.history['val_accuracy'])
 
         # print the test loss and test accuracy
         print("Test loss: ", scores[0])
