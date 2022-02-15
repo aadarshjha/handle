@@ -94,7 +94,7 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
     train_loss = [] 
     train_acc = []
-    
+
     # train across folds
     for train, test in kfold.split(X, y):
 
@@ -177,18 +177,18 @@ def execute_testing(model_cache, X, y, experiment_name='exper1'):
     # take the average of the confusion matrices
     confusion_matrix = np.mean(confusion_history, axis=0)
 
-    # plot the confusion matrix
-    plt.figure()
-    plt.imshow(confusion_matrix, interpolation='nearest', cmap=plt.cm.Blues)
-    plt.colorbar()
-    tick_marks = np.arange(10)
-    plt.xticks(tick_marks, range(10))
-    plt.yticks(tick_marks, range(10))
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-    plt.tight_layout()
-    plt.savefig("confusion_matrix.png")
-    plt.close()
+    # # plot the confusion matrix
+    # plt.figure()
+    # plt.imshow(confusion_matrix, interpolation='nearest', cmap=plt.cm.Blues)
+    # plt.colorbar()
+    # tick_marks = np.arange(10)
+    # plt.xticks(tick_marks, range(10))
+    # plt.yticks(tick_marks, range(10))
+    # plt.ylabel('True label')
+    # plt.xlabel('Predicted label')
+    # plt.tight_layout()
+    # plt.savefig("confusion_matrix.png")
+    # plt.close()
 
     # save the JSON_data to a file
     with open("logs/" + experiment_name + "/" + experiment_name + "_data.json", 'w') as outfile:

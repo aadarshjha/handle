@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import os 
 
-def plot_training_validation(train_loss, train_acc, validation_loss, validation_acc, experiment_name):
+def plot_training_validation(train_loss, train_acc, experiment_name):
 
     # plot the train_loss vs validation_loss in a 5 subplots
     fig, axs = plt.subplots(2, 3)
