@@ -87,10 +87,8 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
     fold_no = 1
 
-    # log to a string buffer: 
-    log_string = ""
-
     model_cache = []
+    predictions_cache = [] 
 
     train_loss = [] 
     train_acc = []
@@ -108,8 +106,6 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         print("For Fold: " + str(fold_no))
 
         # split the testing data into testing and validation 50-50
-
-        # split test into half
         test_len = len(test)
         test_len_half = int(test_len/2)
         test_half_one = test[:test_len_half]
@@ -118,14 +114,20 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         X_val, X_test = X[test_half_one], X[test_half_two]
         y_val, y_test = y[test_half_one], y[test_half_two]
 
-        print(X_val.shape, X_test.shape)
-        print(y_val.shape, y_test.shape)
-
         history = model.fit(X[train], y[train], batch_size=batch_size, epochs=epochs, verbose=verbose, validation_data=(X_val, y_val))
         scores = model.evaluate(X[test], y[test], verbose=verbose)
 
-        # save the predictions 
-        # predictions = model.predict(X_test)
+        # save the predictions from the model.evaluate
+        predictions = model.predict(X_test)
+
+        # compute the precision, recall, f1 score, and accuracy
+        precision = precision_score(y_test, predictions, average='weighted')
+        recall = recall_score(y_test, predictions, average='weighted')
+        f1 = f1_score(y_test, predictions, average='weighted')
+        accuracy = accuracy_score(y_test, predictions)
+
+        # cache the predictions for micro use 
+        predictions_cache.append(predictions)
 
         # one score where you precision score, recall score, f1 score, and accuracy score => macrpo 
         # predictions, vs truth array pass that into metrics. => micro
@@ -138,12 +140,16 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         val_loss.append(history.history['val_loss'])
         val_acc.append(history.history['val_accuracy'])
 
-        # save the predictions, etc. 
-        
-
         # print the test loss and test accuracy
         print("Test loss: ", scores[0])
         print("Test accuracy: ", scores[1])
+
+
+        # print the metrics: 
+        print("Precision: ", precision)
+        print("Recall: ", recall)
+        print("F1: ", f1)
+        print("Accuracy: ", accuracy)
 
         model_cache.append(model)
 
@@ -258,6 +264,6 @@ if __name__ == "__main__":
         hyperparameters["CONFIG"]["BATCH_SIZE"], hyperparameters["CONFIG"]["VERBOSE"], 
         hyperparameters["CONFIG"]["OPTIMIZER"], hyperparameters["CONFIG"]["LOSS"])
 
-    plot_training_validation(train_loss, train_acc, hyperparameters["EXPERIMENT_NAME"])
+    # plot_training_validation(train_loss, train_acc, hyperparameters["EXPERIMENT_NAME"])
 
-    execute_testing(model_cache, X, y, hyperparameters["EXPERIMENT_NAME"])
+    # execute_testing(model_cache, X, y, hyperparameters["EXPERIMENT_NAME"])
