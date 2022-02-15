@@ -74,6 +74,10 @@ def create_model(mode="CNN"):
         model.add(Flatten())
         model.add(Dense(128, activation='relu'))
         model.add(Dense(10, activation='softmax'))
+    if mode == "ResNet": 
+        model = keras.applications.resnet.ResNet50(include_top=True, weights='imagenet', input_tensor=None, input_shape=(120, 320, 1), pooling=None, classes=10)
+        # but also pass for now 
+        return None 
     else: 
         # throw an error to the user 
         raise Exception("Invalid model type")
@@ -115,6 +119,8 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         print("Test loss: ", scores[0])
         print("Test accuracy: ", scores[1])
 
+        model_cache.append(model)
+
         fold_no += 1
 
     return model_cache, train_loss, train_acc
@@ -124,7 +130,7 @@ def execute_testing(model_cache, X, y, experiment_name='exper1'):
     # save all the models in the model_cache
     epoch_counter = 1 
     for model in model_cache:
-        model.save("models/{}_{}.h5".format(experiment_name, epoch_counter))
+        model.save("models/{}/{}.h5".format(experiment_name, epoch_counter))
         epoch_counter = epoch_counter + 1
 
     # cache data into a JSON
@@ -151,7 +157,6 @@ def execute_testing(model_cache, X, y, experiment_name='exper1'):
         # create confusion matrix and store in confusion_history
         cur_cfx = confusion_matrix(y, model.predict_classes(X))
         confusion_history.append(cur_cfx)
-
 
         # compute precision score, recall score, and f1 score
         recall = recall_score(y, model.predict_classes(X))
@@ -205,6 +210,9 @@ if __name__ == "__main__":
     # extract file name from command line input 
     filename = sys.argv[1]
     hyperparameters = extract_hyperparameters(filename)
+
+    if not os.path.exists('models/' + hyperparameters["EXPERIMENT_NAME"]):
+        os.makedirs('models/' + hyperparameters["EXPERIMENT_NAME"])
 
     if not os.path.exists('logs/' + hyperparameters["EXPERIMENT_NAME"]):
         os.makedirs('logs/' + hyperparameters["EXPERIMENT_NAME"])
