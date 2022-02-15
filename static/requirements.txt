@@ -3,6 +3,5 @@ pillow
 matplotlib
 tensorflow
 keras
-opencv
 pandas
 scikit-learn

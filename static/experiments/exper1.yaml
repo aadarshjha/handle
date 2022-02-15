@@ -1,0 +1,4 @@
+# set up the hyperparams with YAML
+EXPERIMENT_NAME: 'exper1'
+CONFIG: 
+  
