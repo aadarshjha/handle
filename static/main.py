@@ -216,7 +216,7 @@ if __name__ == "__main__":
     X, y = augment_data(imagepaths)
 
     # execute the training pipeline
-    model_cache, train_loss, train_acc, validation_loss, validation_acc = execute_training(X, y, hyperparameters["EXPERIMENT_NAME"], 
+    model_cache, train_loss, train_acc = execute_training(X, y, hyperparameters["EXPERIMENT_NAME"], 
         hyperparameters["CONFIG"]["NUM_FOLDS"], hyperparameters["CONFIG"]["EPOCHS"], 
         hyperparameters["CONFIG"]["BATCH_SIZE"], hyperparameters["CONFIG"]["VERBOSE"], 
         hyperparameters["CONFIG"]["OPTIMIZER"], hyperparameters["CONFIG"]["LOSS"])
