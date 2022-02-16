@@ -81,6 +81,8 @@ def create_model(mode="CNN"):
         model.add(Dense(10, activation='softmax'))
     elif mode == "RESNET":
         model = keras.applications.resnet.ResNet50(include_top=False, weights=None, input_shape=(120, 320, 1))
+    elif mode == "RESNET_PRETRAINED": 
+        model = keras.applications.resnet.ResNet50(include_top=False, weights='imagenet', input_shape=(120, 320, 1))
     elif mode == "MOBILENET": 
         model = keras.applications.mobilenet.MobileNet(include_top=False, weights=None, input_shape=(120, 320, 1))
     elif mode == "DENSENET":
