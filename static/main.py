@@ -187,9 +187,10 @@ def execute_micro_macro_metrics(model_cache, predictions_cache, targets_cache, p
     macro_f1 = np.mean(f1_history)
     macro_accuracy = np.mean(accuracy_history)
     cfx_history_avg = np.mean(cfx_history, axis=0)
+    cfx_history_avg_json = json.dumps(cfx_history_avg.tolist())
 
     # store into JSON: 
-    JSON_data['macro_metrics'] = {'precision': macro_precision, 'recall': macro_recall, 'f1': macro_f1, 'accuracy': macro_accuracy, 'cfx': cfx_history_avg}
+    JSON_data['macro_metrics'] = {'precision': macro_precision, 'recall': macro_recall, 'f1': macro_f1, 'accuracy': macro_accuracy, 'cfx': cfx_history_avg_json}
 
     # micro averaging:
     micro_precision = precision_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average='micro')
@@ -199,9 +200,10 @@ def execute_micro_macro_metrics(model_cache, predictions_cache, targets_cache, p
 
     # confusion matrix for micro averaging:
     cfx_micro = confusion_matrix(np.concatenate(targets_cache), np.concatenate(predictions_cache))
-
+    cfx_micro_json = json.dumps(cfx_micro.tolist())
+    
     # store into JSON:
-    JSON_data['micro_metrics'] = {'precision': micro_precision, 'recall': micro_recall, 'f1': micro_f1, 'accuracy': micro_accuracy, 'cfx': cfx_micro}
+    JSON_data['micro_metrics'] = {'precision': micro_precision, 'recall': micro_recall, 'f1': micro_f1, 'accuracy': micro_accuracy, 'cfx': cfx_micro_json}
 
     # save the JSON_data to a file
     with open("logs/" + experiment_name + "/" + experiment_name + "_data.json", 'w') as outfile:
