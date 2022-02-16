@@ -80,8 +80,9 @@ def create_model(mode="CNN"):
         model.add(Dense(128, activation='relu'))
         model.add(Dense(10, activation='softmax'))
     elif mode == "RESNET":
-        # no pretrained weights
         model = keras.applications.resnet.ResNet50(include_top=False, weights=None, input_shape=(120, 320, 1))
+    elif mode == "MOBILENET": 
+        model = keras.applications.mobilenet.MobileNet(include_top=False, weights=None, input_shape=(120, 320, 1))
     else: 
         # throw an error to the user 
         raise Exception("Invalid model type")
