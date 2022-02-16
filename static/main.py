@@ -20,6 +20,8 @@ gpus= tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpus[0], True)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
+PREFIX = "../../drive/MyDrive/handleData/"
+
 # custom plotting
 from plot import * 
 
@@ -176,7 +178,7 @@ def execute_micro_macro_metrics(model_cache, predictions_cache, targets_cache, p
 
     epoch_counter = 1 
     for model in model_cache:
-        model.save("models/{}/{}.h5".format(experiment_name, epoch_counter))
+        model.save(PREFIX + "models/{}/{}.h5".format(experiment_name, epoch_counter))
         epoch_counter = epoch_counter + 1
     
     JSON_data = {}
@@ -206,7 +208,7 @@ def execute_micro_macro_metrics(model_cache, predictions_cache, targets_cache, p
     JSON_data['micro_metrics'] = {'precision': micro_precision, 'recall': micro_recall, 'f1': micro_f1, 'accuracy': micro_accuracy, 'cfx': cfx_micro_json}
 
     # save the JSON_data to a file
-    with open("logs/" + experiment_name + "/" + experiment_name + "_data.json", 'w') as outfile:
+    with open(PREFIX + "logs/" + experiment_name + "/" + experiment_name + "_data.json", 'w') as outfile:
         json.dump(JSON_data, outfile)
 
 def extract_hyperparameters(filename): 
@@ -221,11 +223,11 @@ if __name__ == "__main__":
     filename = sys.argv[1]
     hyperparameters = extract_hyperparameters(filename)
 
-    if not os.path.exists('models/' + hyperparameters["EXPERIMENT_NAME"]):
-        os.makedirs('models/' + hyperparameters["EXPERIMENT_NAME"])
+    if not os.path.exists(PREFIX + 'models/' + hyperparameters["EXPERIMENT_NAME"]):
+        os.makedirs(PREFIX + 'models/' + hyperparameters["EXPERIMENT_NAME"])
 
-    if not os.path.exists('logs/' + hyperparameters["EXPERIMENT_NAME"]):
-        os.makedirs('logs/' + hyperparameters["EXPERIMENT_NAME"])
+    if not os.path.exists(PREFIX + 'logs/' + hyperparameters["EXPERIMENT_NAME"]):
+        os.makedirs(PREFIX + 'logs/' + hyperparameters["EXPERIMENT_NAME"])
 
     # read the data
     imagepaths = read_data()
