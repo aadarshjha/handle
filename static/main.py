@@ -13,6 +13,7 @@ from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers import Dense, Flatten
 import json
+from sklearn.model_selection import train_test_split
 
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 gpus= tf.config.experimental.list_physical_devices('GPU')
@@ -90,6 +91,7 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
     model_cache = []
     predictions_cache = [] 
+    targets_cache = [] 
 
     train_loss = [] 
     train_acc = []
@@ -109,17 +111,8 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         model = create_model()
         model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])  
 
-        # add output to the string buffer: 
         print("For Fold: " + str(fold_no))
-
-        # split the testing data into testing and validation 50-50
-        test_len = len(test)
-        test_len_half = int(test_len/2)
-        test_half_one = test[:test_len_half]
-        test_half_two = test[test_len_half:]
-
-        X_val, X_test = X[test_half_one], X[test_half_two]
-        y_val, y_test = y[test_half_one], y[test_half_two]
+        X_val, X_test, y_val, y_test = train_test_split(X[test], y[test], test_size=0.5, random_state=42)
 
         history = model.fit(X[train], y[train], batch_size=batch_size, epochs=epochs, verbose=verbose, validation_data=(X_val, y_val))
         scores = model.evaluate(X[test], y[test], verbose=verbose)
@@ -134,12 +127,13 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
         f1 = f1_score(y_test, predictions, average='weighted')
         accuracy = accuracy_score(y_test, predictions)
 
+        # cache the target values
+        targets_cache.append(y_test)
+
         # create a confusion matrix
         cfx = confusion_matrix(y_test, predictions)
         cfx_history.append(cfx)
         
-
-
         # cache the above
         precision_history.append(precision)
         recall_history.append(recall)
@@ -176,91 +170,38 @@ def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, b
 
         fold_no += 1
 
-    return model_cache, train_loss, train_acc, val_loss, val_acc, predictions_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history
+    return model_cache, train_loss, train_acc, val_loss, val_acc, predictions_cache, targets_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history
     
-def execute_micro_macro_metrics(model_cache, X, y, experiment_name='exper1'):
+def execute_micro_macro_metrics(model_cache, predictions_cache, targets_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history, experiment_name):
 
-    # save all the models in the model_cache
     epoch_counter = 1 
     for model in model_cache:
         model.save("models/{}/{}.h5".format(experiment_name, epoch_counter))
         epoch_counter = epoch_counter + 1
+    
+    JSON_data = {}
 
-    # cache data into a JSON
-    JSON_data = {}  
+    # macro averaging: 
+    macro_precision = np.mean(precision_history)
+    macro_recall = np.mean(recall_history)
+    macro_f1 = np.mean(f1_history)
+    macro_accuracy = np.mean(accuracy_history)
+    cfx_history_avg = np.mean(cfx_history, axis=0)
 
-    loss_history = []
-    acc_history = []
-    confusion_history = [] 
-    recall_history = [] 
-    precision_history = []
-    f1_history = [] 
+    # store into JSON: 
+    JSON_data['macro_metrics'] = {'precision': macro_precision, 'recall': macro_recall, 'f1': macro_f1, 'accuracy': macro_accuracy, 'cfx': cfx_history_avg}
 
-    # compute mean of the history of metrics: 
+    # micro averaging:
+    micro_precision = precision_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average='micro')
+    micro_recall = recall_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average='micro')
+    micro_f1 = f1_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average='micro')
+    micro_accuracy = accuracy_score(np.concatenate(targets_cache), np.concatenate(predictions_cache))
 
+    # confusion matrix for micro averaging:
+    cfx_micro = confusion_matrix(np.concatenate(targets_cache), np.concatenate(predictions_cache))
 
-    # now, compute metrics for macro: 
-
-
-    # compute the cfx matrix: 
-
-
-    # # test all models in the model_cache array on the entire dataset
-    # counter = 1
-    # for model in model_cache:
-    #     scores = model.evaluate(X, y, verbose=0)
-    #     print("Fold: " + str(counter))
-    #     print("Test loss: " + str(scores[0]))
-    #     print("Test accuracy: " + str(scores[1]))
-
-    #     loss_history.append(scores[0])
-    #     acc_history.append(scores[1])
-
-    #     predict_x=model.predict(X) 
-    #     classes_x=np.argmax(predict_x,axis=1)
-
-    #     # create confusion matrix and store in confusion_history
-    #     cur_cfx = confusion_matrix(y, classes_x)
-    #     confusion_history.append(cur_cfx)
-
-    #     # compute precision score, recall score, and f1 score
-    #     recall = recall_score(y, classes_x)
-    #     precision = precision_score(y, classes_x)
-    #     f1 = f1_score(y, classes_x)
-
-    #     print("Recall: ", recall)
-    #     print("Precision: ", precision)
-    #     print("F1: ", f1)
-
-    #     recall_history.append(recall)
-    #     precision_history.append(precision)
-    #     f1_history.append(f1)
-
-    #     temp_obj = {"Test loss": scores[0], "Test accuracy": scores[1], "Confusion matrix": cur_cfx, "Recall": recall, "Precision": precision, "F1": f1}
-    #     JSON_data["Fold {}".format(counter)] = temp_obj
-
-    #     # print()
-
-    #     counter += 1 
-
-    # average the test loss and test accuracy across all folds and save into JSON
-    JSON_data["Average"] = {"Test loss": np.mean(loss_history), "Test accuracy": np.mean(acc_history), "Confusion Matrix": np.mean(confusion_history, axis=0), "Recall": np.mean(recall_history), "Precision": np.mean(precision_history), "F1": np.mean(f1_history)}
-
-    # take the average of the confusion matrices
-    # confusion_matrix = np.mean(confusion_history, axis=0)
-
-    # # plot the confusion matrix
-    # plt.figure()
-    # plt.imshow(confusion_matrix, interpolation='nearest', cmap=plt.cm.Blues)
-    # plt.colorbar()
-    # tick_marks = np.arange(10)
-    # plt.xticks(tick_marks, range(10))
-    # plt.yticks(tick_marks, range(10))
-    # plt.ylabel('True label')
-    # plt.xlabel('Predicted label')
-    # plt.tight_layout()
-    # plt.savefig("confusion_matrix.png")
-    # plt.close()
+    # store into JSON:
+    JSON_data['micro_metrics'] = {'precision': micro_precision, 'recall': micro_recall, 'f1': micro_f1, 'accuracy': micro_accuracy, 'cfx': cfx_micro}
 
     # save the JSON_data to a file
     with open("logs/" + experiment_name + "/" + experiment_name + "_data.json", 'w') as outfile:
@@ -291,12 +232,10 @@ if __name__ == "__main__":
     X, y = augment_data(imagepaths)
 
     # execute the training pipeline
-    model_cache, train_loss, train_acc, val_loss, val_acc, predictions_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history = \
+    model_cache, train_loss, train_acc, val_loss, val_acc, predictions_cache, targets_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history = \
         execute_training(X, y, hyperparameters["EXPERIMENT_NAME"], 
         hyperparameters["CONFIG"]["NUM_FOLDS"], hyperparameters["CONFIG"]["EPOCHS"], 
         hyperparameters["CONFIG"]["BATCH_SIZE"], hyperparameters["CONFIG"]["VERBOSE"], 
         hyperparameters["CONFIG"]["OPTIMIZER"], hyperparameters["CONFIG"]["LOSS"])
 
-    plot_training_validation(train_loss, train_acc, val_loss, val_acc, hyperparameters["EXPERIMENT_NAME"])
-
-    # execute_micro_macro_metrics(model_cache, X, y, hyperparameters["EXPERIMENT_NAME"])
+    plot_training_validation(model_cache, predictions_cache, targets_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history, hyperparameters["EXPERIMENT_NAME"])
