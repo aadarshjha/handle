@@ -1,5 +1,5 @@
 # set up the hyperparams with YAML
-EXPERIMENT_NAME: 'exper1'
+EXPERIMENT_NAME: '5_32_RESNET'
 CONFIG: 
   NUM_FOLDS: 5
   EPOCHS: 10
@@ -7,3 +7,4 @@ CONFIG:
   VERBOSE: 'false'
   OPTIMIZER: 'adam'
   LOSS: 'sparse_categorical_crossentropy'
+  MODE: 'RESNET'

@@ -78,6 +78,8 @@ def create_model(mode="CNN"):
         model.add(Flatten())
         model.add(Dense(128, activation='relu'))
         model.add(Dense(10, activation='softmax'))
+    elif mode == "RESNET":
+        return 
     else: 
         # throw an error to the user 
         raise Exception("Invalid model type")
@@ -85,7 +87,7 @@ def create_model(mode="CNN"):
     return model 
 
 
-def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, batch_size=32, verbose=False, optimizer='adam', loss='sparse_categorical_crossentropy'):
+def execute_training(X, y, experiment_name = 'exper1', num_folds=5, epochs=10, batch_size=32, verbose=False, optimizer='adam', loss='sparse_categorical_crossentropy', mode='CNN'):
 
     kfold = KFold(n_splits=num_folds, shuffle=True)
 
@@ -240,7 +242,7 @@ if __name__ == "__main__":
         execute_training(X, y, hyperparameters["EXPERIMENT_NAME"], 
         hyperparameters["CONFIG"]["NUM_FOLDS"], hyperparameters["CONFIG"]["EPOCHS"], 
         hyperparameters["CONFIG"]["BATCH_SIZE"], hyperparameters["CONFIG"]["VERBOSE"], 
-        hyperparameters["CONFIG"]["OPTIMIZER"], hyperparameters["CONFIG"]["LOSS"])
+        hyperparameters["CONFIG"]["OPTIMIZER"], hyperparameters["CONFIG"]["LOSS"], hyperparameters["CONFIG"]["MODE"])
     
     plot_training_validation(train_loss, train_acc, val_loss, val_acc, hyperparameters["EXPERIMENT_NAME"])
     execute_micro_macro_metrics(model_cache, predictions_cache, targets_cache, precision_history, recall_history, f1_history, accuracy_history, cfx_history, hyperparameters["EXPERIMENT_NAME"])
