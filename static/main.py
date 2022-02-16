@@ -1,4 +1,5 @@
 import os
+from pickle import NONE
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
@@ -197,6 +198,7 @@ def execute_micro_macro_metrics(model_cache, predictions_cache, targets_cache, p
     JSON_data['macro_metrics'] = {'precision': macro_precision, 'recall': macro_recall, 'f1': macro_f1, 'accuracy': macro_accuracy, 'cfx': cfx_history_avg_json}
 
     # micro averaging:
+
     micro_precision = precision_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average=None)
     micro_recall = recall_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average=None)
     micro_f1 = f1_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average=None)
