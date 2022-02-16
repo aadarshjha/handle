@@ -83,6 +83,8 @@ def create_model(mode="CNN"):
         model = keras.applications.resnet.ResNet50(include_top=False, weights=None, input_shape=(120, 320, 1))
     elif mode == "MOBILENET": 
         model = keras.applications.mobilenet.MobileNet(include_top=False, weights=None, input_shape=(120, 320, 1))
+    elif mode == "DENSENET":
+        model = keras.applications.densenet.DenseNet121(include_top=False, weights=None, input_shape=(120, 320, 1))
     else: 
         # throw an error to the user 
         raise Exception("Invalid model type")
