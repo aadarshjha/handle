@@ -199,9 +199,9 @@ def execute_micro_macro_metrics(model_cache, predictions_cache, targets_cache, p
 
     # micro averaging:
 
-    micro_precision = precision_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average=None)
-    micro_recall = recall_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average=None)
-    micro_f1 = f1_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average=None)
+    micro_precision = precision_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average="weighted")
+    micro_recall = recall_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average="weighted")
+    micro_f1 = f1_score(np.concatenate(targets_cache), np.concatenate(predictions_cache), average="weighted")
     micro_accuracy = accuracy_score(np.concatenate(targets_cache), np.concatenate(predictions_cache))
 
     # confusion matrix for micro averaging:
