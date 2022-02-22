@@ -8,6 +8,9 @@ import json
 with open('./version.json', 'r') as f:
     version = json.load(f)
 
+WIDTH = 1250
+HEIGHT = 820 
+
 
 class Color(QWidget):
 
@@ -36,28 +39,36 @@ class MainWindow(QMainWindow):
         layout = QHBoxLayout()
 
         layout.addWidget(self.left())
-        layout.addWidget(Color('blue'))
+        layout.addWidget(self.right())
 
         widget = QWidget()
         widget.setLayout(layout)
+
+        # removes odd spacing
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
         self.setCentralWidget(widget)
 
     def left(self): 
         left_widget = QWidget(self)
         left_widget.setAutoFillBackground(True)
-        # set width to 40% and height to 100%
-        
+        # set width to 40% and height to 100% of window
+        left_widget.setFixedSize(int(WIDTH * 0.4), HEIGHT)
+        left_widget.setStyleSheet("background-color: blue")
         return left_widget
 
     def right(self):
         right_widget = QWidget(self)
         right_widget.setAutoFillBackground(True)
-        # set width to 
+        right_widget.setFixedSize(int(WIDTH * 0.6), HEIGHT)
+        right_widget.setStyleSheet("background-color: red")
         return right_widget
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+
     window = MainWindow()
     window.show()
+
     app.exec()
