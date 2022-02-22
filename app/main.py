@@ -1,6 +1,8 @@
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout
-from PyQt6.QtGui import QPalette, QColor
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtMultimedia import *
+from PyQt6.QtMultimediaWidgets import *
 import sys 
 import json
 from color import *
@@ -13,13 +15,21 @@ WIDTH = 1250
 HEIGHT = 820 
 
 class MainWindow(QMainWindow): 
-    def __init__(self):
-        super(MainWindow, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
         self.setWindowTitle("Handle: {} | {}".format(version.get('version'), 'Development' if version.get('development') else 'Stable'))
 
         # set fixed size of window
         self.setFixedSize(1250, 820)
         self.setLayout()
+
+        self.available_cameras = False
+
+        if not self.available_cameras: 
+            QMessageBox.warning(self, "No camera found", "No camera found")
+            sys.exit(1)
+
+        print(self.available_cameras)
     
     def setLayout(self):
 
@@ -62,7 +72,13 @@ class MainWindow(QMainWindow):
         return left_widget
 
     def create_camera(self):
-        return Color("Blue")
+        # create a video feed 
+        camera = QWidget(self)
+        camera.setAutoFillBackground(True)
+        camera.setFixedSize(int(WIDTH * 0.5), int(HEIGHT * 0.5))
+        camera.setStyleSheet("background-color: blue")
+
+        return camera
 
     def right(self):
         right_widget = QWidget(self)
