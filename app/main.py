@@ -1,8 +1,8 @@
-from PyQt6.QtCore import *
-from PyQt6.QtWidgets import *
-from PyQt6.QtGui import *
-from PyQt6.QtMultimedia import *
-from PyQt6.QtMultimediaWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtMultimedia import *
+from PyQt5.QtMultimediaWidgets import *
 import sys
 import json
 from color import *
@@ -23,11 +23,15 @@ class MainWindow(QMainWindow):
         self.setFixedSize(1250, 820)
         self.setLayout()
 
-        self.available_devices = QMediaDevices.videoInputs()
+        # self.available_devices = QMediaDevices.videoInputs()
+        self.available_cameras = QCameraInfo.availableCameras()
 
-        if not self.available_devices: 
-            QMessageBox.warning(self, "No camera found", "No camera found")
-            sys.exit(1)
+
+        # if not self.available_devices: 
+        #     QMessageBox.warning(self, "No camera found", "No camera found")
+        #     sys.exit(1)
+
+        # self.viewfinder = QCameraViewfinder()
 
         # print(self.available_cameras)
     
