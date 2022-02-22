@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtMultimedia import *
 from PyQt6.QtMultimediaWidgets import *
-import sys 
+import sys
 import json
 from color import *
 
@@ -15,21 +15,21 @@ WIDTH = 1250
 HEIGHT = 820 
 
 class MainWindow(QMainWindow): 
-    def __init__(self, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
+    def __init__(self):
+        super(MainWindow, self).__init__()
         self.setWindowTitle("Handle: {} | {}".format(version.get('version'), 'Development' if version.get('development') else 'Stable'))
 
         # set fixed size of window
         self.setFixedSize(1250, 820)
         self.setLayout()
 
-        self.available_cameras = False
+        self.available_devices = QMediaDevices.videoInputs()
 
-        if not self.available_cameras: 
+        if not self.available_devices: 
             QMessageBox.warning(self, "No camera found", "No camera found")
             sys.exit(1)
 
-        print(self.available_cameras)
+        # print(self.available_cameras)
     
     def setLayout(self):
 
