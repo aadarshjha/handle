@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVB
 from PyQt6.QtGui import QPalette, QColor
 import sys 
 import json
+from color import *
 
 # read ./version.json
 with open('./version.json', 'r') as f:
@@ -10,17 +11,6 @@ with open('./version.json', 'r') as f:
 
 WIDTH = 1250
 HEIGHT = 820 
-
-
-class Color(QWidget):
-
-    def __init__(self, color):
-        super(Color, self).__init__()
-        self.setAutoFillBackground(True)
-
-        palette = self.palette()
-        palette.setColor(QPalette.ColorRole.Window, QColor(color))
-        self.setPalette(palette)
 
 class MainWindow(QMainWindow): 
     def __init__(self):
@@ -61,7 +51,7 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
 
-        layout.addWidget(Color('Blue'))
+        layout.addWidget(self.create_camera())
         layout.addWidget(Color('Green'))
 
         # remove margin and spacing
@@ -69,18 +59,10 @@ class MainWindow(QMainWindow):
 
         left_widget.setLayout(layout)
 
-
-        # create camera element in top quarter of widget
-        # camera = Color('#00ff00')
-        # camera.setFixedSize(int(WIDTH * 0.4), int(HEIGHT * 0.4))
-        # camera.setStyleSheet("background-color: #00ff00")
-
-
-
-        # left_widget.layout = Q
-
-
         return left_widget
+
+    def create_camera(self):
+        return Color("Blue")
 
     def right(self):
         right_widget = QWidget(self)
