@@ -12,12 +12,11 @@ const styles = {
         height: '100vh',
     },
     left: {
-        width: '60%',
+        width: '55%',
         height: '100vh',
-        backgroundColor: 'red',
     },
     right: {
-        width: '40%',
+        width: '45%',
         height: '100vh',
         backgroundColor: 'blue',
     },
