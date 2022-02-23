@@ -5,3 +5,4 @@ data/leapGestRecog.zip
 static/__pycache__
 web/server/server/
 */*/__pycache__
+*/*/*/__pycache__

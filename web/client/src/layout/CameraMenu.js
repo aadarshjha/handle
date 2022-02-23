@@ -1,6 +1,8 @@
 
 import 'antd/dist/antd.css'; 
 import Webcam from "react-webcam";
+import React, { useState } from 'react';
+
 
 import { Select } from 'antd';
 const { Option } = Select;
@@ -24,11 +26,26 @@ function handleChange(value) {
 }
 
 function CameraMenu() {
+    const webcamRef = React.useRef(null);
+    const [url, setURL] = useState(""); 
+
+    const capture = React.useCallback(
+      () => {
+        const imageSrc = webcamRef.current.getScreenshot();
+        setURL(imageSrc);
+      },
+      [webcamRef]
+    );
   return (
     <div style={styles.container}>
         {/* set up a camera frame */}
         <div style={styles.webcam}>
-            <Webcam style={styles.webcam}/>
+            <Webcam 
+                style={styles.webcam}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+            />
+            <button onClick={capture}>Capture photo</button>
         </div>
         <div style={{
             display: 'flex',
@@ -56,6 +73,8 @@ function CameraMenu() {
                     <Option value="mobilenet">MobileNet</Option>
                 </Select>
             </div>
+
+            <img src={url}></img>
         </div>
     </div>
   );
