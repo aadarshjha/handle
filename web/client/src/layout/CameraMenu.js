@@ -2,6 +2,7 @@
 import 'antd/dist/antd.css'; 
 import Webcam from "react-webcam";
 import React, { useState } from 'react';
+import { Button } from 'antd';
 
 
 import { Select } from 'antd';
@@ -27,12 +28,24 @@ function handleChange(value) {
 
 function CameraMenu() {
     const webcamRef = React.useRef(null);
-    const [url, setURL] = useState(""); 
 
     const capture = React.useCallback(
       () => {
         const imageSrc = webcamRef.current.getScreenshot();
-        setURL(imageSrc);
+
+        // send a POST request to the server with the image data
+        fetch("/api/upload", {
+            method: "POST",
+            body: imageSrc,
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            setURL(data.url);
+        })
+        .catch(err => {
+            console.log(err);
+        });
       },
       [webcamRef]
     );
@@ -45,7 +58,7 @@ function CameraMenu() {
                 ref={webcamRef}
                 screenshotFormat="image/jpeg"
             />
-            <button onClick={capture}>Capture photo</button>
+            <Button onClick={capture}>Capture photo</Button>
         </div>
         <div style={{
             display: 'flex',
@@ -73,8 +86,6 @@ function CameraMenu() {
                     <Option value="mobilenet">MobileNet</Option>
                 </Select>
             </div>
-
-            <img src={url}></img>
         </div>
     </div>
   );
