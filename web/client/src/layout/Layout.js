@@ -1,7 +1,6 @@
 
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
-import Left from "./Left"
-import Right from "./Right"
+import CameraMenu from './CameraMenu';
 
 // create style 
 const styles = {
@@ -13,12 +12,12 @@ const styles = {
         height: '100vh',
     },
     left: {
-        width: '40%',
+        width: '60%',
         height: '100vh',
         backgroundColor: 'red',
     },
     right: {
-        width: '60%',
+        width: '40%',
         height: '100vh',
         backgroundColor: 'blue',
     },
