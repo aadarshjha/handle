@@ -1,7 +1,10 @@
 from flask import Flask, request
 from static.process import *
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # accept a JSON object 
 @app.route('/static/cnn', methods=['POST'])

@@ -3,11 +3,10 @@ import 'antd/dist/antd.css';
 import Webcam from "react-webcam";
 import React, { useState } from 'react';
 import { Button } from 'antd';
-
-
 import { Select } from 'antd';
 const { Option } = Select;
 
+const PREFIX = require('../config.json').dev.prefix; 
 
 const styles = {
     container: {
@@ -22,7 +21,7 @@ const styles = {
 
 }
 
-function handleChange(value) {
+function handleChange(value) {  
     console.log(`selected ${value}`);
 }
 
@@ -33,19 +32,16 @@ function CameraMenu() {
       () => {
         const imageSrc = webcamRef.current.getScreenshot();
 
-        // send a POST request to the server with the image data
-        fetch("/api/upload", {
-            method: "POST",
-            body: imageSrc,
+        // post imageSrc to http://127.0.0.1:5000/static/cnn
+        fetch(`${PREFIX}/static/cnn`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                imageSrc: imageSrc
+            })
         })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data);
-            setURL(data.url);
-        })
-        .catch(err => {
-            console.log(err);
-        });
       },
       [webcamRef]
     );
@@ -56,7 +52,7 @@ function CameraMenu() {
             <Webcam 
                 style={styles.webcam}
                 ref={webcamRef}
-                screenshotFormat="image/jpeg"
+                screenshotFormat="image/png"
             />
             <Button onClick={capture}>Capture photo</Button>
         </div>
