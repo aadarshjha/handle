@@ -5,18 +5,16 @@ from pickle import NONE
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
-import sys 
-import yaml
 import pandas as pd
-from sklearn.model_selection import KFold
-from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers import Dense, Flatten
 import json
-from sklearn.model_selection import train_test_split
+
+# read ./labels/hgrd.json
+with open('static/labels/hgrd.json') as f:
+    labels = json.load(f)
 
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 gpus= tf.config.experimental.list_physical_devices('GPU')
@@ -35,20 +33,10 @@ class Inference:
 
         # get the prediction value
         prediction = np.argmax(prediction, axis=1)
+        # get the prediction label
         
+        return labels[str(prediction[0])]
 
-
-
-        print(prediction)
-        print(prediction)
-        print(prediction)
-        print(prediction)
-
-
-        print("THIS IS THE PREDICTION: ", prediction)        
-        # return prediction
-
-    
     def augment_single_image(self, image): 
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         img = cv2.resize(gray, (320, 120))

@@ -15,6 +15,7 @@ def index():
     data = request.get_json()
     image = Process(data['imageSrc']).readb64()
     inference = Inference(image).preProcess()
+    print(inference)
     return ""
 
 if __name__ == '__main__':
