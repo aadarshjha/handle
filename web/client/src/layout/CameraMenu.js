@@ -31,14 +31,19 @@ function CameraMenu() {
     // post imageSrc to http://127.0.0.1:5000/static/cnn
     fetch(`${PREFIX}/static/cnn`, {
       method: "POST",
+      mode: 'cors',
       headers: {
-        "Content-Type": "application/json",
+        'Access-Control-Allow-Origin':'*',
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         imageSrc: imageSrc,
       }),
-    }).then((res) => console.log(res));
-  }, [webcamRef]);
+    }).then(res => res.json())
+      .then(json => {
+        console.log(json);
+      }); 
+  }, [webcamRef]);  
   return (
     <div style={styles.container}>
       {/* set up a camera frame */}
