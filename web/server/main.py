@@ -14,8 +14,8 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 def index():
     data = request.get_json()
     image = Process(data['imageSrc']).readb64()
-    inference = Inference(image).run()
-    return inference
+    inference = Inference(image).preProcess()
+    return ""
 
 if __name__ == '__main__':
     app.run(debug=True)

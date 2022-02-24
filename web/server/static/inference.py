@@ -27,4 +27,12 @@ class Inference:
         self.image = image
     
     def preProcess(self): 
-        pass
+        self.augment_single_image(self.image)
+        # save the image to a file
+        cv2.imwrite('augmented.png', self.augment_single_image(self.image))
+    
+    def augment_single_image(self, image): 
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        img = cv2.resize(gray, (320, 120))
+        return img
+
