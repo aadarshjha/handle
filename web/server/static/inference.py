@@ -27,9 +27,27 @@ class Inference:
         self.image = image
     
     def preProcess(self): 
-        self.augment_single_image(self.image)
         # save the image to a file
-        cv2.imwrite('augmented.png', self.augment_single_image(self.image))
+        augmented_image = self.augment_single_image(self.image)
+        # inference the prediction
+        model = keras.models.load_model('static/model/5.h5')
+        prediction = model.predict(augmented_image.reshape(1, 120, 320, 1))
+
+        # get the prediction value
+        prediction = np.argmax(prediction, axis=1)
+        
+
+
+
+        print(prediction)
+        print(prediction)
+        print(prediction)
+        print(prediction)
+
+
+        print("THIS IS THE PREDICTION: ", prediction)        
+        # return prediction
+
     
     def augment_single_image(self, image): 
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
