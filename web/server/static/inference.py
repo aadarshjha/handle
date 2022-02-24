@@ -11,6 +11,7 @@ from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers import Dense, Flatten
 import json
+import base64
 
 # read ./labels/hgrd.json
 with open('static/labels/hgrd.json') as f:
@@ -25,20 +26,15 @@ class Inference:
         self.image = image
     
     def preProcess(self): 
-        # save the image to a file
-        augmented_image = self.augment_single_image(self.image)
-        # inference the prediction
+        augmented_image = self.augment_single_image()
         model = keras.models.load_model('static/model/5.h5')
-        prediction = model.predict(augmented_image.reshape(1, 120, 320, 1))
-
-        # get the prediction value
-        prediction = np.argmax(prediction, axis=1)
-        # get the prediction label
-        
+        prediction = model.predict(augmented_image.reshape(1, 120, 320, 1))        
         return labels[str(prediction[0])]
 
-    def augment_single_image(self, image): 
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    def augment_single_image(self): 
+        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         img = cv2.resize(gray, (320, 120))
         return img
 
+    def convert_to_b64(self):
+        return base64.b64encode(self.image)
