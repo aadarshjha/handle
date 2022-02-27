@@ -13,7 +13,12 @@ app.config["CORS_HEADERS"] = "Content-Type"
 @cross_origin(supports_credentials=True)
 def index():
     if request.method == "POST":
-        return jsonify({"sucess": True})
+        # print the posted data
+        # print(request.get_json())
+        fetched_image = request.get_json()["imageSrc"]
+        augmented_image = Inference(fetched_image).augment_single_image()
+
+        return {"hello": "world"}
 
 
 # return a JSON object

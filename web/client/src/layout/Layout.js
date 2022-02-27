@@ -25,7 +25,7 @@ const styles = {
 
 function Layout() {
   const [prediction, setPrediction] = useState("");
-  
+
   return (
     <div style={styles.container}>
       <div style={styles.left}>
