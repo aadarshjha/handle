@@ -19,19 +19,7 @@ def index():
         augmented_image = Inference(fetched_image)
         augmented_image.decode()
         augmented_single_image = augmented_image.augment_single_image()
-
-        # write json.dumps(augmented_single_image.tolist()) to a file
-        with open("./augmented_image.json", "w") as f:
-            json.dump(augmented_single_image.tolist(), f)
-
-        # return the augmented_single_image as a JSON object
         return json.dumps(augmented_single_image.tolist())
-
-
-# return a JSON object
-@app.route("/", methods=["GET"])
-def label():
-    return {"label": "hello"}
 
 
 if __name__ == "__main__":

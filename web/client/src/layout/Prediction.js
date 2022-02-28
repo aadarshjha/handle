@@ -5,7 +5,7 @@ import React, { useState } from "react";
 function Prediction() {
   return (
     <div>
-      <h1>Test</h1>
+      <h1>Inference Results</h1>
     </div>
   );
 }

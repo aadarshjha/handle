@@ -1,8 +1,18 @@
 import "antd/dist/antd.css";
 import Webcam from "react-webcam";
 import React, { useState } from "react";
-import { Button } from "antd";
-import { Select } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Radio,
+  Select,
+  Cascader,
+  DatePicker,
+  InputNumber,
+  TreeSelect,
+  Switch,
+} from "antd";
 const { Option } = Select;
 
 const PREFIX = require("../config.json").dev.prefix;
@@ -16,6 +26,14 @@ const styles = {
   },
   webcam: {
     width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  capture: {
+    width: "10%",
+    marginTop: "10px",
   },
 };
 
@@ -28,7 +46,7 @@ function CameraMenu() {
 
   const capture = React.useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
-    const new_image = imageSrc.split(",")[1]
+    const new_image = imageSrc.split(",")[1];
     // post imageSrc to http://127.0.0.1:5000/static/cnn
     fetch(`${PREFIX}/static/cnn`, {
       method: "POST",
@@ -55,35 +73,62 @@ function CameraMenu() {
           ref={webcamRef}
           screenshotFormat="image/png"
         />
-        <Button onClick={capture}>Capture photo</Button>
+        {/* center this button */}
+        <Button
+          style={styles.capture}
+          type="primary"
+          size="large"
+          onClick={capture}
+        >
+          Capture
+        </Button>
       </div>
       <div
         style={{
           display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-around",
-          alignItems: "center",
+          flexDirection: "column",
+          justifyContent: "flex-start",
           height: "100vh",
           padding: 0,
+          marginLeft: "20px",
         }}
       >
         <div>
-          <h3>Static | Dynamic Mode</h3>
-          <Select style={{ width: 120 }} onChange={handleChange}>
-            <Option value="static">Static</Option>
-            <Option value="dynamic">Dynamic</Option>
-          </Select>
+          <h2>Configurable Options</h2>
         </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <h3>Inferencing Mode</h3>
+            <Form>
+              <Form.Item label="" name="mode">
+                <Radio.Group>
+                  <Radio.Button value="static">Static</Radio.Button>
+                  <Radio.Button value="dynamic">Dynamic</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+            </Form>
+          </div>
 
-        {/* this changes */}
-        <div>
-          <h3>Network Mode</h3>
-          <Select style={{ width: 120 }} onChange={handleChange}>
-            <Option value="cnn">CNN</Option>
-            <Option value="resnet">ResNet</Option>
-            <Option value="densenet">DenseNet</Option>
-            <Option value="mobilenet">MobileNet</Option>
-          </Select>
+          <div>
+          <h3>Model Mode</h3>
+            <Form>
+              <Form.Item label="" name="mode">
+                <Radio.Group>
+                  <Radio.Button value="cnn">CNN</Radio.Button>
+                  <Radio.Button value="resnet">ResNet</Radio.Button>
+                  <Radio.Button value="densenet">DenseNet</Radio.Button>
+                  <Radio.Button value="mobilenet">MobileNet</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+            </Form>
+          </div>
         </div>
       </div>
     </div>
