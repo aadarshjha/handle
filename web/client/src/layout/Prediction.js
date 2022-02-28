@@ -5,7 +5,11 @@ import React, { useState } from "react";
 function Prediction() {
   return (
     <div>
-      <h1>Inference Results</h1>
+      <h2
+      style={{
+        marginLeft: "10px"
+      }}
+      >Inference Results</h2>
     </div>
   );
 }

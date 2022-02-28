@@ -19,7 +19,6 @@ const styles = {
   right: {
     width: "45%",
     height: "100vh",
-    backgroundColor: "blue",
   },
 };
 

@@ -101,7 +101,7 @@ function CameraMenu() {
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
-            alignItems: "center",
+            alignItems: "flex-start",
           }}
         >
           <div>
@@ -116,7 +116,9 @@ function CameraMenu() {
             </Form>
           </div>
 
-          <div>
+          <div style={{
+            marginTop: "-10px",
+          }}>
           <h3>Model Mode</h3>
             <Form>
               <Form.Item label="" name="mode">
