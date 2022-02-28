@@ -5,7 +5,8 @@ from flask_cors import CORS, cross_origin
 import jsonify
 
 app = Flask(__name__)
-CORS(app, support_credentials=True)
+# CORS(app, support_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}})
 app.config["CORS_HEADERS"] = "Content-Type"
 
 # accept a JSON object
@@ -13,12 +14,11 @@ app.config["CORS_HEADERS"] = "Content-Type"
 @cross_origin(supports_credentials=True)
 def index():
     if request.method == "POST":
-        # print the posted data
-        # print(request.get_json())
+        print("hello world")
         fetched_image = request.get_json()["imageSrc"]
         augmented_image = Inference(fetched_image).augment_single_image()
 
-        return {"hello": "world"}
+        return {"hello": augmented_image}
 
 
 # return a JSON object
