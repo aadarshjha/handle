@@ -16,15 +16,29 @@ function Prediction({ prediction, imageSrc }) {
       </h2>
       <div>
         {/* image preview */}
-        <img
-          src={imageSrc}
-          alt="preview"
-          style={{
-            width: "100%",
-            height: "auto",
-            marginTop: "10px",
-          }}
-        />
+
+        {/* if imageSrc is an empty array, render, otherwise display text */}
+        {imageSrc.length === 0 ? (
+          <div>
+            <h3
+              style={{
+                marginLeft: "10px",
+              }}
+            >
+              No image preview
+            </h3>
+          </div>
+        ) : (
+          <img
+            src={imageSrc}
+            alt="preview"
+            style={{
+              width: "100%",
+              height: "auto",
+              marginTop: "10px",
+            }}
+          />
+        )}
       </div>
     </div>
   );

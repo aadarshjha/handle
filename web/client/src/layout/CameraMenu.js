@@ -1,18 +1,7 @@
 import "antd/dist/antd.css";
 import Webcam from "react-webcam";
 import React, { useState } from "react";
-import {
-  Form,
-  Input,
-  Button,
-  Radio,
-  Select,
-  Cascader,
-  DatePicker,
-  InputNumber,
-  TreeSelect,
-  Switch,
-} from "antd";
+import { Form, Button, Radio, Select } from "antd";
 const { Option } = Select;
 
 const PREFIX = require("../config.json").dev.prefix;
