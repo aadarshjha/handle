@@ -40,8 +40,11 @@ class Inference:
         return img
 
     def convert_to_b64(self, img):
-        return base64.b64encode(img)
-
+        # convert a array to base64
+        ret, png = cv2.imencode(".png", img)
+        png_str = base64.b64encode(png)
+        return png_str
+        
     def decode(self):
         new_image = None
         if isinstance(self.image, bytes):
