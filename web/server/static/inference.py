@@ -12,6 +12,8 @@ from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers import Dense, Flatten
 import json
 import base64
+import skimage.io
+
 
 # read ./labels/hgrd.json
 with open("static/labels/hgrd.json") as f:
@@ -33,9 +35,20 @@ class Inference:
         return labels[str(prediction[0])]
 
     def augment_single_image(self):
+        print(self.image)
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         img = cv2.resize(gray, (320, 120))
         return img
 
     def convert_to_b64(self):
         return base64.b64encode(self.image)
+
+    def decode(self):
+        new_image = None
+        if isinstance(self.image, bytes):
+            new_image = self.image.decode("utf-8")
+        else:
+            new_image = self.image
+        imgdata = base64.b64decode(new_image)
+        img = skimage.io.imread(imgdata, plugin="imageio")
+        self.image = img

@@ -28,6 +28,7 @@ function CameraMenu() {
 
   const capture = React.useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
+    const new_image = imageSrc.split(",")[1]
     // post imageSrc to http://127.0.0.1:5000/static/cnn
     fetch(`${PREFIX}/static/cnn`, {
       method: "POST",
@@ -37,7 +38,7 @@ function CameraMenu() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        imageSrc: imageSrc,
+        imageSrc: new_image,
       }),
     })
       .then((res) => res.json())
