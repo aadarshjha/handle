@@ -35,13 +35,12 @@ class Inference:
         return labels[str(prediction[0])]
 
     def augment_single_image(self):
-        print(self.image)
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         img = cv2.resize(gray, (320, 120))
         return img
 
-    def convert_to_b64(self):
-        return base64.b64encode(self.image)
+    def convert_to_b64(self, img):
+        return base64.b64encode(img)
 
     def decode(self):
         new_image = None

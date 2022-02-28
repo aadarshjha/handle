@@ -24,14 +24,15 @@ const styles = {
 
 function Layout() {
   const [prediction, setPrediction] = useState("");
-
+  const [imageSrc, setImageSrc] = useState([]);
   return (
     <div style={styles.container}>
       <div style={styles.left}>
-        <CameraMenu />
+        {/* pass imageSrc and setImageSrc as a prop to CameraMenu */}
+        <CameraMenu setImageSrc={setImageSrc} />
       </div>
       <div style={styles.right}>
-        <Prediction prediction={prediction} />
+        <Prediction prediction={prediction} imageSrc={imageSrc} />
       </div>
     </div>
   );

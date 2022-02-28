@@ -37,11 +37,7 @@ const styles = {
   },
 };
 
-function handleChange(value) {
-  console.log(`selected ${value}`);
-}
-
-function CameraMenu() {
+function CameraMenu({ setImageSrc }) {
   const webcamRef = React.useRef(null);
 
   const capture = React.useCallback(() => {
@@ -61,7 +57,7 @@ function CameraMenu() {
     })
       .then((res) => res.json())
       .then((json) => {
-        console.log(json);
+        setImageSrc("data:image/png;base64," + json.image);
       });
   }, [webcamRef]);
   return (
@@ -116,10 +112,12 @@ function CameraMenu() {
             </Form>
           </div>
 
-          <div style={{
-            marginTop: "-10px",
-          }}>
-          <h3>Model Mode</h3>
+          <div
+            style={{
+              marginTop: "-10px",
+            }}
+          >
+            <h3>Model Mode</h3>
             <Form>
               <Form.Item label="" name="mode">
                 <Radio.Group>
