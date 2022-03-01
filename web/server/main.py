@@ -28,7 +28,12 @@ def index():
             augmented_single_image
         )
 
-        return json.dumps({"image": augmented_single_image_b64.decode("utf-8")})
+        return json.dumps(
+            {
+                "image": augmented_single_image_b64.decode("utf-8"),
+                "prediction": augmented_image.preProcess(),
+            }
+        )
 
 
 if __name__ == "__main__":

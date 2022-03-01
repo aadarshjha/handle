@@ -3,7 +3,6 @@ import React, { useState } from "react";
 
 // TODO: create style
 function Prediction({ prediction, imageSrc }) {
-  console.log(imageSrc);
   return (
     <div>
       <h2
@@ -47,6 +46,30 @@ function Prediction({ prediction, imageSrc }) {
               }}
             />
           </div>
+        )}
+      </div>
+
+      <div>
+        {/* if prediction is an empty array, render, otherwise display text */}
+        {prediction.length === 0 ? (
+          <div>
+            <h3
+              style={{
+                marginLeft: "10px",
+              }}
+            >
+              No prediction
+            </h3>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          ></div>
         )}
       </div>
     </div>

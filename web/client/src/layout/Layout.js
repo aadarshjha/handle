@@ -29,7 +29,7 @@ function Layout() {
     <div style={styles.container}>
       <div style={styles.left}>
         {/* pass imageSrc and setImageSrc as a prop to CameraMenu */}
-        <CameraMenu setImageSrc={setImageSrc} />
+        <CameraMenu setPrediction={setPrediction} setImageSrc={setImageSrc} />
       </div>
       <div style={styles.right}>
         <Prediction prediction={prediction} imageSrc={imageSrc} />

@@ -32,7 +32,9 @@ class Inference:
         augmented_image = self.augment_single_image()
         model = keras.models.load_model("static/model/5.h5")
         prediction = model.predict(augmented_image.reshape(1, 120, 320, 1))
-        return labels[str(prediction[0])]
+        prediction = np.argmax(prediction, axis=1)
+        prediction = labels[str(prediction[0])]
+        return prediction
 
     def augment_single_image(self):
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
@@ -44,7 +46,7 @@ class Inference:
         ret, png = cv2.imencode(".png", img)
         png_str = base64.b64encode(png)
         return png_str
-        
+
     def decode(self):
         new_image = None
         if isinstance(self.image, bytes):

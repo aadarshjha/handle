@@ -26,7 +26,7 @@ const styles = {
   },
 };
 
-function CameraMenu({ setImageSrc }) {
+function CameraMenu({ setPrediction, setImageSrc }) {
   const webcamRef = React.useRef(null);
 
   const capture = React.useCallback(() => {
@@ -47,6 +47,7 @@ function CameraMenu({ setImageSrc }) {
       .then((res) => res.json())
       .then((json) => {
         setImageSrc("data:image/png;base64," + json.image);
+        setPrediction(json.prediction);
       });
   }, [webcamRef]);
   return (
