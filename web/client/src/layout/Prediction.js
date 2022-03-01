@@ -29,15 +29,24 @@ function Prediction({ prediction, imageSrc }) {
             </h3>
           </div>
         ) : (
-          <img
-            src={imageSrc}
-            alt="preview"
+          <div
             style={{
-              width: "100%",
-              height: "auto",
-              marginTop: "10px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
             }}
-          />
+          >
+            <img
+              src={imageSrc}
+              alt="preview"
+              style={{
+                width: "320px",
+                height: "120px",
+                marginTop: "10px",
+              }}
+            />
+          </div>
         )}
       </div>
     </div>
