@@ -67,9 +67,24 @@ function Prediction({ prediction, imageSrc }) {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              alignItems: "center",
+              alignItems: "flex-start",
             }}
-          ></div>
+          >
+            <h3
+              style={{
+                marginLeft: "10px",
+              }}
+            >
+              Vanilla CNN
+            </h3>
+            <p
+              style={{
+                marginLeft: "10px",
+              }}
+            >
+              {prediction}
+            </p>
+          </div>
         )}
       </div>
     </div>
