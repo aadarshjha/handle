@@ -75,7 +75,7 @@ function Prediction({ prediction, imageSrc }) {
                 marginLeft: "10px",
               }}
             >
-              Vanilla CNN
+              Hand Gesture Recognition Database
             </h3>
             <p
               style={{
