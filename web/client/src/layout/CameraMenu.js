@@ -67,21 +67,34 @@ function CameraMenu({
   const handleStopCaptureClick = React.useCallback(() => {
     mediaRecorderRef.current.stop();
     setCapturing(false);
+    handleDownload();
   }, [mediaRecorderRef, webcamRef, setCapturing]);
 
   const handleDownload = React.useCallback(() => {
     if (recordedChunks.length) {
-      const blob = new Blob(recordedChunks, {
-        type: "video/webm",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      document.body.appendChild(a);
-      a.style = "display: none";
-      a.href = url;
-      a.download = "capture.webm";
-      a.click();
-      window.URL.revokeObjectURL(url);
+      console.log(recordedChunks)
+      // visualize(recordedChunks);
+
+
+      // function play() {
+      //   var superBuffer = new Blob(recordedChunks);
+      //   videoElement.src =
+      //     window.URL.createObjectURL(superBuffer);
+      // }
+
+
+      // const blob = new Blob(recordedChunks, {
+      //   type: "video/webm",
+      // });
+      // const url = URL.createObjectURL(blob);
+      // const a = document.createElement("a");
+      // document.body.appendChild(a);
+      // a.style = "display: none";
+      // a.href = url;
+      // a.download = "capture.webm";
+      // a.click();
+      // window.URL.revokeObjectURL(url);
+      // console.log(recordedChunks);
       setRecordedChunks([]);
     }
   }, [recordedChunks]);
@@ -184,17 +197,6 @@ function CameraMenu({
         )}
         ;
       </div>
-      {/* <div>
-        <>
-          <Webcam audio={false} ref={webcamRef} />
-          {capturing ? (
-            <button onClick={handleStopCaptureClick}>Stop Capture</button>
-          ) : (
-            <button onClick={handleStartCaptureClick}>Start Capture</button>
-          )}
-
-        </>
-      </div> */}
       <div
         style={{
           display: "flex",
