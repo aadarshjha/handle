@@ -25,14 +25,27 @@ const styles = {
 function Layout() {
   const [prediction, setPrediction] = useState("");
   const [imageSrc, setImageSrc] = useState([]);
+  const [imageOptions, setImageOptions] = useState({
+    mode: "static",
+    model: "cnn",
+  });
   return (
     <div style={styles.container}>
       <div style={styles.left}>
         {/* pass imageSrc and setImageSrc as a prop to CameraMenu */}
-        <CameraMenu setPrediction={setPrediction} setImageSrc={setImageSrc} />
+        <CameraMenu
+          setPrediction={setPrediction}
+          setImageSrc={setImageSrc}
+          setImageOptions={setImageOptions}
+          imageOptions={imageOptions}
+        />
       </div>
       <div style={styles.right}>
-        <Prediction prediction={prediction} imageSrc={imageSrc} />
+        <Prediction
+          prediction={prediction}
+          imageSrc={imageSrc}
+          inferenceOptions={imageOptions}
+        />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import "antd/dist/antd.css"; // or 'antd/dist/antd.less's
 import React, { useState } from "react";
 
 // TODO: create style
-function Prediction({ prediction, imageSrc }) {
+function Prediction({ prediction, imageSrc, imageOptions }) {
   return (
     <div>
       <h2
@@ -14,8 +14,6 @@ function Prediction({ prediction, imageSrc }) {
         Inference Results
       </h2>
       <div>
-        {/* image preview */}
-
         {/* if imageSrc is an empty array, render, otherwise display text */}
         {imageSrc.length === 0 ? (
           <div>
@@ -43,6 +41,7 @@ function Prediction({ prediction, imageSrc }) {
                 width: "320px",
                 height: "120px",
                 marginTop: "10px",
+                marginBottom: "10px",
               }}
             />
           </div>

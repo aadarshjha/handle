@@ -26,8 +26,40 @@ const styles = {
   },
 };
 
-function CameraMenu({ setPrediction, setImageSrc }) {
+function CameraMenu({
+  setPrediction,
+  setImageSrc,
+  setImageOptions,
+  imageOptions,
+}) {
   const webcamRef = React.useRef(null);
+
+  const updateOptions = (e) => {
+    const typeOfButton = e.target.value;
+
+    const typeOfModels = [
+      "cnn",
+      "densenet",
+      "densenet_pretrained",
+      "resnet",
+      "resnet_pretrained",
+      "mobilenet",
+      "mobilenet_pretrained",
+    ];
+
+    // check if typeOfButton is in typeOfModels
+    if (typeOfModels.includes(typeOfButton)) {
+      setImageOptions({
+        ...imageOptions,
+        model: typeOfButton,
+      });
+    } else {
+      setImageOptions({
+        ...imageOptions,
+        mode: typeOfButton,
+      });
+    }
+  };
 
   const capture = React.useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
@@ -59,7 +91,7 @@ function CameraMenu({ setPrediction, setImageSrc }) {
           ref={webcamRef}
           screenshotFormat="image/png"
         />
-        {/* center this button */}
+
         <Button
           style={styles.capture}
           type="primary"
@@ -93,11 +125,14 @@ function CameraMenu({ setPrediction, setImageSrc }) {
           <div>
             <h3>Inferencing Mode</h3>
             <Form>
-              <Form.Item label="" name="mode" defaultValue={"static"}>
-                <Radio.Group buttonStyle="solid" >
-                  {/* check this as default */}
-                  <Radio.Button value="static">Static</Radio.Button>
-                  <Radio.Button value="dynamic" buttonStyle="solid" >Dynamic</Radio.Button>
+              <Form.Item label="" name="mode">
+                <Radio.Group buttonStyle="solid" defaultValue={"static"}>
+                  <Radio.Button onChange={updateOptions} value="static">
+                    Static
+                  </Radio.Button>
+                  <Radio.Button onChange={updateOptions} value="dynamic">
+                    Dynamic
+                  </Radio.Button>
                 </Radio.Group>
               </Form.Item>
             </Form>
@@ -112,13 +147,36 @@ function CameraMenu({ setPrediction, setImageSrc }) {
             <Form>
               <Form.Item label="" name="mode">
                 <Radio.Group buttonStyle="solid" defaultValue={"cnn"}>
-                  <Radio.Button value="cnn">CNN</Radio.Button>
-                  <Radio.Button value="densenet">DenseNet</Radio.Button>
-                  <Radio.Button value="densenet_pretrained">DenseNet Pretrained</Radio.Button>
-                  <Radio.Button value="mobilenet">MobileNet</Radio.Button>
-                  <Radio.Button value="mobilenet_pretrained">MobileNet Pretrained</Radio.Button>
-                  <Radio.Button value="resnet">ResNet</Radio.Button>
-                  <Radio.Button value="resnet_pretrained">ResNet Pretrained</Radio.Button>
+                  <Radio.Button onChange={updateOptions} value="cnn">
+                    CNN
+                  </Radio.Button>
+                  <Radio.Button onChange={updateOptions} value="densenet">
+                    DenseNet
+                  </Radio.Button>
+                  <Radio.Button
+                    onChange={updateOptions}
+                    value="densenet_pretrained"
+                  >
+                    DenseNet Pretrained
+                  </Radio.Button>
+                  <Radio.Button onChange={updateOptions} value="mobilenet">
+                    MobileNet
+                  </Radio.Button>
+                  <Radio.Button
+                    onChange={updateOptions}
+                    value="mobilenet_pretrained"
+                  >
+                    MobileNet Pretrained
+                  </Radio.Button>
+                  <Radio.Button onChange={updateOptions} value="resnet">
+                    ResNet
+                  </Radio.Button>
+                  <Radio.Button
+                    onChange={updateOptions}
+                    value="resnet_pretrained"
+                  >
+                    ResNet Pretrained
+                  </Radio.Button>
                 </Radio.Group>
               </Form.Item>
             </Form>
