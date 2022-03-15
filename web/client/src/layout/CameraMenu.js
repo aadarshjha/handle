@@ -159,9 +159,7 @@ function CameraMenu({
               Capture
             </Button>
           </div>
-        ) : // its dynamic mode
-        // if capturing
-        !capturing ? (
+        ) : !capturing ? (
           <div>
             <Button
               style={styles.videoCapture}
