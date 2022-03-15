@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { Form, Button, Radio, Select } from "antd";
 const { Option } = Select;
 
+// ideas
+// inverting the colors.
+
 const PREFIX = require("../config.json").dev.prefix;
 
 const styles = {
@@ -72,16 +75,8 @@ function CameraMenu({
 
   const handleDownload = React.useCallback(() => {
     if (recordedChunks.length) {
-      console.log(recordedChunks)
-      // visualize(recordedChunks);
-
-
-      // function play() {
-      //   var superBuffer = new Blob(recordedChunks);
-      //   videoElement.src =
-      //     window.URL.createObjectURL(superBuffer);
-      // }
-
+      const superBuffer = new Blob(recordedChunks);
+      // window.URL.createObjectURL(superBuffer);
 
       // const blob = new Blob(recordedChunks, {
       //   type: "video/webm",
@@ -132,7 +127,7 @@ function CameraMenu({
     const imageSrc = webcamRef.current.getScreenshot();
     const new_image = imageSrc.split(",")[1];
 
-    fetch(`${PREFIX}/static/cnn`, {
+    fetch(`${PREFIX}/static/inference`, {
       method: "POST",
       mode: "cors",
       headers: {
