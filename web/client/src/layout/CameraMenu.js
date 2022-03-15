@@ -21,7 +21,11 @@ const styles = {
     alignItems: "center",
   },
   capture: {
-    width: "10%",
+    width: "100%",
+    marginTop: "10px",
+  },
+  videoCapture: {
+    width: "100%",
     marginTop: "10px",
   },
 };
@@ -145,20 +149,22 @@ function CameraMenu({
         />
         {/* if in dynamic mode */}
         {imageOptions.mode === "static" ? (
-          <Button
-            style={styles.capture}
-            type="primary"
-            size="large"
-            onClick={capture}
-          >
-            Capture
-          </Button>
+          <div>
+            <Button
+              style={styles.capture}
+              type="primary"
+              size="large"
+              onClick={capture}
+            >
+              Capture
+            </Button>
+          </div>
         ) : // its dynamic mode
         // if capturing
         !capturing ? (
           <div>
             <Button
-              style={styles.capture}
+              style={styles.videoCapture}
               type="primary"
               size="large"
               onClick={handleStartCaptureClick}
@@ -169,7 +175,7 @@ function CameraMenu({
         ) : (
           <div>
             <Button
-              style={styles.capture}
+              style={styles.videoCapture}
               type="primary"
               size="large"
               onClick={handleStopCaptureClick}
@@ -177,7 +183,8 @@ function CameraMenu({
               Stop Video
             </Button>
           </div>
-        )};
+        )}
+        ;
       </div>
       {/* <div>
         <>
