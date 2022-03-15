@@ -14,7 +14,12 @@ function Prediction({ prediction, imageSrc, imageOptions }) {
         Inference Results
       </h2>
 
-      <p>
+      <p
+        style={{
+          marginLeft: "10px",
+          textAlign: "center",
+        }}
+      >
         Deploying {imageOptions.model.toUpperCase()} in{" "}
         {imageOptions.mode.toUpperCase()} mode.
       </p>

@@ -34,30 +34,27 @@ class Inference:
     def preProcess(self):
         augmented_image = self.augment_single_image()
 
-        model = None 
+        model = None
 
-        # apply the correct model: 
+        # apply the correct model:
         if self.model == "cnn":
-            model = keras.models.load_model("static/model/5.h5")
+            model = keras.models.load_model("static/model/cnn.h5")
         elif self.model == "densenet":
-            model = keras.models.load_model("static/model/5.h5")
-        elif self.model == "densenet_pretrained": 
-            model = keras.models.load_model("static/model/5.h5")
+            model = keras.models.load_model("static/model/densenet.h5")
+        elif self.model == "densenet_pretrained":
+            model = keras.models.load_model("static/model/densenet_pretrained.h5")
         elif self.model == "resnet":
-            model = keras.models.load_model("static/model/5.h5")
+            model = keras.models.load_model("static/model/resnet.h5")
         elif self.model == "resnet_pretrained":
-            model = keras.models.load_model("static/model/5.h5")
-        elif self.model == "mobilenet": 
-            model = keras.models.load_model("static/model/5.h5")
+            model = keras.models.load_model("static/model/resnet_pretrained.h5")
+        elif self.model == "mobilenet":
+            model = keras.models.load_model("static/model/mobilenet.h5")
         elif self.model == "mobilenet_pretrained":
-            model = keras.models.load_model("static/model/5.h5")
-        else: 
+            model = keras.models.load_model("static/model/mobilenet_pretrained.h5")
+        else:
             print("Error: model not found")
             return None
-        
-        
-        model = keras.models.load_model("static/model/5.h5")
-        
+
         prediction = model.predict(augmented_image.reshape(1, 120, 320, 1))
         prediction = np.argmax(prediction, axis=1)
         prediction = labels[str(prediction[0])]

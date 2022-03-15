@@ -65,8 +65,8 @@ function CameraMenu({
     const imageSrc = webcamRef.current.getScreenshot();
     const new_image = imageSrc.split(",")[1];
 
-    console.log("here")
-    console.log(imageOptions.model)
+    console.log("here");
+    console.log(imageOptions.model);
 
     // post imageSrc to http://127.0.0.1:5000/static/cnn
     fetch(`${PREFIX}/static/cnn`, {
