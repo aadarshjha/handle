@@ -93,10 +93,11 @@ function CameraMenu({ setPrediction, setImageSrc }) {
           <div>
             <h3>Inferencing Mode</h3>
             <Form>
-              <Form.Item label="" name="mode">
-                <Radio.Group>
+              <Form.Item label="" name="mode" defaultValue={"static"}>
+                <Radio.Group buttonStyle="solid" >
+                  {/* check this as default */}
                   <Radio.Button value="static">Static</Radio.Button>
-                  <Radio.Button value="dynamic">Dynamic</Radio.Button>
+                  <Radio.Button value="dynamic" buttonStyle="solid" >Dynamic</Radio.Button>
                 </Radio.Group>
               </Form.Item>
             </Form>
@@ -110,11 +111,14 @@ function CameraMenu({ setPrediction, setImageSrc }) {
             <h3>Model Mode</h3>
             <Form>
               <Form.Item label="" name="mode">
-                <Radio.Group>
+                <Radio.Group buttonStyle="solid" defaultValue={"cnn"}>
                   <Radio.Button value="cnn">CNN</Radio.Button>
-                  <Radio.Button value="resnet">ResNet</Radio.Button>
                   <Radio.Button value="densenet">DenseNet</Radio.Button>
+                  <Radio.Button value="densenet_pretrained">DenseNet Pretrained</Radio.Button>
                   <Radio.Button value="mobilenet">MobileNet</Radio.Button>
+                  <Radio.Button value="mobilenet_pretrained">MobileNet Pretrained</Radio.Button>
+                  <Radio.Button value="resnet">ResNet</Radio.Button>
+                  <Radio.Button value="resnet_pretrained">ResNet Pretrained</Radio.Button>
                 </Radio.Group>
               </Form.Item>
             </Form>
