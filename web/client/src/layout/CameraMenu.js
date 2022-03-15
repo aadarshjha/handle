@@ -75,7 +75,7 @@ function CameraMenu({
       document.body.appendChild(a);
       a.style = "display: none";
       a.href = url;
-      a.download = "react-webcam-stream-capture.webm";
+      a.download = "capture.webm";
       a.click();
       window.URL.revokeObjectURL(url);
       setRecordedChunks([]);
@@ -143,17 +143,43 @@ function CameraMenu({
           ref={webcamRef}
           screenshotFormat="image/png"
         />
-
-        <Button
-          style={styles.capture}
-          type="primary"
-          size="large"
-          onClick={capture}
-        >
-          Capture
-        </Button>
+        {/* if in dynamic mode */}
+        {imageOptions.mode === "static" ? (
+          <Button
+            style={styles.capture}
+            type="primary"
+            size="large"
+            onClick={capture}
+          >
+            Capture
+          </Button>
+        ) : // its dynamic mode
+        // if capturing
+        !capturing ? (
+          <div>
+            <Button
+              style={styles.capture}
+              type="primary"
+              size="large"
+              onClick={handleStartCaptureClick}
+            >
+              Start Video
+            </Button>
+          </div>
+        ) : (
+          <div>
+            <Button
+              style={styles.capture}
+              type="primary"
+              size="large"
+              onClick={handleStopCaptureClick}
+            >
+              Stop Video
+            </Button>
+          </div>
+        )};
       </div>
-      <div>
+      {/* <div>
         <>
           <Webcam audio={false} ref={webcamRef} />
           {capturing ? (
@@ -161,11 +187,9 @@ function CameraMenu({
           ) : (
             <button onClick={handleStartCaptureClick}>Start Capture</button>
           )}
-          {recordedChunks.length > 0 && (
-            <button onClick={handleDownload}>Download</button>
-          )}
+
         </>
-      </div>
+      </div> */}
       <div
         style={{
           display: "flex",
