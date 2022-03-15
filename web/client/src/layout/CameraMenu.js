@@ -64,6 +64,10 @@ function CameraMenu({
   const capture = React.useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     const new_image = imageSrc.split(",")[1];
+
+    console.log("here")
+    console.log(imageOptions.model)
+
     // post imageSrc to http://127.0.0.1:5000/static/cnn
     fetch(`${PREFIX}/static/cnn`, {
       method: "POST",
@@ -74,6 +78,8 @@ function CameraMenu({
       },
       body: JSON.stringify({
         imageSrc: new_image,
+        model: imageOptions.model,
+        mode: imageOptions.mode,
       }),
     })
       .then((res) => res.json())
@@ -81,7 +87,7 @@ function CameraMenu({
         setImageSrc("data:image/png;base64," + json.image);
         setPrediction(json.prediction);
       });
-  }, [webcamRef]);
+  }, [webcamRef, imageOptions]);
   return (
     <div style={styles.container}>
       {/* set up a camera frame */}

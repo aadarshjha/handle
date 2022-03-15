@@ -13,6 +13,11 @@ function Prediction({ prediction, imageSrc, imageOptions }) {
       >
         Inference Results
       </h2>
+
+      <p>
+        Deploying {imageOptions.model.toUpperCase()} in{" "}
+        {imageOptions.mode.toUpperCase()} mode.
+      </p>
       <div>
         {/* if imageSrc is an empty array, render, otherwise display text */}
         {imageSrc.length === 0 ? (

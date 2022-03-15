@@ -2,6 +2,7 @@
 
 import os
 from pickle import NONE
+from pyexpat import model
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
@@ -25,12 +26,38 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 class Inference:
-    def __init__(self, image):
+    def __init__(self, image, model, mode):
         self.image = image
+        self.model = model
+        self.mode = mode
 
     def preProcess(self):
         augmented_image = self.augment_single_image()
+
+        model = None 
+
+        # apply the correct model: 
+        if self.model == "cnn":
+            model = keras.models.load_model("static/model/5.h5")
+        elif self.model == "densenet":
+            model = keras.models.load_model("static/model/5.h5")
+        elif self.model == "densenet_pretrained": 
+            model = keras.models.load_model("static/model/5.h5")
+        elif self.model == "resnet":
+            model = keras.models.load_model("static/model/5.h5")
+        elif self.model == "resnet_pretrained":
+            model = keras.models.load_model("static/model/5.h5")
+        elif self.model == "mobilenet": 
+            model = keras.models.load_model("static/model/5.h5")
+        elif self.model == "mobilenet_pretrained":
+            model = keras.models.load_model("static/model/5.h5")
+        else: 
+            print("Error: model not found")
+            return None
+        
+        
         model = keras.models.load_model("static/model/5.h5")
+        
         prediction = model.predict(augmented_image.reshape(1, 120, 320, 1))
         prediction = np.argmax(prediction, axis=1)
         prediction = labels[str(prediction[0])]

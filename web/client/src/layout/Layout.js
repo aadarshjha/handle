@@ -44,7 +44,7 @@ function Layout() {
         <Prediction
           prediction={prediction}
           imageSrc={imageSrc}
-          inferenceOptions={imageOptions}
+          imageOptions={imageOptions}
         />
       </div>
     </div>
