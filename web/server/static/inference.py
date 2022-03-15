@@ -8,9 +8,6 @@ from tensorflow import keras
 import numpy as np
 import cv2
 import pandas as pd
-from keras.models import Sequential
-from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.layers import Dense, Flatten
 import json
 import base64
 import skimage.io
