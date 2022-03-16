@@ -6,3 +6,4 @@ keras
 pandas
 scikit-learn
 PyYAML
+opencv-python
