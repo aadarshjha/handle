@@ -1,8 +1,7 @@
 import "antd/dist/antd.css"; // or 'antd/dist/antd.less's
 import React, { useState, useEffect } from "react";
 
-function PredictionTextDynamic({ prediction, imageSrc, imageOptions }) {
-
+function PredictionTextDynamic({ prediction, imageSrc, imageOptions, geturl }) {
   return (
     <div>
       <h2
@@ -24,8 +23,8 @@ function PredictionTextDynamic({ prediction, imageSrc, imageOptions }) {
         {imageOptions.mode.toUpperCase()} mode.
       </p>
       <div>
-        {/* if imageSrc is an empty array, render, otherwise display text */}
-        {imageSrc.length === 0 ? (
+        {/* if url is an empty string, don't render anything */}
+        {geturl === "" ? (
           <div>
             <h3
               style={{
@@ -44,16 +43,7 @@ function PredictionTextDynamic({ prediction, imageSrc, imageOptions }) {
               alignItems: "center",
             }}
           >
-            <img
-              src={imageSrc}
-              alt="preview"
-              style={{
-                width: "320px",
-                height: "120px",
-                marginTop: "10px",
-                marginBottom: "10px",
-              }}
-            />
+            <video style={{ width: "70%"}}controls src={geturl}></video>
           </div>
         )}
       </div>

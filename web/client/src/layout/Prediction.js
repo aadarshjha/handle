@@ -4,7 +4,7 @@ import PredictionTextStatic from "./PredictionTextStatic";
 import PredictionTextDynamic from "./PredictionTextDynamic";
 
 // TODO: create style
-function Prediction({ prediction, imageSrc, imageOptions }) {
+function Prediction({ prediction, imageSrc, imageOptions, geturl }) {
   console.log(prediction);
   console.log(imageSrc);
   console.log(imageOptions);
@@ -26,6 +26,7 @@ function Prediction({ prediction, imageSrc, imageOptions }) {
         prediction={prediction}
         imageSrc={imageSrc}
         imageOptions={imageOptions}
+        geturl={geturl}
       />
     );
   }

@@ -29,6 +29,7 @@ function Layout() {
     mode: "static",
     model: "cnn",
   });
+  const [geturl, seturl] = React.useState("");
   return (
     <div style={styles.container}>
       <div style={styles.left}>
@@ -38,6 +39,8 @@ function Layout() {
           setImageSrc={setImageSrc}
           setImageOptions={setImageOptions}
           imageOptions={imageOptions}
+          geturl={geturl}
+          seturl={seturl}
         />
       </div>
       <div style={styles.right}>
@@ -45,6 +48,7 @@ function Layout() {
           prediction={prediction}
           imageSrc={imageSrc}
           imageOptions={imageOptions}
+          geturl={geturl}
         />
       </div>
     </div>

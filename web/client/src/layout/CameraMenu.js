@@ -37,6 +37,8 @@ function CameraMenu({
   setImageSrc,
   setImageOptions,
   imageOptions,
+  geturl,
+  seturl,
 }) {
   const webcamRef = React.useRef(null);
 
@@ -45,8 +47,6 @@ function CameraMenu({
   const [capturing, setCapturing] = React.useState(false);
   const [recordedChunks, setRecordedChunks] = React.useState([]);
   const [displayError, setDisplayError] = React.useState(false);
-
-  const [geturl, seturl] = React.useState("");
 
   const handleStartCaptureClick = React.useCallback(() => {
     setCapturing(true);
