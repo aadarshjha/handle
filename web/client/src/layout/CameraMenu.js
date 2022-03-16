@@ -6,6 +6,8 @@ const { Option } = Select;
 
 const PREFIX = require("../config.json").dev.prefix;
 
+const srcInsert = document.getElementById("srcInsert");
+
 const styles = {
   container: {
     display: "flex",
@@ -44,6 +46,8 @@ function CameraMenu({
   const [recordedChunks, setRecordedChunks] = React.useState([]);
   const [displayError, setDisplayError] = React.useState(false);
 
+  const [geturl, seturl] = React.useState("");
+
   const handleStartCaptureClick = React.useCallback(() => {
     setCapturing(true);
     mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
@@ -75,17 +79,9 @@ function CameraMenu({
       const blob = new Blob(recordedChunks, {
         type: "video/webm",
       });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      document.body.appendChild(a);
-      a.style = "display: none";
-      a.href = url;
-      a.download = "capture.webm";
-      a.click();
-      window.URL.revokeObjectURL(url);
+      seturl(URL.createObjectURL(blob)); 
       setRecordedChunks([]);
     } else {
-      // render <Alert message="Error Text" type="error" />
       setDisplayError(true);
     }
   }, [recordedChunks]);
@@ -149,7 +145,7 @@ function CameraMenu({
         {displayError && (
           <Alert
             message="Error"
-            description="Please try again"
+            description="No video taken!"
             type="error"
             showIcon
             closable
@@ -158,13 +154,21 @@ function CameraMenu({
         )}
       </div>
       {/* set up a camera frame */}
+      <video width="320" height="240" controls>
+      <source id="insertPreview"  source={geturl}></source>
+        Your browser does not support the video tag.
+      </video>
+      <p>
+      {geturl}
+      </p>
+      
+
       <div style={styles.webcam}>
         <Webcam
           style={styles.webcam}
           ref={webcamRef}
           screenshotFormat="image/png"
         />
-        {/* if in dynamic mode */}
         {imageOptions.mode === "static" ? (
           <div>
             <Button
