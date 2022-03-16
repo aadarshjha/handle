@@ -67,34 +67,21 @@ function CameraMenu({
   const handleStopCaptureClick = React.useCallback(() => {
     mediaRecorderRef.current.stop();
     setCapturing(false);
-    handleDownload();
   }, [mediaRecorderRef, webcamRef, setCapturing]);
 
   const handleDownload = React.useCallback(() => {
     if (recordedChunks.length) {
-      console.log(recordedChunks)
-      // visualize(recordedChunks);
-
-
-      // function play() {
-      //   var superBuffer = new Blob(recordedChunks);
-      //   videoElement.src =
-      //     window.URL.createObjectURL(superBuffer);
-      // }
-
-
-      // const blob = new Blob(recordedChunks, {
-      //   type: "video/webm",
-      // });
-      // const url = URL.createObjectURL(blob);
-      // const a = document.createElement("a");
-      // document.body.appendChild(a);
-      // a.style = "display: none";
-      // a.href = url;
-      // a.download = "capture.webm";
-      // a.click();
-      // window.URL.revokeObjectURL(url);
-      // console.log(recordedChunks);
+      const blob = new Blob(recordedChunks, {
+        type: "video/webm",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      document.body.appendChild(a);
+      a.style = "display: none";
+      a.href = url;
+      a.download = "capture.webm";
+      a.click();
+      window.URL.revokeObjectURL(url);
       setRecordedChunks([]);
     }
   }, [recordedChunks]);
@@ -182,6 +169,14 @@ function CameraMenu({
             >
               Start Video
             </Button>
+            <Button
+              style={styles.videoCapture}
+              type="primary"
+              size="large"
+              onClick={handleDownload}
+            >
+              Preview
+            </Button>
           </div>
         ) : (
           <div>
@@ -193,6 +188,17 @@ function CameraMenu({
             >
               Stop Video
             </Button>
+
+            <Button
+              style={styles.videoCapture}
+              type="primary"
+              size="large"
+              onClick={handleDownload}
+            >
+              Preview
+            </Button>
+
+
           </div>
         )}
         ;
