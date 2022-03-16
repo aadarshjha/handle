@@ -79,7 +79,7 @@ function CameraMenu({
       const blob = new Blob(recordedChunks, {
         type: "video/webm",
       });
-      seturl(URL.createObjectURL(blob)); 
+      seturl(URL.createObjectURL(blob));
       setRecordedChunks([]);
     } else {
       setDisplayError(true);
@@ -154,15 +154,11 @@ function CameraMenu({
         )}
       </div>
       {/* set up a camera frame */}
-      <video width="320" height="240" controls>
-      <source id="insertPreview"  source={geturl}></source>
-        Your browser does not support the video tag.
-      </video>
-      <p>
-      {geturl}
-      </p>
-      
-
+      {
+        // if url is not an empty string
+        geturl !== "" ? <video controls src={geturl}></video> : <></>
+      }
+      <p>{geturl}</p>
       <div style={styles.webcam}>
         <Webcam
           style={styles.webcam}
@@ -220,7 +216,6 @@ function CameraMenu({
             </Button>
           </div>
         )}
-        ;
       </div>
       <div
         style={{
