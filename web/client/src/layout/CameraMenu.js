@@ -1,7 +1,7 @@
 import "antd/dist/antd.css";
 import Webcam from "react-webcam";
 import React, { useState } from "react";
-import { Form, Button, Radio, Select } from "antd";
+import { Form, Button, Radio, Select, Alert } from "antd";
 const { Option } = Select;
 
 const PREFIX = require("../config.json").dev.prefix;
@@ -42,6 +42,7 @@ function CameraMenu({
   const mediaRecorderRef = React.useRef(null);
   const [capturing, setCapturing] = React.useState(false);
   const [recordedChunks, setRecordedChunks] = React.useState([]);
+  const [displayError, setDisplayError] = React.useState(false);
 
   const handleStartCaptureClick = React.useCallback(() => {
     setCapturing(true);
@@ -83,6 +84,9 @@ function CameraMenu({
       a.click();
       window.URL.revokeObjectURL(url);
       setRecordedChunks([]);
+    } else {
+      // render <Alert message="Error Text" type="error" />
+      setDisplayError(true);
     }
   }, [recordedChunks]);
 
@@ -139,7 +143,20 @@ function CameraMenu({
       });
   }, [webcamRef, imageOptions]);
   return (
+    // if displayError is true, then <Alert message="Error Text" type="error" />
     <div style={styles.container}>
+      <div>
+        {displayError && (
+          <Alert
+            message="Error"
+            description="Please try again"
+            type="error"
+            showIcon
+            closable
+            onClose={() => setDisplayError(false)}
+          />
+        )}
+      </div>
       {/* set up a camera frame */}
       <div style={styles.webcam}>
         <Webcam
@@ -197,8 +214,6 @@ function CameraMenu({
             >
               Preview
             </Button>
-
-
           </div>
         )}
         ;
