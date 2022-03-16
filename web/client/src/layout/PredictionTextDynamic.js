@@ -43,7 +43,7 @@ function PredictionTextDynamic({ prediction, imageSrc, imageOptions, geturl }) {
               alignItems: "center",
             }}
           >
-            <video style={{ width: "70%"}}controls src={geturl}></video>
+            <video style={{ width: "70%" }} controls src={geturl}></video>
           </div>
         )}
       </div>
