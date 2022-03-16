@@ -61,29 +61,30 @@ function PredictionTextDynamic({ prediction, imageSrc, imageOptions, geturl }) {
             </h3>
           </div>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "flex-start",
-            }}
-          >
-            <h3
-              style={{
-                marginLeft: "10px",
-              }}
-            >
-              Hand Gesture Recognition Database
-            </h3>
-            <p
-              style={{
-                marginLeft: "10px",
-              }}
-            >
-              {prediction}
-            </p>
-          </div>
+            <>still need to make predictions...nothing yet</>
+        //   <div
+        //     style={{
+        //       display: "flex",
+        //       flexDirection: "column",
+        //       justifyContent: "center",
+        //       alignItems: "flex-start",
+        //     }}
+        //   >
+        //     <h3
+        //       style={{
+        //         marginLeft: "10px",
+        //       }}
+        //     >
+        //       Hand Gesture Recognition Database
+        //     </h3>
+        //     <p
+        //       style={{
+        //         marginLeft: "10px",
+        //       }}
+        //     >
+        //       {prediction}
+        //     </p>
+        //   </div>
         )}
       </div>
     </div>
