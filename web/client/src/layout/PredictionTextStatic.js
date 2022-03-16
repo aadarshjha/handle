@@ -1,7 +1,7 @@
 import "antd/dist/antd.css"; // or 'antd/dist/antd.less's
 import React, { useState, useEffect } from "react";
 
-function PredictionText({ prediction, imageSrc, imageOptions }) {
+function PredictionTextStatic({ prediction, imageSrc, imageOptions }) {
   // const [toggleView, changeToggleView] = useState(true);
 
   //   useEffect(() => {}, [imageOptions.mode]); // <-- here put the parameter to listen
@@ -35,9 +35,7 @@ function PredictionText({ prediction, imageSrc, imageOptions }) {
                 marginLeft: "10px",
               }}
             >
-              {imageOptions.mode === "static"
-                ? "No image preview"
-                : "No video preview"}
+              No image preview
             </h3>
           </div>
         ) : (
@@ -105,4 +103,4 @@ function PredictionText({ prediction, imageSrc, imageOptions }) {
   );
 }
 
-export default PredictionText;
+export default PredictionTextStatic;

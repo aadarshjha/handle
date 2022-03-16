@@ -153,12 +153,7 @@ function CameraMenu({
           />
         )}
       </div>
-      {/* set up a camera frame */}
-      {
-        // if url is not an empty string
-        geturl !== "" ? <video controls src={geturl}></video> : <></>
-      }
-      <p>{geturl}</p>
+
       <div style={styles.webcam}>
         <Webcam
           style={styles.webcam}
