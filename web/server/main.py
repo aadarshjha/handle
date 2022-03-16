@@ -14,7 +14,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 app.config["CORS_HEADERS"] = "Content-Type"
 
 # accept a JSON object
-@app.route("/static/inference", methods=["POST", "GET"])
+@app.route("/static/cnn", methods=["POST", "GET"])
 @cross_origin(supports_credentials=True)
 def index():
     if request.method == "POST":
