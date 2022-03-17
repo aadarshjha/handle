@@ -15,7 +15,6 @@ from sklearn.metrics import (
     f1_score,
     precision_score,
     recall_score,
-    clear,
 )
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
