@@ -26,7 +26,7 @@ from sklearn.model_selection import train_test_split
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 gpus = tf.config.experimental.list_physical_devices("GPU")
-# tf.config.experimental.set_memory_growth(gpus[0], True)
+tf.config.experimental.set_memory_growth(gpus[0], True)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 PREFIX = "../drive/MyDrive/handleData/"
@@ -401,55 +401,56 @@ if __name__ == "__main__":
     # X, y = augment_data(imagepaths)
     X, y = get_data(train_dir)
 
-    print(X)
-    print(y)
+    # print(X)
+    # print(y)
 
-    print("The shape of X_train is : ", X.shape)
-    print("The shape of y_train is : ", y.shape)
+    # print("The shape of X_train is : ", X.shape)
+    # print("The shape of y_train is : ", y.shape)
 
-    # # execute the training pipeline
-    # (
-    #     model_cache,
-    #     train_loss,
-    #     train_acc,
-    #     val_loss,
-    #     val_acc,
-    #     predictions_cache,
-    #     targets_cache,
-    #     precision_history,
-    #     recall_history,
-    #     f1_history,
-    #     accuracy_history,
-    #     cfx_history,
-    # ) = execute_training(
-    #     X,
-    #     y,
-    #     hyperparameters["EXPERIMENT_NAME"],
-    #     hyperparameters["CONFIG"]["NUM_FOLDS"],
-    #     hyperparameters["CONFIG"]["EPOCHS"],
-    #     hyperparameters["CONFIG"]["BATCH_SIZE"],
-    #     hyperparameters["CONFIG"]["VERBOSE"],
-    #     hyperparameters["CONFIG"]["OPTIMIZER"],
-    #     hyperparameters["CONFIG"]["LOSS"],
-    #     hyperparameters["CONFIG"]["MODE"],
-    # )
+    # execute the training pipeline
+    (
+        model_cache,
+        train_loss,
+        train_acc,
+        val_loss,
+        val_acc,
+        predictions_cache,
+        targets_cache,
+        precision_history,
+        recall_history,
+        f1_history,
+        accuracy_history,
+        cfx_history,
+    ) = execute_training(
+        X,
+        y,
+        hyperparameters["EXPERIMENT_NAME"],
+        hyperparameters["CONFIG"]["NUM_FOLDS"],
+        hyperparameters["CONFIG"]["EPOCHS"],
+        hyperparameters["CONFIG"]["BATCH_SIZE"],
+        hyperparameters["CONFIG"]["VERBOSE"],
+        hyperparameters["CONFIG"]["OPTIMIZER"],
+        hyperparameters["CONFIG"]["LOSS"],
+        hyperparameters["CONFIG"]["MODE"],
+    )
 
-    # plot_training_validation(
-    #     train_loss,
-    #     train_acc,
-    #     val_loss,
-    #     val_acc,
-    #     hyperparameters["EXPERIMENT_NAME"],
-    #     PREFIX,
-    # )
-    # execute_micro_macro_metrics(
-    #     model_cache,
-    #     predictions_cache,
-    #     targets_cache,
-    #     precision_history,
-    #     recall_history,
-    #     f1_history,
-    #     accuracy_history,
-    #     cfx_history,
-    #     hyperparameters["EXPERIMENT_NAME"],
-    # )
+    plot_training_validation(
+        train_loss,
+        train_acc,
+        val_loss,
+        val_acc,
+        hyperparameters["EXPERIMENT_NAME"],
+        PREFIX,
+    )
+
+    execute_micro_macro_metrics(
+        model_cache,
+        predictions_cache,
+        targets_cache,
+        precision_history,
+        recall_history,
+        f1_history,
+        accuracy_history,
+        cfx_history,
+        hyperparameters["EXPERIMENT_NAME"],
+    )
