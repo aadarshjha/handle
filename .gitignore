@@ -2,7 +2,12 @@
 data/leapGestRecog
 static/test.py
 data/leapGestRecog.zip
+data/archive.zip
+data/archive
 static/__pycache__
 web/server/server/
 */*/__pycache__
 */*/*/__pycache__
+*/*/*/*/__pycache__
+*/*/*/*/*/__pycache__
+*.zip
