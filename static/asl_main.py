@@ -25,6 +25,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
+from sklearn.metrics import classification_report, confusion_matrix
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 # gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -35,7 +36,7 @@ DRIVE = False
 
 # the PREFIX will be "../../drive/MyDrive/handleData/" if DRIVE is false
 
-PREFIX = "../../drive/MyDrive/handleData/" if DRIVE else "../data/asl-mnist/"
+PREFIX = "../../drive/MyDrive/aslData/" if DRIVE else "../data/asl-mnist/"
 
 # custom plotting
 from plot import *
@@ -134,27 +135,27 @@ def create_model(mode="CNN"):
         pass
     elif mode == "RESNET":
         model = keras.applications.resnet.ResNet50(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
+            include_top=False, weights=None, input_shape=(28, 28, 1)
         )
     elif mode == "RESNET_PRETRAINED":
         model = keras.applications.resnet.ResNet50(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
+            include_top=False, weights="imagenet", input_shape=(28, 28, 1)
         )
     elif mode == "MOBILENET":
         model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
+            include_top=False, weights=None, input_shape=(28, 28, 1)
         )
     elif mode == "MOBILENET_PRETRAINED":
         model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
+            include_top=False, weights="imagenet", input_shape=(28, 28, 1)
         )
     elif mode == "DENSENET":
         model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
+            include_top=False, weights=None, input_shape=(28, 28, 1)
         )
     elif mode == "DENSENET_PRETRAINED":
         model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
+            include_top=False, weights="imagenet", input_shape=(28, 28, 1)
         )
     else:
         # throw an error to the user
@@ -226,16 +227,20 @@ def execute_training(
         predictions = y_prob.argmax(axis=-1)
 
         # compute the precision, recall, f1 score, and accuracy
-        precision = precision_score(y_test, predictions, average="weighted")
-        recall = recall_score(y_test, predictions, average="weighted")
-        f1 = f1_score(y_test, predictions, average="weighted")
-        accuracy = accuracy_score(y_test, predictions)
+        precision = precision_score(
+            np.argmax(y_test, axis=1), predictions, average="weighted"
+        )
+        recall = recall_score(
+            np.argmax(y_test, axis=1), predictions, average="weighted"
+        )
+        f1 = f1_score(np.argmax(y_test, axis=1), predictions, average="weighted")
+        accuracy = accuracy_score(np.argmax(y_test, axis=1), predictions)
 
         # cache the target values
         targets_cache.append(y_test)
 
         # create a confusion matrix
-        cfx = confusion_matrix(y_test, predictions)
+        cfx = confusion_matrix(np.argmax(y_test, axis=1), predictions)
         cfx_history.append(cfx)
 
         # cache the above
