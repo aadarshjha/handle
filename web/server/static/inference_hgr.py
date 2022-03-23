@@ -60,9 +60,6 @@ class InferenceHGR:
             model_hgr = keras.models.load_model(
                 "static/model/hgr/mobilenet_pretrained.h5"
             )
-            # model_asl = keras.models.load_model(
-            #     "static/model/asl/mobilenet_pretrained.h5"
-            # )
         else:
             print("Error: model not found")
             return None

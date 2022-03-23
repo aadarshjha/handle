@@ -1,4 +1,5 @@
 # inference class
+from cProfile import label
 import os
 from pickle import NONE
 from pyexpat import model
@@ -60,7 +61,7 @@ class InferenceASL:
         prediction_asl = np.argmax(prediction_asl, axis=1)
         prediction_asl = labels[str(prediction_asl[0])]
 
-        return None
+        return prediction_asl
 
     def augment_single_image(self):
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
