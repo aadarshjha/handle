@@ -23,33 +23,35 @@ def index():
         model = request.get_json()["model"]
         mode = request.get_json()["mode"]
 
-        # # for the HGR dataset
-        # augmented_image = InferenceHGR(fetched_image, model, mode)
-        # augmented_image.decode()
-        # augmented_single_image = augmented_image.augment_single_image()
-
-        # # convert augmented_single_image to base64
-        # augmented_single_image_b64 = augmented_image.convert_to_b64(
-        #     augmented_single_image
-        # )
-
-        # making it work with ASL
-
-        augmented_image = InferenceASL(fetched_image, model, mode)
-        augmented_image.decode()
-        augmented_single_image = augmented_image.augment_single_image()
+        # for the HGR dataset
+        augmented_image_hgr = InferenceHGR(fetched_image, model, mode)
+        augmented_image_hgr.decode()
+        augmented_single_image_hgr = augmented_image_hgr.augment_single_image()
 
         # convert augmented_single_image to base64
-        augmented_single_image_b64 = augmented_image.convert_to_b64(
-            augmented_single_image
+        augmented_single_image_b64_hgr = augmented_image_hgr.convert_to_b64(
+            augmented_single_image_hgr
         )
 
-        print(augmented_image.preProcess())
+        augmented_image_asl = InferenceASL(fetched_image, model, mode)
+        augmented_image_asl.decode()
+        augmented_single_image_asl = augmented_image_asl.augment_single_image()
+
+        # convert augmented_single_image to base64
+        augmented_single_image_b64_asl = augmented_image_asl.convert_to_b64(
+            augmented_single_image_asl
+        )
 
         return json.dumps(
             {
-                "image": augmented_single_image_b64.decode("utf-8"),
-                "prediction": augmented_image.preProcess(),
+                "HGR": {
+                    "image": augmented_single_image_b64_hgr.decode("utf-8"),
+                    "prediction": augmented_image_hgr.preProcess(),
+                },
+                "ASL": {
+                    "image": augmented_single_image_b64_asl.decode("utf-8"),
+                    "prediction": augmented_image_asl.preProcess(),
+                },
             }
         )
 

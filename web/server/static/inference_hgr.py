@@ -74,10 +74,8 @@ class InferenceHGR:
         return prediction_hgr
 
     def augment_single_image(self):
-        print("PRE SHAPE", self.image.shape)
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        img_hgr = cv2.resize(gray, (28, 28))
-        print("POST SHAPE", img_hgr.shape)
+        img_hgr = cv2.resize(gray, (320, 120))
         return img_hgr
 
     def convert_to_b64(self, img):
