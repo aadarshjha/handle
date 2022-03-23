@@ -1,7 +1,8 @@
 from lib2to3.pytree import convert
 from flask import Flask, request
 from static.process import Process
-from static.inference import Inference
+from static.inference_hgr import Inference
+from static.inference_asl import Inference
 from flask_cors import CORS, cross_origin
 import json
 import base64

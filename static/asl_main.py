@@ -27,14 +27,14 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
 from sklearn.metrics import classification_report, confusion_matrix
 
-os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
-gpus = tf.config.experimental.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(gpus[0], True)
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+# os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+# gpus = tf.config.experimental.list_physical_devices("GPU")
+# tf.config.experimental.set_memory_growth(gpus[0], True)
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-DRIVE = True
+DRIVE = False
 
-PREFIX = "../../drive/MyDrive/aslData/asl-mnist/" if DRIVE else "../data/asl-mnist/"
+PREFIX = "../data/asl-mnist/"
 
 # custom plotting
 from plot import *
