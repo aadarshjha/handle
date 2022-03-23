@@ -11,9 +11,8 @@ import json
 import base64
 import skimage.io
 
-
 # read ./labels/hgrd.json
-with open("static/labels/hgrd.json") as f:
+with open("static/labels/asl.json") as f:
     labels = json.load(f)
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
@@ -64,10 +63,8 @@ class InferenceASL:
         return None
 
     def augment_single_image(self):
-        print("PRE SHAPE", self.image.shape)
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         image = cv2.resize(gray, (28, 28))
-        print("POST SHAPE", image.shape)
         return image
 
     def convert_to_b64(self, img):
