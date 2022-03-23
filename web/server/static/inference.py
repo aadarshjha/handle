@@ -38,19 +38,29 @@ class Inference:
         # apply the correct model:
         if self.model == "cnn":
             model_hgr = keras.models.load_model("static/model/hgr/cnn.h5")
-            # model_asl = keras.models.load_model("static/model/asl/cnn.h5")
+            model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         elif self.model == "densenet":
-            model = keras.models.load_model("static/model/densenet.h5")
+            model_hgr = keras.models.load_model("static/model/hgr/densenet.h5")
+            model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         elif self.model == "densenet_pretrained":
-            model = keras.models.load_model("static/model/densenet_pretrained.h5")
+            model_hgr = keras.models.load_model(
+                "static/model/hgr/densenet_pretrained.h5"
+            )
+            model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         elif self.model == "resnet":
-            model = keras.models.load_model("static/model/resnet.h5")
+            model_hgr = keras.models.load_model("static/model/hgr/resnet.h5")
+            model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         elif self.model == "resnet_pretrained":
-            model = keras.models.load_model("static/model/resnet_pretrained.h5")
+            model_hgr = keras.models.load_model("static/model/hgr/resnet_pretrained.h5")
+            model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         elif self.model == "mobilenet":
-            model = keras.models.load_model("static/model/mobilenet.h5")
+            model_hgr = keras.models.load_model("static/model/hgr/mobilenet.h5")
+            model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         elif self.model == "mobilenet_pretrained":
-            model = keras.models.load_model("static/model/mobilenet_pretrained.h5")
+            model_hgr = keras.models.load_model(
+                "static/model/hgr/mobilenet_pretrained.h5"
+            )
+            model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         else:
             print("Error: model not found")
             return None
