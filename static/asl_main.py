@@ -8,8 +8,6 @@ import cv2
 import sys
 import yaml
 import pandas as pd
-import skimage
-import skimage.transform
 from sklearn.model_selection import KFold
 from sklearn.metrics import (
     accuracy_score,
@@ -20,110 +18,88 @@ from sklearn.metrics import (
 )
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
+from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Dense, Flatten
 import json
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelBinarizer
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
-gpus = tf.config.experimental.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(gpus[0], True)
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+# gpus = tf.config.experimental.list_physical_devices("GPU")
+# tf.config.experimental.set_memory_growth(gpus[0], True)
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-PREFIX = "../drive/MyDrive/handleData/"
+DRIVE = False
 
+# the PREFIX will be "../../drive/MyDrive/handleData/" if DRIVE is false
 
-batch_size = 64
-imageSize = 64
-target_dims = (imageSize, imageSize, 3)
-num_classes = 29
-
-train_len = 87000
-train_dir = "../drive/MyDrive/asl_alphabet_train/asl_alphabet_train/"
-
+PREFIX = "../../drive/MyDrive/handleData/" if DRIVE else "../data/asl-mnist/"
 
 # custom plotting
 from plot import *
 
 
-def get_data(folder):
-    X = np.empty((train_len, imageSize, imageSize, 3), dtype=np.float32)
-    y = np.empty((train_len,), dtype=np.int)
-    cnt = 0
-    for folderName in os.listdir(folder):
-        if not folderName.startswith("."):
-            if folderName in ["A"]:
-                label = 0
-            elif folderName in ["B"]:
-                label = 1
-            elif folderName in ["C"]:
-                label = 2
-            elif folderName in ["D"]:
-                label = 3
-            elif folderName in ["E"]:
-                label = 4
-            elif folderName in ["F"]:
-                label = 5
-            elif folderName in ["G"]:
-                label = 6
-            elif folderName in ["H"]:
-                label = 7
-            elif folderName in ["I"]:
-                label = 8
-            elif folderName in ["J"]:
-                label = 9
-            elif folderName in ["K"]:
-                label = 10
-            elif folderName in ["L"]:
-                label = 11
-            elif folderName in ["M"]:
-                label = 12
-            elif folderName in ["N"]:
-                label = 13
-            elif folderName in ["O"]:
-                label = 14
-            elif folderName in ["P"]:
-                label = 15
-            elif folderName in ["Q"]:
-                label = 16
-            elif folderName in ["R"]:
-                label = 17
-            elif folderName in ["S"]:
-                label = 18
-            elif folderName in ["T"]:
-                label = 19
-            elif folderName in ["U"]:
-                label = 20
-            elif folderName in ["V"]:
-                label = 21
-            elif folderName in ["W"]:
-                label = 22
-            elif folderName in ["X"]:
-                label = 23
-            elif folderName in ["Y"]:
-                label = 24
-            elif folderName in ["Z"]:
-                label = 25
-            elif folderName in ["del"]:
-                label = 26
-            elif folderName in ["nothing"]:
-                label = 27
-            elif folderName in ["space"]:
-                label = 28
-            else:
-                label = 29
-            for image_filename in os.listdir(folder + folderName):
-                img_file = cv2.imread(folder + folderName + "/" + image_filename)
-                if img_file is not None:
-                    img_file = skimage.transform.resize(
-                        img_file, (imageSize, imageSize, 3)
-                    )
-                    img_arr = np.asarray(img_file).reshape(
-                        (-1, imageSize, imageSize, 3)
-                    )
-                    X[cnt] = img_arr
-                    y[cnt] = label
-                    cnt += 1
-    return X, y
+def read_data():
+    train_df = pd.read_csv(
+        PREFIX + "sign_mnist_train.csv",
+    )
+    test_df = pd.read_csv(
+        PREFIX + "sign_mnist_test.csv",
+    )
+
+    return train_df, test_df
+
+
+def augment_data(train_df, test_df):
+
+    X = []
+    y = []
+
+    y_train = train_df["label"]
+    y_test = test_df["label"]
+
+    del train_df["label"]
+    del test_df["label"]
+
+    x_train = train_df.values
+    x_test = test_df.values
+
+    label_binarizer = LabelBinarizer()
+    y_train = label_binarizer.fit_transform(y_train)
+    y_test = label_binarizer.fit_transform(y_test)
+
+    x_train = x_train / 255
+    x_test = x_test / 255
+
+    # Reshaping the data from 1-D to 3-D as required through input by CNN's
+    x_train = x_train.reshape(-1, 28, 28, 1)
+    x_test = x_test.reshape(-1, 28, 28, 1)
+
+    # data augmentation
+    datagen = ImageDataGenerator(
+        featurewise_center=False,  # set input mean to 0 over the dataset
+        samplewise_center=False,  # set each sample mean to 0
+        featurewise_std_normalization=False,  # divide inputs by std of the dataset
+        samplewise_std_normalization=False,  # divide each input by its std
+        zca_whitening=False,  # apply ZCA whitening
+        rotation_range=10,  # randomly rotate images in the range (degrees, 0 to 180)
+        zoom_range=0.1,  # Randomly zoom image
+        width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
+        height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+        horizontal_flip=False,  # randomly flip images
+        vertical_flip=False,
+    )  # randomly flip images
+
+    # combine the x_trrarin and x_test
+    X = np.concatenate((x_train, x_test))
+    y = np.concatenate((y_train, y_test))
+
+    print("Images loaded: ", len(X))
+    print("Labels loaded: ", len(y))
+
+    return X, y, datagen
 
 
 def create_model(mode="CNN"):
@@ -131,43 +107,54 @@ def create_model(mode="CNN"):
     model = None
     if mode == "CNN":
         model = Sequential()
-        model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(64, 64, 3)))
-        model.add(MaxPooling2D((2, 2)))
-
-        model.add(Conv2D(64, (3, 3), activation="relu"))
-        model.add(MaxPooling2D((2, 2)))
-
-        model.add(Conv2D(64, (3, 3), activation="relu"))
-        model.add(MaxPooling2D((2, 2)))
-
+        model.add(
+            Conv2D(
+                75,
+                (3, 3),
+                strides=1,
+                padding="same",
+                activation="relu",
+                input_shape=(28, 28, 1),
+            )
+        )
+        model.add(BatchNormalization())
+        model.add(MaxPooling2D((2, 2), strides=2, padding="same"))
+        model.add(Conv2D(50, (3, 3), strides=1, padding="same", activation="relu"))
+        model.add(Dropout(0.2))
+        model.add(BatchNormalization())
+        model.add(MaxPooling2D((2, 2), strides=2, padding="same"))
+        model.add(Conv2D(25, (3, 3), strides=1, padding="same", activation="relu"))
+        model.add(BatchNormalization())
+        model.add(MaxPooling2D((2, 2), strides=2, padding="same"))
         model.add(Flatten())
-        model.add(Dense(128, activation="relu"))
-        model.add(Dense(10, activation="softmax"))
+        model.add(Dense(units=512, activation="relu"))
+        model.add(Dropout(0.3))
+        model.add(Dense(units=24, activation="softmax"))
     elif mode == "CNN_PRETRAINED":
         pass
     elif mode == "RESNET":
         model = keras.applications.resnet.ResNet50(
-            include_top=False, weights=None, input_shape=(64, 64, 3)
+            include_top=False, weights=None, input_shape=(120, 320, 1)
         )
     elif mode == "RESNET_PRETRAINED":
         model = keras.applications.resnet.ResNet50(
-            include_top=False, weights="imagenet", input_shaspe=(64, 64, 3)
+            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
         )
     elif mode == "MOBILENET":
         model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights=None, input_shape=(64, 64, 3)
+            include_top=False, weights=None, input_shape=(120, 320, 1)
         )
     elif mode == "MOBILENET_PRETRAINED":
         model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights="imagenet", input_shape=(64, 64, 3)
+            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
         )
     elif mode == "DENSENET":
         model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights=None, input_shape=(64, 64, 3)
+            include_top=False, weights=None, input_shape=(120, 320, 1)
         )
     elif mode == "DENSENET_PRETRAINED":
         model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights="imagenet", input_shape=(64, 64, 3)
+            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
         )
     else:
         # throw an error to the user
@@ -179,13 +166,14 @@ def create_model(mode="CNN"):
 def execute_training(
     X,
     y,
+    datagen,
     experiment_name="exper1",
     num_folds=5,
     epochs=10,
     batch_size=32,
     verbose=False,
     optimizer="adam",
-    loss="sparse_categorical_crossentropy",
+    loss="categorical_crossentropy",
     mode="CNN",
 ):
 
@@ -213,17 +201,20 @@ def execute_training(
     for train, test in kfold.split(X, y):
 
         model = create_model()
-        model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
+        model.compile(
+            optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        )
 
         print("For Fold: " + str(fold_no))
         X_val, X_test, y_val, y_test = train_test_split(
             X[test], y[test], test_size=0.5, random_state=42
         )
 
+        # fit the training data for the datagen
+        datagen.fit(X[train])
+
         history = model.fit(
-            X[train],
-            y[train],
-            batch_size=batch_size,
+            datagen.flow(X[train], y[train], batch_size=batch_size),
             epochs=epochs,
             verbose=verbose,
             validation_data=(X_val, y_val),
@@ -268,10 +259,12 @@ def execute_training(
         print("Test loss: ", scores[0])
         print("Test accuracy: ", scores[1])
 
+        # print the metrics:
         print("Precision: ", precision)
         print("Recall: ", recall)
         print("F1: ", f1)
         print("Accuracy: ", accuracy)
+        # print the confusion matrix
         print("Confusion Matrix", cfx)
 
         print("\n")
@@ -395,17 +388,10 @@ if __name__ == "__main__":
         os.makedirs(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"])
 
     # read the data
-    # imagepaths = read_data()
+    imagepaths = read_data()
 
     # finalize data
-    # X, y = augment_data(imagepaths)
-    X, y = get_data(train_dir)
-
-    # print(X)
-    # print(y)
-
-    # print("The shape of X_train is : ", X.shape)
-    # print("The shape of y_train is : ", y.shape)
+    X, y, datagen = augment_data(imagepaths[0], imagepaths[1])
 
     # execute the training pipeline
     (
@@ -424,6 +410,7 @@ if __name__ == "__main__":
     ) = execute_training(
         X,
         y,
+        datagen,
         hyperparameters["EXPERIMENT_NAME"],
         hyperparameters["CONFIG"]["NUM_FOLDS"],
         hyperparameters["CONFIG"]["EPOCHS"],
@@ -434,23 +421,22 @@ if __name__ == "__main__":
         hyperparameters["CONFIG"]["MODE"],
     )
 
-    plot_training_validation(
-        train_loss,
-        train_acc,
-        val_loss,
-        val_acc,
-        hyperparameters["EXPERIMENT_NAME"],
-        PREFIX,
-    )
-
-    execute_micro_macro_metrics(
-        model_cache,
-        predictions_cache,
-        targets_cache,
-        precision_history,
-        recall_history,
-        f1_history,
-        accuracy_history,
-        cfx_history,
-        hyperparameters["EXPERIMENT_NAME"],
-    )
+    # plot_training_validation(
+    #     train_loss,
+    #     train_acc,
+    #     val_loss,
+    #     val_acc,
+    #     hyperparameters["EXPERIMENT_NAME"],
+    #     PREFIX,
+    # )
+    # execute_micro_macro_metrics(
+    #     model_cache,
+    #     predictions_cache,
+    #     targets_cache,
+    #     precision_history,
+    #     recall_history,
+    #     f1_history,
+    #     accuracy_history,
+    #     cfx_history,
+    #     hyperparameters["EXPERIMENT_NAME"],
+    # )

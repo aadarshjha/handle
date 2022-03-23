@@ -330,7 +330,7 @@ def execute_micro_macro_metrics(
 
 def extract_hyperparameters(filename):
     hyperparams = None
-    with open("experiments/{}.yaml".format(filename), "r") as f:
+    with open("experiments_hgr/{}.yaml".format(filename), "r") as f:
         hyperparameters = yaml.load(f, Loader=yaml.FullLoader)
     return hyperparameters
 
