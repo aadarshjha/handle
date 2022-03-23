@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 
 function PredictionTextStatic({ prediction, imageSrc, imageOptions }) {
   console.log(imageSrc);
+  console.log(imageOptions)
   return (
     <div>
       <h2
@@ -90,7 +91,7 @@ function PredictionTextStatic({ prediction, imageSrc, imageOptions }) {
               }}
             >
               <img
-                src={imageSrc.ASL}
+                src={imageSrc.HGR}
                 alt="preview"
                 style={{
                   width: "320px",
