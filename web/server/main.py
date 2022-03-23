@@ -1,8 +1,8 @@
 from lib2to3.pytree import convert
 from flask import Flask, request
 from static.process import Process
-from static.inference_hgr import Inference
-from static.inference_asl import Inference
+from static.inference_hgr import InferenceHGR
+from static.inference_asl import InferenceASL
 from flask_cors import CORS, cross_origin
 import json
 import base64
@@ -19,13 +19,10 @@ app.config["CORS_HEADERS"] = "Content-Type"
 @cross_origin(supports_credentials=True)
 def index():
     if request.method == "POST":
-        print(request.get_json()["model"])
-        print(request.get_json()["mode"])
-
         fetched_image = request.get_json()["imageSrc"]
         model = request.get_json()["model"]
         mode = request.get_json()["mode"]
-        augmented_image = Inference(fetched_image, model, mode)
+        augmented_image = InferenceHGR(fetched_image, model, mode)
         augmented_image.decode()
         augmented_single_image = augmented_image.augment_single_image()
 

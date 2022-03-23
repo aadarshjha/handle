@@ -21,7 +21,7 @@ gpus = tf.config.experimental.list_physical_devices("GPU")
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
-class Inference:
+class InferenceHGR:
     def __init__(self, image, model, mode):
         self.image = image
         self.model = model

@@ -21,7 +21,7 @@ gpus = tf.config.experimental.list_physical_devices("GPU")
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
-class Inference:
+class InferenceASL:
     def __init__(self, image, model, mode):
         self.image = image
         self.model = model
@@ -29,45 +29,34 @@ class Inference:
 
     def preProcess(self):
         augmented_image = self.augment_single_image()
-        hgr_image = augmented_image
+        asl_image = augmented_image
 
-        model = None
+        model_asl = None
 
         # apply the correct model:
         if self.model == "cnn":
-            model_hgr = keras.models.load_model("static/model/hgr/cnn.h5")
-            # model_asl = keras.models.load_model("static/model/asl/cnn.h5")
+            model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         elif self.model == "densenet":
-            model_hgr = keras.models.load_model("static/model/hgr/densenet.h5")
-            # model_asl = keras.models.load_model("static/model/asl/densenet.h5")
+            model_asl = keras.models.load_model("static/model/asl/densenet.h5")
         elif self.model == "densenet_pretrained":
-            model_hgr = keras.models.load_model(
-                "static/model/hgr/densenet_pretrained.h5"
+            model_asl = keras.models.load_model(
+                "static/model/asl/densenet_pretrained.h5"
             )
-            # model_asl = keras.models.load_model(
-            #     "static/model/asl/densenet_pretrained.h5"
-            # )
         elif self.model == "resnet":
-            model_hgr = keras.models.load_model("static/model/hgr/resnet.h5")
-            # model_asl = keras.models.load_model("static/model/asl/resnet.h5")
+            model_asl = keras.models.load_model("static/model/asl/resnet.h5")
         elif self.model == "resnet_pretrained":
-            model_hgr = keras.models.load_model("static/model/hgr/resnet_pretrained.h5")
-            # model_asl = keras.models.load_model("static/model/asl/resnet_pretrained.h5")
+            model_asl = keras.models.load_model("static/model/asl/resnet_pretrained.h5")
         elif self.model == "mobilenet":
-            model_hgr = keras.models.load_model("static/model/hgr/mobilenet.h5")
-            # model_asl = keras.models.load_model("static/model/asl/mobilenet.h5")
+            model_asl = keras.models.load_model("static/model/asl/mobilenet.h5")
         elif self.model == "mobilenet_pretrained":
-            model_hgr = keras.models.load_model(
-                "static/model/hgr/mobilenet_pretrained.h5"
+            model_asl = keras.models.load_model(
+                "static/model/asl/mobilenet_pretrained.h5"
             )
-            # model_asl = keras.models.load_model(
-            #     "static/model/asl/mobilenet_pretrained.h5"
-            # )
         else:
             print("Error: model not found")
             return None
 
-        prediction_hgr = model_hgr.predict(hgr_image.reshape(1, 120, 320, 1))
+        prediction_hgr = model_asl.predict(asl_image.reshape(1, 120, 320, 1))
         prediction_hgr = np.argmax(prediction_hgr, axis=1)
         prediction_hgr = labels[str(prediction_hgr[0])]
 
