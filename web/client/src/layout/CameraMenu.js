@@ -134,8 +134,15 @@ function CameraMenu({
     })
       .then((res) => res.json())
       .then((json) => {
-        setImageSrc("data:image/png;base64," + json.image);
-        setPrediction(json.prediction);
+        console.log(json)
+        setImageSrc({
+          HGR: "data:image/png;base64," + json.HGR.image,
+          ASL: "data:image/png;base64," + json.ASL.image,
+        });
+        setPrediction({
+          HGR: json.HGR.prediction,
+          ASL: json.ASL.prediction,
+        });
       });
   }, [webcamRef, imageOptions]);
   return (

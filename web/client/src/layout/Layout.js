@@ -23,8 +23,8 @@ const styles = {
 };
 
 function Layout() {
-  const [prediction, setPrediction] = useState("");
-  const [imageSrc, setImageSrc] = useState([]);
+  const [prediction, setPrediction] = useState({});
+  const [imageSrc, setImageSrc] = useState({});
   const [imageOptions, setImageOptions] = useState({
     mode: "static",
     model: "cnn",
