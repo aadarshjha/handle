@@ -28,15 +28,13 @@ from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
 from sklearn.metrics import classification_report, confusion_matrix
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
-# gpus = tf.config.experimental.list_physical_devices("GPU")
-# tf.config.experimental.set_memory_growth(gpus[0], True)
-# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+gpus = tf.config.experimental.list_physical_devices("GPU")
+tf.config.experimental.set_memory_growth(gpus[0], True)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-DRIVE = False
+DRIVE = True
 
-# the PREFIX will be "../../drive/MyDrive/handleData/" if DRIVE is false
-
-PREFIX = "../../drive/MyDrive/aslData/" if DRIVE else "../data/asl-mnist/"
+PREFIX = "../../drive/MyDrive/aslData/asl-mnist/" if DRIVE else "../data/asl-mnist/"
 
 # custom plotting
 from plot import *
@@ -341,22 +339,24 @@ def execute_micro_macro_metrics(
         average="weighted",
     )
     micro_recall = recall_score(
-        np.concatenate(targets_cache),
+        np.argmax(np.concatenate(targets_cache), axis=1),
         np.concatenate(predictions_cache),
         average="weighted",
     )
     micro_f1 = f1_score(
-        np.concatenate(targets_cache),
+        np.argmax(np.concatenate(targets_cache), axis=1),
         np.concatenate(predictions_cache),
         average="weighted",
     )
     micro_accuracy = accuracy_score(
-        np.concatenate(targets_cache), np.concatenate(predictions_cache)
+        np.argmax(np.concatenate(targets_cache), axis=1),
+        np.concatenate(predictions_cache),
     )
 
     # confusion matrix for micro averaging:
     cfx_micro = confusion_matrix(
-        np.concatenate(targets_cache), np.concatenate(predictions_cache)
+        np.argmax(np.concatenate(targets_cache), axis=1),
+        np.concatenate(predictions_cache),
     )
     cfx_micro_json = json.dumps(cfx_micro.tolist())
 
