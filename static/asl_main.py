@@ -211,6 +211,10 @@ def execute_training(
             X[test], y[test], test_size=0.5, random_state=42
         )
 
+        print("Training data: ", len(X[train]))
+        print("Validation data: ", len(X_val))
+        print("Test data: ", len(X_test))
+
         # fit the training data for the datagen
         datagen.fit(X[train])
 
@@ -331,7 +335,6 @@ def execute_micro_macro_metrics(
     }
 
     # micro averaging:
-
     micro_precision = precision_score(
         np.concatenate(targets_cache),
         np.concatenate(predictions_cache),
@@ -426,22 +429,23 @@ if __name__ == "__main__":
         hyperparameters["CONFIG"]["MODE"],
     )
 
-    # plot_training_validation(
-    #     train_loss,
-    #     train_acc,
-    #     val_loss,
-    #     val_acc,
-    #     hyperparameters["EXPERIMENT_NAME"],
-    #     PREFIX,
-    # )
-    # execute_micro_macro_metrics(
-    #     model_cache,
-    #     predictions_cache,
-    #     targets_cache,
-    #     precision_history,
-    #     recall_history,
-    #     f1_history,
-    #     accuracy_history,
-    #     cfx_history,
-    #     hyperparameters["EXPERIMENT_NAME"],
-    # )
+    plot_training_validation(
+        train_loss,
+        train_acc,
+        val_loss,
+        val_acc,
+        hyperparameters["EXPERIMENT_NAME"],
+        PREFIX,
+    )
+
+    execute_micro_macro_metrics(
+        model_cache,
+        predictions_cache,
+        targets_cache,
+        precision_history,
+        recall_history,
+        f1_history,
+        accuracy_history,
+        cfx_history,
+        hyperparameters["EXPERIMENT_NAME"],
+    )
