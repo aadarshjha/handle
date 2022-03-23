@@ -56,16 +56,19 @@ class InferenceASL:
             print("Error: model not found")
             return None
 
-        prediction_hgr = model_asl.predict(asl_image.reshape(1, 120, 320, 1))
-        prediction_hgr = np.argmax(prediction_hgr, axis=1)
-        prediction_hgr = labels[str(prediction_hgr[0])]
+        # predict the image
+        prediction_asl = model_asl.predict(asl_image.reshape(1, 28, 28, 1))
+        prediction_asl = np.argmax(prediction_asl, axis=1)
+        prediction_asl = labels[str(prediction_asl[0])]
 
-        return prediction_hgr
+        return None
 
     def augment_single_image(self):
+        print("PRE SHAPE", self.image.shape)
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        img_hgr = cv2.resize(gray, (320, 120))
-        return img_hgr
+        image = cv2.resize(gray, (28, 28))
+        print("POST SHAPE", image.shape)
+        return image
 
     def convert_to_b64(self, img):
         # convert a array to base64

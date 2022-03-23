@@ -22,7 +22,20 @@ def index():
         fetched_image = request.get_json()["imageSrc"]
         model = request.get_json()["model"]
         mode = request.get_json()["mode"]
-        augmented_image = InferenceHGR(fetched_image, model, mode)
+
+        # # for the HGR dataset
+        # augmented_image = InferenceHGR(fetched_image, model, mode)
+        # augmented_image.decode()
+        # augmented_single_image = augmented_image.augment_single_image()
+
+        # # convert augmented_single_image to base64
+        # augmented_single_image_b64 = augmented_image.convert_to_b64(
+        #     augmented_single_image
+        # )
+
+        # making it work with ASL
+
+        augmented_image = InferenceASL(fetched_image, model, mode)
         augmented_image.decode()
         augmented_single_image = augmented_image.augment_single_image()
 
@@ -30,6 +43,8 @@ def index():
         augmented_single_image_b64 = augmented_image.convert_to_b64(
             augmented_single_image
         )
+
+        print(augmented_image.preProcess())
 
         return json.dumps(
             {
