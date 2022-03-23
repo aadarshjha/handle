@@ -28,6 +28,8 @@ class Inference:
         self.model = model
         self.mode = mode
 
+        print(self.mode)
+
     def preProcess(self):
         augmented_image = self.augment_single_image()
 
@@ -35,7 +37,8 @@ class Inference:
 
         # apply the correct model:
         if self.model == "cnn":
-            model = keras.models.load_model("static/model/cnn.h5")
+            model_hgr = keras.models.load_model("static/model/hgr/cnn.h5")
+            # model_asl = keras.models.load_model("static/model/asl/cnn.h5")
         elif self.model == "densenet":
             model = keras.models.load_model("static/model/densenet.h5")
         elif self.model == "densenet_pretrained":
@@ -52,7 +55,7 @@ class Inference:
             print("Error: model not found")
             return None
 
-        prediction = model.predict(augmented_image.reshape(1, 120, 320, 1))
+        prediction = model_hgr.predict(augmented_image.reshape(1, 120, 320, 1))
         prediction = np.argmax(prediction, axis=1)
         prediction = labels[str(prediction[0])]
         return prediction
