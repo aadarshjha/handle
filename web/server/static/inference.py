@@ -65,10 +65,15 @@ class Inference:
             print("Error: model not found")
             return None
 
-        prediction = model_hgr.predict(augmented_image.reshape(1, 120, 320, 1))
-        prediction = np.argmax(prediction, axis=1)
-        prediction = labels[str(prediction[0])]
-        return prediction
+        prediction_hgr = model_hgr.predict(augmented_image.reshape(1, 120, 320, 1))
+        prediction_hgr = np.argmax(prediction_hgr, axis=1)
+        prediction_hgr = labels[str(prediction_hgr[0])]
+
+        # prediction_asl = model_hgr.predict(augmented_image.reshape(1, 120, 320, 1))
+        # prediction_asl = np.argmax(prediction_asl, axis=1)
+        # prediction_asl = labels[str(prediction_asl[0])]
+
+        return prediction_hgr
 
     def augment_single_image(self):
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
