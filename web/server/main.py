@@ -6,10 +6,7 @@ from static.inference_asl import InferenceASL
 from flask_cors import CORS, cross_origin
 from dynamic.inference_ipn import InferenceIPN
 import json
-import torch
-
 import cv2 as cv
-import base64
 
 app = Flask(__name__)
 # CORS(app, support_credentials=True)
@@ -25,33 +22,17 @@ def dynamic_index():
         json_obj = request.get_json()
         blob = json_obj["videoSrc"]
 
-        videoClass = InferenceIPN(blob)
-        frames = videoClass.fetchFrames()
+        inferenceClass = InferenceIPN(blob)
+        frames = inferenceClass.fetchFrames()
 
-        # print(augmented_video)
+        try:
+            inferenceClass.rejectionCriterion(len(frames))
+        except:
+            # return an error status
+            return json.dumps({"status": "error"})
+            
+        # we can continue to inference
 
-        # fetched_image = request.get_json()["imageSrc"]
-        # model = request.get_json()["model"]
-        # mode = request.get_json()["mode"]
-
-        # # for the HGR dataset
-        # augmented_image_hgr = InferenceHGR(fetched_image, model, mode)
-        # augmented_image_hgr.decode()
-        # augmented_single_image_hgr = augmented_image_hgr.augment_single_image()
-
-        # # convert augmented_single_image to base64
-        # augmented_single_image_b64_hgr = augmented_image_hgr.convert_to_b64(
-        #     augmented_single_image_hgr
-        # )
-
-        # augmented_image_asl = InferenceASL(fetched_image, model, mode)
-        # augmented_image_asl.decode()
-        # augmented_single_image_asl = augmented_image_asl.augment_single_image()
-
-        # # convert augmented_single_image to base64
-        # augmented_single_image_b64_asl = augmented_image_asl.convert_to_b64(
-        #     augmented_single_image_asl
-        # )
 
         # return json.dumps(
         #     {

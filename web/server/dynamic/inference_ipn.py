@@ -57,3 +57,9 @@ class InferenceIPN:
 
         print(len(frames))
         return frames
+
+    def rejectionCriterion(self, test_num): 
+        if test_num < 10: 
+            raise Exception("rejectionCriterionError: The video needs be at 30 frames.")
+        else: 
+            print("Works")
