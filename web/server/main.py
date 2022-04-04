@@ -25,7 +25,9 @@ def dynamic_index():
         json_obj = request.get_json()
         blob = json_obj["videoSrc"]
 
-        augmented_video = InferenceIPN(blob).fetchFrames()
+        videoClass = InferenceIPN(blob)
+        frames = videoClass.fetchFrames()
+
         # print(augmented_video)
 
         # fetched_image = request.get_json()["imageSrc"]
