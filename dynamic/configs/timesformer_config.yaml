@@ -1,0 +1,11 @@
+video_path: 'D:\Projects\ML\MiniIPN'
+annotation_path: 'D:\Projects\ML\MiniIPN\mini_ipn.json'
+result_path: 'timesformer\'
+save_name: 'timesformer'
+sample_size: 112
+sample_duration: 32
+batch_size: 8
+n_epochs: 5
+n_threads: 8
+model: 'timesformer'
+checkpoint: 1

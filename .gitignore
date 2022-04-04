@@ -12,3 +12,12 @@ web/server/server/
 */*/*/*/*/__pycache__
 *.zip
 data/*
+dynamic/MiniIPN/*
+*.pth
+*.pyth
+dynamic/cnn_lstm/*.log
+dynamic/egogesture/*.log
+dynamic/ipn/*.log
+dynamic/kinetics/*.log
+dynamic/timesformer/*.log
+dynamic/__pycache__
