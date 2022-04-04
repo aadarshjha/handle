@@ -5,7 +5,7 @@ from static.inference_hgr import InferenceHGR
 from static.inference_asl import InferenceASL
 from flask_cors import CORS, cross_origin
 import json
-import base64
+import torch
 
 import cv2 as cv
 
