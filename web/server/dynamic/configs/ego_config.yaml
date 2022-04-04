@@ -1,0 +1,13 @@
+video_path: 'D:\Projects\ML\MiniIPN'
+annotation_path: 'D:\Projects\ML\MiniIPN/mini_ipn.json'
+result_path: 'egogesture/'
+save_name: 'ego_resnext-101'
+sample_size: 112
+sample_duration: 32
+batch_size: 8
+n_epochs: 5
+pretrain_path: 'dynamic/model/egogesture/ego_resnext-101.pth'
+pretrain_dataset: 'egogesture'
+n_threads: 8
+model: 'resnext'
+checkpoint: 1

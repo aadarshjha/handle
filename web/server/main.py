@@ -28,7 +28,9 @@ def dynamic_index():
         if not inferenceClass.rejectionCriterion(len(frames)):
             return json.dumps({"error": "Video too short"})
         else:
-            inferenceClass.preProcess(frames)
+            clip = inferenceClass.preProcess(frames)
+            inference = inferenceClass.inference(clip)
+            print(inference)
 
         # we can continue to inference
 

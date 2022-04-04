@@ -13,7 +13,9 @@ import torch
 import torchvision
 from PIL import Image
 from dynamic.transform_utils import TemporalCenterCrop, Compose, ToTensor, Normalize, Scale, CenterCrop
+from dynamic.network import *
 import sys
+import yaml
 
 # find somee labels -- later on. 
 # # read ./labels/hgrd.json
@@ -21,6 +23,15 @@ import sys
 #     labels = json.load(f)
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+
+class Config:
+    def __init__(self, in_dict: dict):
+        for key, val in in_dict.items():
+            if isinstance(val, (list, tuple)):
+                setattr(self, key, [DictObj(x) if isinstance(x, dict) else x for x in val])
+            else:
+                setattr(self, key, DictObj(val) if isinstance(val, dict) else val)
+
 
 class InferenceIPN:
     def __init__(self, blob):
@@ -84,8 +95,34 @@ class InferenceIPN:
         clip = torch.cat(clip, 0).view((32, -1) + dim).permute(1, 0, 2, 3)
         return clip
 
-    def inference(self): 
-        pass
+    def inference(self, clip): 
+        # load model with pytorch
+        # open a YAML
+
+        config_dict = {}
+
+        try: 
+            with open("./dynamic/configs/ego_config.yaml", 'r') as f: 
+                user_config = yaml.safe_load(f)
+                config_dict.update(user_config)
+        except Exception:
+            print("Error reading config file")
+            exit(1)
+        
+        config_dict['device'] = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        config = Config(config_dict)
+        model, _ = load_resnext101(config, device=config.device)
+
+        # pass in clip to model
+        model.eval()
+        with torch.no_grad():
+            output = model(clip)
+            output = output.view(32, -1)
+            output = torch.nn.functional.softmax(output, dim=1)
+            output = output.cpu().numpy()
+            output = np.argmax(output, axis=1)
+            output = output.tolist()
+            return output
 
     def rejectionCriterion(self, test_num): 
         if test_num < 32: 
