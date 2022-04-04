@@ -2,7 +2,10 @@ import "antd/dist/antd.css";
 import Webcam from "react-webcam";
 import React, { useState } from "react";
 import { Form, Button, Radio, Select, Alert } from "antd";
+
 const { Option } = Select;
+const { promises: fs } = require("fs");
+const webmToMp4 = require("webm-to-mp4");
 
 const PREFIX = require("../config.json").dev.prefix;
 
@@ -51,7 +54,7 @@ function CameraMenu({
   const handleStartCaptureClick = React.useCallback(() => {
     setCapturing(true);
     mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
-      mimeType: "video/webm",
+      mimeType: "video/mp4",
     });
     mediaRecorderRef.current.addEventListener(
       "dataavailable",
@@ -88,6 +91,10 @@ function CameraMenu({
     if (recordedChunks.length) {
       const blob = new Blob(recordedChunks, {
         type: "video/webm",
+      });
+
+      fs.writeFile("file.mp4", Buffer.from(webmToMp4(blob))).then(() => {
+        console.log("file saved");
       });
 
       (async () => {

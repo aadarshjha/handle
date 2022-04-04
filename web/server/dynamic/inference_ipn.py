@@ -11,6 +11,8 @@ import pandas as pd
 import json
 import base64
 import skimage.io
+import ffmpy 
+
 
 # read ./labels/hgrd.json
 with open("static/labels/asl.json") as f:
@@ -38,9 +40,31 @@ class InferenceIPN:
             f.write(bs64)
     
         bs64bytes = base64.b64decode(bs64)
-        with open("./video.webm", "wb") as f:
+
+        # save the video a file preprocsessing.webm, this is the video that 
+        # will be used for the preprocessing
+        with open("./preprocsessing.webm", "wb") as f:
             f.write(bs64bytes)
 
+        ff = ffmpy.FFmpeg(
+            inputs={"./preprocsessing.webm": None},
+            outputs={"./preprocsessing.mp4": None},
+        )
+
+        ff.run()
+
+        # open preprocsessing.webm with opencv
+        cap = cv2.VideoCapture("./preprocsessing.mp4")
+
+        success, image = cap.read() 
+
+        frames = [] 
+
+        while success: 
+            frames.append(image)
+            success, image = cap.read() 
+        
+        print(frames[:6])
         return None
 
     # def preProcess(self):
