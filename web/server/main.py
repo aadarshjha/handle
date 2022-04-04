@@ -4,10 +4,12 @@ from static.process import Process
 from static.inference_hgr import InferenceHGR
 from static.inference_asl import InferenceASL
 from flask_cors import CORS, cross_origin
+from dynamic.inference_ipn import InferenceIPN
 import json
 import torch
 
 import cv2 as cv
+import base64
 
 app = Flask(__name__)
 # CORS(app, support_credentials=True)
@@ -19,7 +21,13 @@ app.config["CORS_HEADERS"] = "Content-Type"
 @cross_origin(supports_credentials=True)
 def dynamic_index():
     if request.method == "POST":
-        print(request.get_json())
+
+        json_obj = request.get_json()
+        blob = json_obj["videoSrc"]
+
+        augmented_video = InferenceIPN(blob).processVideo()
+        # print(augmented_video)
+
         # fetched_image = request.get_json()["imageSrc"]
         # model = request.get_json()["model"]
         # mode = request.get_json()["mode"]
