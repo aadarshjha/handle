@@ -74,11 +74,43 @@ function CameraMenu({
     setCapturing(false);
   }, [mediaRecorderRef, webcamRef, setCapturing]);
 
-  const handleDownload = React.useCallback(() => {
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = function () {
+        resolve(reader.result);
+      };
+    });
+  };
+
+  const handlePreview = React.useCallback(() => {
     if (recordedChunks.length) {
       const blob = new Blob(recordedChunks, {
         type: "video/webm",
       });
+
+      (async () => {
+        const b64 = await blobToBase64(blob);
+        const jsonString = JSON.stringify({ blob: b64 });
+        // send to our backend.
+        fetch(`${PREFIX}/dynamic/cnn`, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            videoSrc: jsonString,
+          }),
+        })
+          .then((res) => res.json())
+          .then((json) => {
+            console.log(json);
+          });
+      })();
+
       seturl(URL.createObjectURL(blob));
       setRecordedChunks([]);
     } else {
@@ -192,7 +224,7 @@ function CameraMenu({
               style={styles.videoCapture}
               type="primary"
               size="large"
-              onClick={handleDownload}
+              onClick={handlePreview}
             >
               Preview
             </Button>
@@ -212,7 +244,7 @@ function CameraMenu({
               style={styles.videoCapture}
               type="primary"
               size="large"
-              onClick={handleDownload}
+              onClick={handlePreview}
             >
               Preview
             </Button>
