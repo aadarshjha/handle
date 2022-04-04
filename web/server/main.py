@@ -25,13 +25,12 @@ def dynamic_index():
         inferenceClass = InferenceIPN(blob)
         frames = inferenceClass.fetchFrames()
 
-        if not inferenceClass.rejectionCriterion(len(frames)): 
+        if not inferenceClass.rejectionCriterion(len(frames)):
             return json.dumps({"error": "Video too short"})
-        else: 
+        else:
             inferenceClass.preProcess(frames)
-            
-        # we can continue to inference
 
+        # we can continue to inference
 
         # return json.dumps(
         #     {

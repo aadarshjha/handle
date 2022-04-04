@@ -55,8 +55,6 @@ class InferenceIPN:
         while success:
             frames.append(image)
             success, image = cap.read()
-
-        print(len(frames))
         return frames
     
     def preProcess(self, frames):
@@ -67,7 +65,7 @@ class InferenceIPN:
         for element in frames:
             pil_frames.append(Image.fromarray(cv2.cvtColor(element, cv2.COLOR_BGR2RGB)))
         
-        temporalTransforms = Compose([TemporalCenterCrop(112)])
+        temporalTransforms = Compose([TemporalCenterCrop(32)])
         spatialTransforms = Compose([Scale(112), CenterCrop(112), ToTensor(1), Normalize([114.7748, 107.7354, 99.475], [38.7568578, 37.88248729, 40.02898126])])
 
         # create a list of indices for the frames
@@ -76,25 +74,21 @@ class InferenceIPN:
 
         clip = []
 
-
-
         spatialTransforms.randomize_parameters()
 
         # load up the frames from the clip
         for i in indices: 
             clip.append(spatialTransforms(pil_frames[i]))
 
-        
-        # convert clip to nparray
-        clip = np.array(clip)
-
         dim = clip[0].size()[-2:]
         clip = torch.cat(clip, 0).view((32, -1) + dim).permute(1, 0, 2, 3)
-        print(clip.shape)
-
-
         return clip
+
+    def inference(self): 
+        pass
 
     def rejectionCriterion(self, test_num): 
         if test_num < 32: 
             return False 
+        else: 
+            return True
