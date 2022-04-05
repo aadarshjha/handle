@@ -94,6 +94,9 @@ function CameraMenu({
       });
       blobToBase64(blob).then((base64) => {
         const jsonString = JSON.stringify({ blob: base64 });
+        console.log({videoSrc: jsonString,
+          model: imageOptions.model,
+          mode: imageOptions.mode})
         // send to our backend.
         fetch(`${PREFIX}/dynamic/cnn`, {
           method: "POST",
@@ -111,9 +114,6 @@ function CameraMenu({
           .then((res) => res.json())
           .then((json) => {
             setVideoPrediction({ ...json });
-            // reeturn json in div
-            console.log({ ...json });
-            console.log(videoPrediction);
           });
       });
 

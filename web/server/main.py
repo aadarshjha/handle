@@ -4,10 +4,10 @@ from static.process import Process
 from static.inference_hgr import InferenceHGR
 from static.inference_asl import InferenceASL
 from flask_cors import CORS, cross_origin
-from dynamic.inference_ego import InferenceEgo
+from dynamic.inference import Inference
+
 import json
 import cv2 as cv
-from datetime import datetime
 
 app = Flask(__name__)
 # CORS(app, support_credentials=True)
@@ -24,26 +24,25 @@ def dynamic_index():
         blob = json_obj["videoSrc"]
         mode = json_obj["model"]
 
+        inferenceClass = Inference(blob, mode)
+        frames = inferenceClass.fetchFrames()
+
+        if not inferenceClass.rejectionCriterion(len(frames)):
+            return json.dumps({"Error": "Video Is Rejected, Needs To Be More Long"})
+
         if mode == "resnext":
-            inferenceClass = InferenceEgo(blob)
-            frames = inferenceClass.fetchFrames()
-
-            now = datetime.now()
-
-            current_time = now.strftime("%H:%M:%S")
-
-            if not inferenceClass.rejectionCriterion(len(frames)):
-                return json.dumps({"Error": "Video Is Rejected, Needs To Be More Long"})
-            else:
-                clip = inferenceClass.preProcess(frames)
-                inference = inferenceClass.inference(clip)
-                print("inference: ", inference)
-                return json.dumps(
-                    {
-                        "EgoGesture": {"prediction": inference[0]},
-                        "IPN": {"prediction": inference[1]},
-                    }
-                )
+            clip = inferenceClass.preProcess(frames)
+            inference = inferenceClass.inference(clip)
+            return json.dumps(
+                {
+                    "EgoGesture": {"prediction": inference[0]},
+                    "IPN": {"prediction": inference[1]},
+                }
+            )
+        elif mode == "lstm":
+            pass
+        elif mode == "timesformer":
+            pass
         else:
             return json.dumps({"Error": "Model Not Found"})
 

@@ -46,9 +46,10 @@ class Config:
                 setattr(self, key, DictObj(val) if isinstance(val, dict) else val)
 
 
-class InferenceEgo:
-    def __init__(self, blob):
+class Inference:
+    def __init__(self, blob, mode):
         self.blob = blob
+        self.mode = mode
 
     def processFrames(self):
         pass
@@ -119,60 +120,82 @@ class InferenceEgo:
     def inference(self, clip):
 
         prediction_list = []
-        # load model with pytorch
-        # open a YAML
-
         config_dict = {}
 
-        try:
-            with open("./dynamic/configs/ego_config.yaml", "r") as f:
-                user_config = yaml.safe_load(f)
-                config_dict.update(user_config)
-        except Exception:
-            print("Error reading config file")
-            exit(1)
+        if self.mode == "resnext":
 
-        config_dict["device"] = torch.device(
-            "cuda:0" if torch.cuda.is_available() else "cpu"
-        )
-        config = Config(config_dict)
-        model, _ = load_resnext101(config, device=config.device)
+            try:
+                with open("./dynamic/configs/ego_config.yaml", "r") as f:
+                    user_config = yaml.safe_load(f)
+                    config_dict.update(user_config)
+            except Exception:
+                print("Error reading config file")
+                exit(1)
 
-        # pass in clip to model
-        model.eval()
+            config_dict["device"] = torch.device(
+                "cuda:0" if torch.cuda.is_available() else "cpu"
+            )
+            config = Config(config_dict)
+            model, _ = load_resnext101(config, device=config.device)
 
-        clip = clip.unsqueeze(0)
-        clip = clip.to(config.device)
+            # pass in clip to model
+            model.eval()
 
-        with torch.no_grad():
-            output = model(clip)
-            _, pred = output.topk(1, 1)
-            idx = pred.squeeze().cpu().numpy()
+            clip = clip.unsqueeze(0)
+            clip = clip.to(config.device)
 
-        prediction_list.append(classes[idx])
+            with torch.no_grad():
+                output = model(clip)
+                _, pred = output.topk(1, 1)
+                idx = pred.squeeze().cpu().numpy()
 
-        try:
-            with open("./dynamic/configs/ipn_config.yaml", "r") as f:
-                user_config = yaml.safe_load(f)
-                config_dict.update(user_config)
-        except Exception:
-            print("Error reading config file")
-            exit(1)
+            prediction_list.append(classes[idx])
 
-        config = Config(config_dict)
-        model, _ = load_resnext101(config, device=config.device)
+            try:
+                with open("./dynamic/configs/ipn_config.yaml", "r") as f:
+                    user_config = yaml.safe_load(f)
+                    config_dict.update(user_config)
+            except Exception:
+                print("Error reading config file")
+                exit(1)
 
-        # pass in clip to model
-        model.eval()
+            config = Config(config_dict)
+            model, _ = load_resnext101(config, device=config.device)
 
-        with torch.no_grad():
-            output = model(clip)
-            _, pred = output.topk(1, 1)
-            idx = pred.squeeze().cpu().numpy()
+            # pass in clip to model
+            model.eval()
 
-        prediction_list.append(classes[idx])
-        print(prediction_list)
-        return prediction_list
+            with torch.no_grad():
+                output = model(clip)
+                _, pred = output.topk(1, 1)
+                idx = pred.squeeze().cpu().numpy()
+
+            prediction_list.append(classes[idx])
+            print(prediction_list)
+            return prediction_list
+        elif self.mode == "lstm":
+            try:
+                with open("./dynamic/configs/lstm_config.yaml", "r") as f:
+                    user_config = yaml.safe_load(f)
+                    config_dict.update(user_config)
+            except Exception:
+                print("Error reading config file")
+                exit(1)
+
+            config = Config(config_dict)
+            model, _ = load_cnn_lstm(config, device=config.device)
+
+            # pass in clip to model
+            model.eval()
+
+            with torch.no_grad():
+                output = model(clip)
+                _, pred = output.topk(1, 1)
+                idx = pred.squeeze().cpu().numpy()
+
+            prediction_list.append(classes[idx])
+            print(prediction_list)
+            return prediction_list
 
     def rejectionCriterion(self, test_num):
         return test_num >= 32
