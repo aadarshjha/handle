@@ -88,7 +88,7 @@ function CameraMenu({
       const blob = new Blob(recordedChunks, {
         type: "video/webm",
       });
-      
+
       (async () => {
         const b64 = await blobToBase64(blob);
         const jsonString = JSON.stringify({ blob: b64 });
@@ -128,6 +128,9 @@ function CameraMenu({
       "resnet_pretrained",
       "mobilenet",
       "mobilenet_pretrained",
+      "resnext",
+      "lstm",
+      "timesformer",
     ];
 
     // check if typeOfButton is in typeOfModels
@@ -293,42 +296,61 @@ function CameraMenu({
             }}
           >
             <h3>Model Mode</h3>
-            <Form>
-              <Form.Item label="" name="mode">
-                <Radio.Group buttonStyle="solid" defaultValue={"cnn"}>
-                  <Radio.Button onChange={updateOptions} value="cnn">
-                    CNN
-                  </Radio.Button>
-                  <Radio.Button onChange={updateOptions} value="densenet">
-                    DenseNet
-                  </Radio.Button>
-                  <Radio.Button
-                    onChange={updateOptions}
-                    value="densenet_pretrained"
-                  >
-                    DenseNet Pretrained
-                  </Radio.Button>
-                  <Radio.Button onChange={updateOptions} value="mobilenet">
-                    MobileNet
-                  </Radio.Button>
-                  <Radio.Button
-                    onChange={updateOptions}
-                    value="mobilenet_pretrained"
-                  >
-                    MobileNet Pretrained
-                  </Radio.Button>
-                  <Radio.Button onChange={updateOptions} value="resnet">
-                    ResNet
-                  </Radio.Button>
-                  <Radio.Button
-                    onChange={updateOptions}
-                    value="resnet_pretrained"
-                  >
-                    ResNet Pretrained
-                  </Radio.Button>
-                </Radio.Group>
-              </Form.Item>
-            </Form>
+            {/* if the mode is static */}
+            {imageOptions.mode === "static" ? (
+              <Form>
+                <Form.Item label="" name="mode">
+                  <Radio.Group buttonStyle="solid" defaultValue={"cnn"}>
+                    <Radio.Button onChange={updateOptions} value="cnn">
+                      CNN
+                    </Radio.Button>
+                    <Radio.Button onChange={updateOptions} value="densenet">
+                      DenseNet
+                    </Radio.Button>
+                    <Radio.Button
+                      onChange={updateOptions}
+                      value="densenet_pretrained"
+                    >
+                      DenseNet Pretrained
+                    </Radio.Button>
+                    <Radio.Button onChange={updateOptions} value="mobilenet">
+                      MobileNet
+                    </Radio.Button>
+                    <Radio.Button
+                      onChange={updateOptions}
+                      value="mobilenet_pretrained"
+                    >
+                      MobileNet Pretrained
+                    </Radio.Button>
+                    <Radio.Button onChange={updateOptions} value="resnet">
+                      ResNet
+                    </Radio.Button>
+                    <Radio.Button
+                      onChange={updateOptions}
+                      value="resnet_pretrained"
+                    >
+                      ResNet Pretrained
+                    </Radio.Button>
+                  </Radio.Group>
+                </Form.Item>
+              </Form>
+            ) : (
+              <Form>
+                <Form.Item label="" name="mode">
+                  <Radio.Group buttonStyle="solid" defaultValue={"resnext"}>
+                    <Radio.Button onChange={updateOptions} value="resnext">
+                      ResNext
+                    </Radio.Button>
+                    <Radio.Button onChange={updateOptions} value="lstm">
+                      LSTM
+                    </Radio.Button>
+                    <Radio.Button onChange={updateOptions} value="timesformer">
+                      TimesFormer
+                    </Radio.Button>
+                  </Radio.Group>
+                </Form.Item>
+              </Form>
+            )}
           </div>
         </div>
       </div>
