@@ -165,9 +165,6 @@ class InferenceEgo:
         # pass in clip to model
         model.eval()
 
-        clip = clip.unsqueeze(0)
-        clip = clip.to(config.device)
-
         with torch.no_grad():
             output = model(clip)
             _, pred = output.topk(1, 1)
