@@ -29,6 +29,9 @@ from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
 from sklearn.metrics import classification_report, confusion_matrix
 from keras.models import load_model
 
+# custom plotting
+from plot import *
+
 PREFIX = "drive/MyDrive/aslData/asl-mnist/"
 
 
@@ -356,23 +359,23 @@ if __name__ == "__main__":
         hyperparameters["CONFIG"]["MODE"],
     )
 
-    # plot_training_validation(
-    #     train_loss,
-    #     train_acc,
-    #     val_loss,
-    #     val_acc,
-    #     hyperparameters["EXPERIMENT_NAME"],
-    #     PREFIX,
-    # )
+    plot_training_validation(
+        train_loss,
+        train_acc,
+        val_loss,
+        val_acc,
+        hyperparameters["EXPERIMENT_NAME"],
+        PREFIX,
+    )
 
-    # execute_micro_macro_metrics(
-    #     model_cache,
-    #     predictions_cache,
-    #     targets_cache,
-    #     precision_history,
-    #     recall_history,
-    #     f1_history,
-    #     accuracy_history,
-    #     cfx_history,
-    #     hyperparameters["EXPERIMENT_NAME"],
-    # )
+    execute_micro_macro_metrics(
+        model_cache,
+        predictions_cache,
+        targets_cache,
+        precision_history,
+        recall_history,
+        f1_history,
+        accuracy_history,
+        cfx_history,
+        hyperparameters["EXPERIMENT_NAME"],
+    )
