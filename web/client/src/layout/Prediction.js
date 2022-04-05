@@ -4,7 +4,13 @@ import PredictionTextStatic from "./PredictionTextStatic";
 import PredictionTextDynamic from "./PredictionTextDynamic";
 
 // TODO: create style
-function Prediction({ prediction, imageSrc, imageOptions, geturl }) {
+function Prediction({
+  videoPrediction,
+  prediction,
+  imageSrc,
+  imageOptions,
+  geturl,
+}) {
   const [toggleView, changeToggleView] = useState(true);
 
   useEffect(() => {}, [imageOptions.mode]); // <-- here put the parameter to listen
@@ -20,6 +26,7 @@ function Prediction({ prediction, imageSrc, imageOptions, geturl }) {
   } else {
     return (
       <PredictionTextDynamic
+        videoPrediction={videoPrediction}
         prediction={prediction}
         imageSrc={imageSrc}
         imageOptions={imageOptions}

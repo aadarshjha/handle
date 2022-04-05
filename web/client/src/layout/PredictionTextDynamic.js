@@ -55,8 +55,9 @@ function PredictionTextDynamic({
       </div>
 
       <div>
-        {/* if prediction is an empty array, render, otherwise display text */}
-        {prediction.length === 0 ? (
+        {/* check if videoPrediction is undefined */}
+
+        {videoPrediction === undefined ? (
           <div>
             <h3
               style={{
@@ -67,7 +68,35 @@ function PredictionTextDynamic({
             </h3>
           </div>
         ) : (
-          <></>
+          <div>
+            {Object.keys(videoPrediction).map((key, index) => {
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <h3
+                    style={{
+                      marginLeft: "10px",
+                    }}
+                  >
+                    {key}
+                  </h3>
+                  <p
+                    style={{
+                      marginLeft: "10px",
+                    }}
+                  >
+                    {videoPrediction[key].prediction}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import "antd/dist/antd.css";
 import Webcam from "react-webcam";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Button, Radio, Select, Alert } from "antd";
 
 const { Option } = Select;
@@ -33,6 +33,7 @@ const styles = {
 
 function CameraMenu({
   setVideoPrediction,
+  videoPrediction,
   setPrediction,
   setImageSrc,
   setImageOptions,
@@ -84,15 +85,15 @@ function CameraMenu({
     });
   };
 
+  // useEffect
+
   const handlePreview = React.useCallback(() => {
     if (recordedChunks.length) {
       const blob = new Blob(recordedChunks, {
         type: "video/webm",
       });
-
-      (async () => {
-        const b64 = await blobToBase64(blob);
-        const jsonString = JSON.stringify({ blob: b64 });
+      blobToBase64(blob).then((base64) => {
+        const jsonString = JSON.stringify({ blob: base64 });
         // send to our backend.
         fetch(`${PREFIX}/dynamic/cnn`, {
           method: "POST",
@@ -109,16 +110,19 @@ function CameraMenu({
         })
           .then((res) => res.json())
           .then((json) => {
-            setVideoPrediction(json);
+            setVideoPrediction({ ...json });
+            // reeturn json in div
+            console.log({ ...json });
+            console.log(videoPrediction);
           });
-      })();
+      });
 
       seturl(URL.createObjectURL(blob));
       setRecordedChunks([]);
     } else {
       setDisplayError(true);
     }
-  }, [recordedChunks]);
+  }, [recordedChunks, imageOptions, setVideoPrediction, videoPrediction]);
 
   const updateOptions = (e) => {
     const typeOfButton = e.target.value;

@@ -7,6 +7,7 @@ from flask_cors import CORS, cross_origin
 from dynamic.inference_ego import InferenceEgo
 import json
 import cv2 as cv
+from datetime import datetime
 
 app = Flask(__name__)
 # CORS(app, support_credentials=True)
@@ -26,6 +27,10 @@ def dynamic_index():
         if mode == "resnext":
             inferenceClass = InferenceEgo(blob)
             frames = inferenceClass.fetchFrames()
+
+            now = datetime.now()
+
+            current_time = now.strftime("%H:%M:%S")
 
             if not inferenceClass.rejectionCriterion(len(frames)):
                 return json.dumps({"Error": "Video Is Rejected, Needs To Be More Long"})
