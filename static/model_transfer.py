@@ -32,7 +32,7 @@ from keras.models import load_model
 # custom plotting
 from plot import *
 
-PREFIX = "drive/MyDrive/aslData/asl-mnist/"
+PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
 
 
 def read_data():
