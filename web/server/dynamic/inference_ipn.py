@@ -24,6 +24,9 @@ import yaml
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
+
+classes = ["No Gesture", "Pointing With One Finger", "Double Click With One Finger"]
+
 class Config:
     def __init__(self, in_dict: dict):
         for key, val in in_dict.items():
@@ -115,17 +118,16 @@ class InferenceIPN:
 
         # pass in clip to model
         model.eval()
+
+        clip = clip.unsqueeze(0)
+        clip = clip.to(config.device)
+
         with torch.no_grad():
             output = model(clip)
-            output = output.view(32, -1)
-            output = torch.nn.functional.softmax(output, dim=1)
-            output = output.cpu().numpy()
-            output = np.argmax(output, axis=1)
-            output = output.tolist()
-            return output
+            _, pred = output.topk(1,1)
+            idx = pred.squeeze().cpu().numpy()
+
+        return classes[idx]
 
     def rejectionCriterion(self, test_num): 
-        if test_num < 32: 
-            return False 
-        else: 
-            return True
+        return test_num >= 32

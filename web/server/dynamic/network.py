@@ -209,18 +209,15 @@ def load_resnext101(config, device):
 
     model = ResNeXt([3, 4, 23, 3], sample_size=config.sample_size, sample_duration=config.sample_duration,
                     num_classes=13)
-    pretrain_dict = torch.load(pretrain_pth)
-    pretrain_dict['state_dict'] = {key.replace('module.', ''): value for key, value in pretrain_dict['state_dict'].items()}
 
-    del pretrain_dict['state_dict']['fc.weight']
-    del pretrain_dict['state_dict']['fc.bias']
-
-    model = fix_model_layers(model, config)
-    model.load_state_dict(pretrain_dict['state_dict'], strict=False)
-
+    
     # Replace last layer for MiniIPN (3 classes)
     model.fc = nn.Linear(model.fc.in_features, 3)
+    model = fix_model_layers(model, config)
     
+    pretrain_dict = torch.load(pretrain_pth, map_location=device)
+    model.load_state_dict(pretrain_dict, strict=False)
+
     model.fc = model.fc.to(device)
     model = model.to(device)
     print(model)
