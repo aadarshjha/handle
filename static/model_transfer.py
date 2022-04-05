@@ -29,7 +29,7 @@ from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
 from sklearn.metrics import classification_report, confusion_matrix
 from keras.models import load_model
 
-PREFIX = "../data/asl-mnist/"
+PREFIX = "drive/MyDrive/aslData/asl-mnist/"
 
 
 def read_data():
