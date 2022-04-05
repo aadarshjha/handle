@@ -1,7 +1,13 @@
 import "antd/dist/antd.css"; // or 'antd/dist/antd.less's
 import React, { useState, useEffect } from "react";
 
-function PredictionTextDynamic({ prediction, imageSrc, imageOptions, geturl }) {
+function PredictionTextDynamic({
+  videoPrediction,
+  prediction,
+  imageOptions,
+  geturl,
+}) {
+  console.log(videoPrediction);
   return (
     <div>
       <h2
@@ -61,7 +67,7 @@ function PredictionTextDynamic({ prediction, imageSrc, imageOptions, geturl }) {
             </h3>
           </div>
         ) : (
-          <>still need to make predictions...nothing yet</>
+          <></>
         )}
       </div>
     </div>

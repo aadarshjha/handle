@@ -2,8 +2,6 @@ import "antd/dist/antd.css"; // or 'antd/dist/antd.less's
 import React, { useState, useEffect } from "react";
 
 function PredictionTextStatic({ prediction, imageSrc, imageOptions }) {
-  console.log(imageSrc);
-  console.log(imageOptions);
   return (
     <div>
       <h2

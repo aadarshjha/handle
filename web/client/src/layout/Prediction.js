@@ -5,9 +5,6 @@ import PredictionTextDynamic from "./PredictionTextDynamic";
 
 // TODO: create style
 function Prediction({ prediction, imageSrc, imageOptions, geturl }) {
-  console.log(prediction);
-  console.log(imageSrc);
-  console.log(imageOptions);
   const [toggleView, changeToggleView] = useState(true);
 
   useEffect(() => {}, [imageOptions.mode]); // <-- here put the parameter to listen

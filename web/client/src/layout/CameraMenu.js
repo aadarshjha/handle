@@ -32,6 +32,7 @@ const styles = {
 };
 
 function CameraMenu({
+  setVideoPrediction,
   setPrediction,
   setImageSrc,
   setImageOptions,
@@ -108,7 +109,7 @@ function CameraMenu({
         })
           .then((res) => res.json())
           .then((json) => {
-            console.log(json);
+            setVideoPrediction(json);
           });
       })();
 

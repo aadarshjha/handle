@@ -23,6 +23,7 @@ const styles = {
 };
 
 function Layout() {
+  const [videoPrediction, setVideoPrediction] = useState({});
   const [prediction, setPrediction] = useState({});
   const [imageSrc, setImageSrc] = useState({});
   const [imageOptions, setImageOptions] = useState({
@@ -35,6 +36,7 @@ function Layout() {
       <div style={styles.left}>
         {/* pass imageSrc and setImageSrc as a prop to CameraMenu */}
         <CameraMenu
+          setVideoPrediction={setVideoPrediction}
           setPrediction={setPrediction}
           setImageSrc={setImageSrc}
           setImageOptions={setImageOptions}
@@ -45,6 +47,7 @@ function Layout() {
       </div>
       <div style={styles.right}>
         <Prediction
+          videoPrediction={videoPrediction}
           prediction={prediction}
           imageSrc={imageSrc}
           imageOptions={imageOptions}
