@@ -89,10 +89,11 @@ def augment_data(train_df, test_df):
     # convert X to a numpy array
     X = np.array(X)
 
+    # reshape every element in X to (320, 120, 1)
+    X = X.reshape(X.shape[0], 120, 320, 1)
     y_net = np.concatenate((y_train, y_test))
     y = y_net
 
-    # convert Y to a numpy array
     y = np.array(y)
 
     return X, y
