@@ -95,13 +95,20 @@ def augment_data(train_df, test_df):
     X = np.concatenate((x_train, x_test))
     y = np.concatenate((y_train, y_test))
 
+    # rescale each element in X to 32x32x1
+    for element in X:
+        # use PIL to resize to 32x32x1
+        pass
+
     print("Images loaded: ", len(X))
     print("Labels loaded: ", len(y))
 
     return X, y, datagen
 
 
-def create_model(mode="CNN"):
+def create_model(mode):
+
+    print(mode)
 
     model = None
     if mode == "CNN":
@@ -133,12 +140,15 @@ def create_model(mode="CNN"):
         pass
     elif mode == "RESNET":
         model = keras.applications.resnet.ResNet50(
-            include_top=False, weights=None, input_shape=(28, 28, 1)
+            include_top=False, weights=None, input_shape=(32, 32, 1)
         )
+        model.summary()
     elif mode == "RESNET_PRETRAINED":
         model = keras.applications.resnet.ResNet50(
             include_top=False, weights="imagenet", input_shape=(28, 28, 1)
         )
+        # print a summary of the model
+        model.summary()
     elif mode == "MOBILENET":
         model = keras.applications.mobilenet.MobileNet(
             include_top=False, weights=None, input_shape=(28, 28, 1)
@@ -166,6 +176,7 @@ def execute_training(
     X,
     y,
     datagen,
+    mode,
     experiment_name="exper1",
     num_folds=5,
     epochs=10,
@@ -173,7 +184,6 @@ def execute_training(
     verbose=False,
     optimizer="adam",
     loss="categorical_crossentropy",
-    mode="CNN",
 ):
 
     kfold = KFold(n_splits=num_folds, shuffle=True)
@@ -199,7 +209,7 @@ def execute_training(
     # train across folds
     for train, test in kfold.split(X, y):
 
-        model = create_model()
+        model = create_model(mode)
         model.compile(
             optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
         )
@@ -419,6 +429,7 @@ if __name__ == "__main__":
         X,
         y,
         datagen,
+        hyperparameters["CONFIG"]["MODE"],
         hyperparameters["EXPERIMENT_NAME"],
         hyperparameters["CONFIG"]["NUM_FOLDS"],
         hyperparameters["CONFIG"]["EPOCHS"],
@@ -426,7 +437,6 @@ if __name__ == "__main__":
         hyperparameters["CONFIG"]["VERBOSE"],
         hyperparameters["CONFIG"]["OPTIMIZER"],
         hyperparameters["CONFIG"]["LOSS"],
-        hyperparameters["CONFIG"]["MODE"],
     )
 
     plot_training_validation(

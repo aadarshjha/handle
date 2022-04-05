@@ -331,6 +331,8 @@ if __name__ == "__main__":
     for layer in model.layers[:-1]:
         layer.trainable = False
 
+    # edit the last layer
+
     # execute the training pipeline
     (
         model_cache,
