@@ -9,15 +9,22 @@ import pandas as pd
 import json
 import base64
 import subprocess
-import torch 
+import torch
 import torchvision
 from PIL import Image
-from dynamic.transform_utils import TemporalCenterCrop, Compose, ToTensor, Normalize, Scale, CenterCrop
+from dynamic.transform_utils import (
+    TemporalCenterCrop,
+    Compose,
+    ToTensor,
+    Normalize,
+    Scale,
+    CenterCrop,
+)
 from dynamic.network import *
 import sys
 import yaml
 
-# find somee labels -- later on. 
+# find somee labels -- later on.
 # # read ./labels/hgrd.json
 # with open("static/labels/asl.json") as f:
 #     labels = json.load(f)
@@ -27,11 +34,14 @@ os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
 classes = ["No Gesture", "Pointing With One Finger", "Double Click With One Finger"]
 
+
 class Config:
     def __init__(self, in_dict: dict):
         for key, val in in_dict.items():
             if isinstance(val, (list, tuple)):
-                setattr(self, key, [DictObj(x) if isinstance(x, dict) else x for x in val])
+                setattr(
+                    self, key, [DictObj(x) if isinstance(x, dict) else x for x in val]
+                )
             else:
                 setattr(self, key, DictObj(val) if isinstance(val, dict) else val)
 
@@ -40,8 +50,8 @@ class InferenceEgo:
     def __init__(self, blob):
         self.blob = blob
 
-    def processFrames(self): 
-        pass 
+    def processFrames(self):
+        pass
 
     def fetchFrames(self):
         # convert blob string to object
@@ -70,17 +80,25 @@ class InferenceEgo:
             frames.append(image)
             success, image = cap.read()
         return frames
-    
+
     def preProcess(self, frames):
         # convert opencv image to PIL
-        pil_frames = [] 
-
+        pil_frames = []
 
         for element in frames:
             pil_frames.append(Image.fromarray(cv2.cvtColor(element, cv2.COLOR_BGR2RGB)))
-        
+
         temporalTransforms = Compose([TemporalCenterCrop(32)])
-        spatialTransforms = Compose([Scale(112), CenterCrop(112), ToTensor(1), Normalize([114.7748, 107.7354, 99.475], [38.7568578, 37.88248729, 40.02898126])])
+        spatialTransforms = Compose(
+            [
+                Scale(112),
+                CenterCrop(112),
+                ToTensor(1),
+                Normalize(
+                    [114.7748, 107.7354, 99.475], [38.7568578, 37.88248729, 40.02898126]
+                ),
+            ]
+        )
 
         # create a list of indices for the frames
         indices = list(range(len(pil_frames)))
@@ -91,28 +109,32 @@ class InferenceEgo:
         spatialTransforms.randomize_parameters()
 
         # load up the frames from the clip
-        for i in indices: 
+        for i in indices:
             clip.append(spatialTransforms(pil_frames[i]))
 
         dim = clip[0].size()[-2:]
         clip = torch.cat(clip, 0).view((32, -1) + dim).permute(1, 0, 2, 3)
         return clip
 
-    def inference(self, clip): 
+    def inference(self, clip):
+
+        prediction_list = []
         # load model with pytorch
         # open a YAML
 
         config_dict = {}
 
-        try: 
-            with open("./dynamic/configs/ego_config.yaml", 'r') as f: 
+        try:
+            with open("./dynamic/configs/ego_config.yaml", "r") as f:
                 user_config = yaml.safe_load(f)
                 config_dict.update(user_config)
         except Exception:
             print("Error reading config file")
             exit(1)
-        
-        config_dict['device'] = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+        config_dict["device"] = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu"
+        )
         config = Config(config_dict)
         model, _ = load_resnext101(config, device=config.device)
 
@@ -124,10 +146,36 @@ class InferenceEgo:
 
         with torch.no_grad():
             output = model(clip)
-            _, pred = output.topk(1,1)
+            _, pred = output.topk(1, 1)
             idx = pred.squeeze().cpu().numpy()
 
-        return classes[idx]
+        prediction_list.append(classes[idx])
 
-    def rejectionCriterion(self, test_num): 
+        try:
+            with open("./dynamic/configs/ipn_config.yaml", "r") as f:
+                user_config = yaml.safe_load(f)
+                config_dict.update(user_config)
+        except Exception:
+            print("Error reading config file")
+            exit(1)
+
+        config = Config(config_dict)
+        model, _ = load_resnext101(config, device=config.device)
+
+        # pass in clip to model
+        model.eval()
+
+        clip = clip.unsqueeze(0)
+        clip = clip.to(config.device)
+
+        with torch.no_grad():
+            output = model(clip)
+            _, pred = output.topk(1, 1)
+            idx = pred.squeeze().cpu().numpy()
+
+        prediction_list.append(classes[idx])
+
+        return prediction_list
+
+    def rejectionCriterion(self, test_num):
         return test_num >= 32

@@ -6,7 +6,7 @@ sample_size: 112
 sample_duration: 32
 batch_size: 8
 n_epochs: 5
-pretrain_path: 'models/ipn_resnext_101.pth'
+pretrain_path: 'dynamic/model/ipn/ipn_model_resnext-101.pth'
 pretrain_dataset: 'ipn'
 n_threads: 8
 model: 'resnext'

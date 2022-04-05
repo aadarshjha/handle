@@ -16,6 +16,7 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
+from PIL import Image
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.preprocessing.image import ImageDataGenerator
@@ -26,6 +27,7 @@ from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
 from sklearn.metrics import classification_report, confusion_matrix
+
 
 # os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 # gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -76,6 +78,17 @@ def augment_data(train_df, test_df):
     x_train = x_train.reshape(-1, 28, 28, 1)
     x_test = x_test.reshape(-1, 28, 28, 1)
 
+    # X_test = []
+
+    # for element in x_train:
+    #     print(element[0])
+    #     print(element.shape)
+    #     break
+    # return None
+
+    # print(len(x_train))
+    # print(x_train[0].shape)
+
     # data augmentation
     datagen = ImageDataGenerator(
         featurewise_center=False,  # set input mean to 0 over the dataset
@@ -94,11 +107,6 @@ def augment_data(train_df, test_df):
     # combine the x_trrarin and x_test
     X = np.concatenate((x_train, x_test))
     y = np.concatenate((y_train, y_test))
-
-    # rescale each element in X to 32x32x1
-    for element in X:
-        # use PIL to resize to 32x32x1
-        pass
 
     print("Images loaded: ", len(X))
     print("Labels loaded: ", len(y))
@@ -140,7 +148,7 @@ def create_model(mode):
         pass
     elif mode == "RESNET":
         model = keras.applications.resnet.ResNet50(
-            include_top=False, weights=None, input_shape=(32, 32, 1)
+            include_top=False, weights=None, input_shape=(28, 28, 1)
         )
         model.summary()
     elif mode == "RESNET_PRETRAINED":

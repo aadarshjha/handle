@@ -22,7 +22,7 @@ def dynamic_index():
         json_obj = request.get_json()
         blob = json_obj["videoSrc"]
 
-        inferenceClass = InferenceIPN(blob)
+        inferenceClass = InferenceEgo(blob)
         frames = inferenceClass.fetchFrames()
 
         if not inferenceClass.rejectionCriterion(len(frames)):
@@ -31,9 +31,6 @@ def dynamic_index():
             clip = inferenceClass.preProcess(frames)
             inference = inferenceClass.inference(clip)
             print(inference)
-
-        # we can continue to inference
-
         # return json.dumps(
         #     {
         #         "HGR": {
