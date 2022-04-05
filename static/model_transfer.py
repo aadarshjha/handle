@@ -48,7 +48,7 @@ def read_data():
 
 def extract_hyperparameters(filename):
     hyperparams = None
-    with open("experiments_asl/{}.yaml".format(filename), "r") as f:
+    with open("experiments_hgr{}.yaml".format(filename), "r") as f:
         hyperparameters = yaml.load(f, Loader=yaml.FullLoader)
     return hyperparameters
 
