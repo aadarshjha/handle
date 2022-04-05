@@ -21,30 +21,26 @@ def dynamic_index():
 
         json_obj = request.get_json()
         blob = json_obj["videoSrc"]
+        mode = json_obj["model"]
 
-        inferenceClass = InferenceEgo(blob)
-        frames = inferenceClass.fetchFrames()
+        if mode == "resnext":
+            inferenceClass = InferenceEgo(blob)
+            frames = inferenceClass.fetchFrames()
 
-        if not inferenceClass.rejectionCriterion(len(frames)):
-            return json.dumps({"error": "Video too short"})
+            if not inferenceClass.rejectionCriterion(len(frames)):
+                return json.dumps({"Error": "Video Is Rejected, Needs To Be More Long"})
+            else:
+                clip = inferenceClass.preProcess(frames)
+                inference = inferenceClass.inference(clip)
+                print("inference: ", inference)
+                return json.dumps(
+                    {
+                        "EgoGesture": {"prediction": inference[0]},
+                        "IPN": {"prediction": inference[1]},
+                    }
+                )
         else:
-            clip = inferenceClass.preProcess(frames)
-            inference = inferenceClass.inference(clip)
-            print(inference)
-        # return json.dumps(
-        #     {
-        #         "HGR": {
-        #             "image": augmented_single_image_b64_hgr.decode("utf-8"),
-        #             "prediction": augmented_image_hgr.preProcess(),
-        #         },
-        #         "ASL": {
-        #             "image": augmented_single_image_b64_asl.decode("utf-8"),
-        #             "prediction": augmented_image_asl.preProcess(),
-        #         },
-        #     }
-        # )
-
-        return json.dumps({})
+            return json.dumps({"Error": "Model Not Found"})
 
 
 # accept a JSON object

@@ -171,7 +171,7 @@ class InferenceEgo:
             idx = pred.squeeze().cpu().numpy()
 
         prediction_list.append(classes[idx])
-
+        print(prediction_list)
         return prediction_list
 
     def rejectionCriterion(self, test_num):

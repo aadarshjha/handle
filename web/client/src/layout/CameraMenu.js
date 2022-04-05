@@ -102,6 +102,8 @@ function CameraMenu({
           },
           body: JSON.stringify({
             videoSrc: jsonString,
+            model: imageOptions.model,
+            mode: imageOptions.mode,
           }),
         })
           .then((res) => res.json())
@@ -168,7 +170,6 @@ function CameraMenu({
     })
       .then((res) => res.json())
       .then((json) => {
-        console.log(json);
         setImageSrc({
           HGR: "data:image/png;base64," + json.HGR.image,
           ASL: "data:image/png;base64," + json.ASL.image,
