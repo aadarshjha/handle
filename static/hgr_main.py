@@ -22,10 +22,10 @@ from keras.layers import Dense, Flatten
 import json
 from sklearn.model_selection import train_test_split
 
-os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
-gpus = tf.config.experimental.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(gpus[0], True)
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+# os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+# gpus = tf.config.experimental.list_physical_devices("GPU")
+# tf.config.experimental.set_memory_growth(gpus[0], True)
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 PREFIX = "../../drive/MyDrive/handleData/"
 
