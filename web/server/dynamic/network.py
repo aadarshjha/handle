@@ -229,6 +229,8 @@ def load_resnext101(config, device):
 def load_cnn_lstm(config, device):
     # Load CNN model
     model = ResNet_LSTM().to(device)
+    pretrain_dict = torch.load(config.pretrain_path, map_location=device)
+    model.load_state_dict(pretrain_dict, strict=False)
     return model, model.parameters()
 
 
