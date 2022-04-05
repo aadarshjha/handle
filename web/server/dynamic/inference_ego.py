@@ -36,7 +36,7 @@ class Config:
                 setattr(self, key, DictObj(val) if isinstance(val, dict) else val)
 
 
-class InferenceIPN:
+class InferenceEgo:
     def __init__(self, blob):
         self.blob = blob
 

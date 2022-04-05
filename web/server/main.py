@@ -4,7 +4,7 @@ from static.process import Process
 from static.inference_hgr import InferenceHGR
 from static.inference_asl import InferenceASL
 from flask_cors import CORS, cross_origin
-from dynamic.inference_ipn import InferenceIPN
+from dynamic.inference_ego import InferenceEgo
 import json
 import cv2 as cv
 
