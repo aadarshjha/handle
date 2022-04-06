@@ -9,3 +9,4 @@ n_epochs: 5
 n_threads: 8
 model: 'timesformer'
 checkpoint: 1
+pretrain_path: 'dynamic/model/timesformer/timesformer.pth'

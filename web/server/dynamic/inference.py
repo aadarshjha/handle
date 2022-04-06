@@ -192,13 +192,44 @@ class Inference:
             # pass in clip to model
             model.eval()
 
+            clip = clip.unsqueeze(0)
+            clip = clip.to(config.device)
+
             with torch.no_grad():
                 output = model(clip)
                 _, pred = output.topk(1, 1)
                 idx = pred.squeeze().cpu().numpy()
 
             prediction_list.append(classes[idx])
-            print(prediction_list)
+            return prediction_list
+        elif self.mode == "timesformer":
+            try:
+                with open("./dynamic/configs/timesformer_config.yaml", "r") as f:
+                    user_config = yaml.safe_load(f)
+                    config_dict.update(user_config)
+            except Exception:
+                print("Error reading config file")
+                exit(1)
+
+            config_dict["device"] = torch.device(
+                "cuda:0" if torch.cuda.is_available() else "cpu"
+            )
+
+            config = Config(config_dict)
+            model, _ = load_cnn_lstm(config, device=config.device)
+
+            # pass in clip to model
+            model.eval()
+
+            clip = clip.unsqueeze(0)
+            clip = clip.to(config.device)
+
+            with torch.no_grad():
+                output = model(clip)
+                _, pred = output.topk(1, 1)
+                idx = pred.squeeze().cpu().numpy()
+
+            prediction_list.append(classes[idx])
             return prediction_list
 
     def rejectionCriterion(self, test_num):

@@ -50,7 +50,15 @@ def dynamic_index():
                 }
             )
         elif mode == "timesformer":
-            pass
+            clip = inferenceClass.preProcess(frames)
+            inference = inferenceClass.inference(clip)
+            print(inference)
+            return json.dumps(
+                {
+                    # "EgoGesture": {"prediction": inference[0]},
+                    # "IPN": {"prediction": inference[1]},
+                }
+            )
         else:
             return json.dumps({"Error": "Model Not Found"})
 
