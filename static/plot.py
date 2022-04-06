@@ -7,26 +7,22 @@ def plot_training_validation(
 ):
 
     # plot the train_loss vs validation_loss in a 5 subplots
+    fig, axs = plt.subplots(2, 3)
 
-    # create a 1 x 2 subplot
-    fig, axs = plt.subplots(1, 2, figsize=(20, 10))
-
-    # plot the train_loss vs validation_loss in a 5 subplots
-
-    axs[0].plot(train_loss[0], label="train_loss")
-    axs[0].plot(val_loss[0], label="val_loss")
-    axs[0].set_title("Fold 1")
+    axs[0, 0].plot(train_loss[0], label="train_loss")
+    axs[0, 0].plot(val_loss[0], label="val_loss")
+    axs[0, 0].set_title("Fold 1")
 
     # set the x axis as epoch and y axis as loss
-    axs[0].set_xlabel("Epoch")
-    axs[0].set_ylabel("Loss")
+    axs[0, 0].set_xlabel("Epoch")
+    axs[0, 0].set_ylabel("Loss")
 
-    axs[1].plot(train_loss[1], label="train_loss")
-    axs[1].plot(val_loss[1], label="val_loss")
-    axs[1].set_title("Fold 2")
+    axs[0, 1].plot(train_loss[1], label="train_loss")
+    axs[0, 1].plot(val_loss[1], label="val_loss")
+    axs[0, 1].set_title("Fold 2")
 
-    axs[1].set_xlabel("Epoch")
-    axs[1].set_ylabel("Loss")
+    axs[0, 1].set_xlabel("Epoch")
+    axs[0, 1].set_ylabel("Loss")
 
     axs[0, 2].plot(train_loss[2], label="train_loss")
     axs[0, 2].plot(val_loss[2], label="val_loss")
@@ -58,6 +54,9 @@ def plot_training_validation(
     # make the graphs look nice
     plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
 
+    # increase the width of the image
+    fig.set_size_inches(20, 10)
+
     # save the image and create folder if it doesn't exist
     plt.savefig(
         PREFIX
@@ -72,21 +71,21 @@ def plot_training_validation(
     plt.clf()
 
     # do the same thing with train_acc and validation_acc
-    fig, axs = plt.subplots(1, 2, figsize=(20, 10))
+    fig, axs = plt.subplots(2, 3)
 
-    axs[0].plot(train_acc[0], label="train_acc")
-    axs[0].plot(val_acc[0], label="val_acc")
-    axs[0].set_title("Fold 1")
+    axs[0, 0].plot(train_acc[0], label="train_acc")
+    axs[0, 0].plot(val_acc[0], label="val_acc")
+    axs[0, 0].set_title("Fold 1")
 
-    axs[0].set_xlabel("Epoch")
-    axs[0].set_ylabel("Accuracy")
+    axs[0, 0].set_xlabel("Epoch")
+    axs[0, 0].set_ylabel("Accuracy")
 
-    axs[1].plot(train_acc[1], label="train_acc")
-    axs[1].plot(val_acc[1], label="val_acc")
-    axs[1].set_title("Fold 2")
+    axs[0, 1].plot(train_acc[1], label="train_acc")
+    axs[0, 1].plot(val_acc[1], label="val_acc")
+    axs[0, 1].set_title("Fold 2")
 
-    axs[1].set_xlabel("Epoch")
-    axs[1].set_ylabel("Accuracy")
+    axs[0, 1].set_xlabel("Epoch")
+    axs[0, 1].set_ylabel("Accuracy")
 
     axs[0, 2].plot(train_acc[2], label="train_acc")
     axs[0, 2].plot(val_acc[2], label="val_acc")
@@ -117,6 +116,9 @@ def plot_training_validation(
 
     # make the graphs look nice
     plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
+
+    # increase the width of the image
+    fig.set_size_inches(20, 10)
 
     # save the image
 
