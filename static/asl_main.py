@@ -41,7 +41,7 @@ from keras import Input, Model
 from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
-from keras.applications.vgg16 import VGG16
+from keras.applications import VGG16
 
 from keras import backend as K
 
@@ -198,11 +198,10 @@ def create_mobilenet_pretrained(
 
 def create_vgg16(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
     old_model = VGG16(input_shape=input_shape, include_top=False, weights="imagenet")
-    old_model.layers[0].trainable = False
 
-    model = Sequential()
-    model.add(old_model)
-    model.add(Dense(n_out, activation="softmax"))
+    old_model.trainable = False
+
+    model = Sequential([old_model, Dense(n_out, activation="softmax")])
 
     model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
     return model
