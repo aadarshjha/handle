@@ -1,5 +1,6 @@
 import os
 from pickle import NONE
+from telnetlib import SE
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
@@ -8,6 +9,7 @@ import cv2
 import sys
 import yaml
 import pandas as pd
+import gc
 from sklearn.model_selection import KFold
 from sklearn.metrics import (
     accuracy_score,
@@ -16,13 +18,30 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
+from PIL import Image
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.layers import Dense, Flatten
+from keras.preprocessing.image import ImageDataGenerator
+from keras.layers import Dense, Flatten, GlobalAveragePooling2D
 import json
 from sklearn.model_selection import train_test_split
-
-from PIL import Image
+from sklearn.preprocessing import LabelBinarizer
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import optimizers
+from tensorflow.keras.layers import (
+    Dense,
+    Dropout,
+    MaxPool2D,
+    Conv2D,
+    BatchNormalization,
+    Flatten,
+)
+from sklearn.metrics import confusion_matrix
+from keras import Input, Model
+from keras.applications.mobilenet import MobileNet
+from keras.applications.resnet import ResNet50
+from keras.applications.densenet import DenseNet121
+from keras.applications.vgg16 import VGG16
 
 # os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 # gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -92,7 +111,7 @@ def augment_data(imagepaths):
 
 def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
     model = Sequential()
-    model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(dim_y, dim_x, 3)))
+    model.add(Conv2D(32, (5, 5), activation="relu", input_shape=input_shape))
     model.add(MaxPooling2D((2, 2)))
 
     model.add(Conv2D(64, (3, 3), activation="relu"))
@@ -110,6 +129,23 @@ def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
     return model
 
 
+def create_mobilenet(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
+    base_model = MobileNet(input_shape=input_shape, include_top=False, weights=None)
+    base_model.trainable = False
+    model = Sequential(
+        [
+            base_model,
+            GlobalAveragePooling2D(),
+            Dense(1024, activation="relu"),
+            Dense(1024, activation="relu"),
+            Dense(512, activation="relu"),
+            Dense(n_out, activation="sigmoid"),
+        ]
+    )
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+    return model
+
+
 def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
 
     model = None
@@ -118,7 +154,7 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
             loss_fn=loss_fn,
             optimizer_algorithm=optimizer_algorithm,
             monitor_metric=monitor_metric,
-            input_shape=(dim_y, dim_x, 1),
+            input_shape=(dim_y, dim_x, 3),
             n_out=10,
         )
     elif mode == "RESNET_PRETRAINED":
@@ -126,9 +162,14 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
             include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
         )
     elif mode == "MOBILENET_PRETRAINED":
-        model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
+        model = create_mobilenet(
+            loss_fn=loss_fn,
+            optimizer_algorithm=optimizer_algorithm,
+            monitor_metric=monitor_metric,
+            input_shape=(dim_y, dim_x, 3),
+            n_out=10,
         )
+
     elif mode == "DENSENET_PRETRAINED":
         model = keras.applications.densenet.DenseNet121(
             include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
