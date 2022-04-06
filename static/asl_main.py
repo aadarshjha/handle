@@ -20,7 +20,7 @@ from PIL import Image
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Dense, Flatten
+from keras.layers import Dense, Flatten, GlobalAveragePooling2D
 import json
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
@@ -35,6 +35,8 @@ from tensorflow.keras.layers import (
     Flatten,
 )
 from sklearn.metrics import classification_report, confusion_matrix
+
+from keras.applications.mobilenet import MobileNet
 
 # os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 # gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -123,6 +125,46 @@ def CNN_Model(
 
     model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
 
+    return model
+
+
+def create_mobilenet(input_shape, n_out):
+
+    base_model = MobileNet(input_shape=input_shape, include_top=False, weights=None)
+    base_model.trainable = False
+    model = Sequential(
+        [
+            base_model,
+            GlobalAveragePooling2D(),
+            Dense(20, activation="relu"),
+            Dropout(0.4),
+            Dense(10, activation="relu"),
+            Dropout(0.3),
+            Dense(n_out, activation="sigmoid"),
+        ]
+    )
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+    return model
+
+
+def create_mobilenet_pretrained(input_shape, n_out):
+
+    base_model = MobileNet(
+        input_shape=input_shape, include_top=False, weights="imagenet"
+    )
+    base_model.trainable = False
+    model = Sequential(
+        [
+            base_model,
+            GlobalAveragePooling2D(),
+            Dense(20, activation="relu"),
+            Dropout(0.4),
+            Dense(10, activation="relu"),
+            Dropout(0.3),
+            Dense(n_out, activation="sigmoid"),
+        ]
+    )
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
     return model
 
 
@@ -496,14 +538,14 @@ if __name__ == "__main__":
         hyperparameters["CONFIG"]["LOSS"],
     )
 
-    plot_training_validation(
-        train_loss,
-        train_acc,
-        val_loss,
-        val_acc,
-        hyperparameters["EXPERIMENT_NAME"],
-        PREFIX,
-    )
+    # plot_training_validation(
+    #     train_loss,
+    #     train_acc,
+    #     val_loss,
+    #     val_acc,
+    #     hyperparameters["EXPERIMENT_NAME"],
+    #     PREFIX,
+    # )
 
     execute_micro_macro_metrics(
         model_cache,
