@@ -197,7 +197,9 @@ def create_mobilenet_pretrained(
 
 
 def create_vgg16(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
-    old_model = VGG16(input_shape=input_shape, include_top=False, weights="imagenet")
+    old_model = VGG16(
+        input_shape=input_shape, include_top=False, weights="imagenet", pooling="avg"
+    )
 
     old_model.trainable = False
 
