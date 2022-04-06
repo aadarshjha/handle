@@ -129,6 +129,19 @@ def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
     return model
 
 
+def create_vgg16(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
+    old_model = VGG16(
+        input_shape=input_shape, include_top=False, weights="imagenet", pooling="avg"
+    )
+
+    old_model.trainable = False
+
+    model = Sequential([old_model, Dense(n_out, activation="sigmoid")])
+
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+    return model
+
+
 def create_mobilenet(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
     base_model = MobileNet(
         input_shape=input_shape, include_top=False, weights="imagenet"
@@ -177,7 +190,13 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
             include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
         )
     elif mode == "VGG16_PRETRAINED":
-        pass
+        model = create_vgg16(
+            loss_fn=loss_fn,
+            optimizer_algorithm=optimizer_algorithm,
+            monitor_metric=monitor_metric,
+            input_shape=(dim_y, dim_x, 3),
+            n_out=10,
+        )
     else:
         # throw an error to the user
         raise Exception("Invalid model type")
