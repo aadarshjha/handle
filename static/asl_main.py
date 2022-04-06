@@ -32,12 +32,14 @@ from tensorflow.keras.layers import (
     Dropout,
     MaxPool2D,
     Conv2D,
+    BatchNormalization,
     Flatten,
 )
 from sklearn.metrics import confusion_matrix
 from keras import Input, Model
 from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet import ResNet50
+from keras.applications.densenet import DenseNet121
 
 # os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 # gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -166,6 +168,39 @@ def create_mobilenet_pretrained(input_shape, n_out):
     return model
 
 
+def create_densenet_pretrained(input_shape, n_out):
+    OldModel = DenseNet121(
+        include_top=False, input_shape=input_shape, weights="imagenet"
+    )
+
+    for layer in OldModel.layers[:149]:
+        layer.trainable = False
+    for layer in OldModel.layers[149:]:
+        layer.trainable = True
+
+    model = Sequential()
+    model.add(OldModel)
+    model.add(Flatten())
+    model.add(BatchNormalization())
+    model.add(Dense(256, activation="relu"))
+    model.add(Dropout(0.7))
+    model.add(BatchNormalization())
+    model.add(Dense(128, activation="relu"))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(64, activation="relu"))
+    model.add(Dropout(0.3))
+    model.add(Dense(n_out, activation="softmax"))
+
+    model.compile(
+        optimizer=optimizers.Adam(),
+        loss="categorical_crossentropy",
+        metrics=["accuracy"],
+    )
+
+    return model
+
+
 def read_data():
     train_df = pd.read_csv(
         PREFIX + "sign_mnist_train.csv",
@@ -248,10 +283,8 @@ def create_model(mode):
     #     model = keras.applications.densenet.DenseNet121(
     #         include_top=False, weights=None, input_shape=(28, 28, 1)
     #     )
-    # elif mode == "DENSENET_PRETRAINED":
-    #     model = keras.applications.densenet.DenseNet121(
-    #         include_top=False, weights="imagenet", input_shape=(28, 28, 1)
-    #     )
+    elif mode == "DENSENET_PRETRAINED":
+        model = create_densenet_pretrained((224, 224, 3), 24)
     else:
         # throw an error to the user
         raise Exception("Invalid model type")
@@ -306,9 +339,9 @@ def execute_training(
         X_train = X[train]
         y_train = y[train]
 
-        X_train = tf.image.resize(X_train, (120, 120))
-        X_val = tf.image.resize(X_val, (120, 120))
-        X_test = tf.image.resize(X_test, (120, 120))
+        X_train = tf.image.resize(X_train, (224, 224))
+        X_val = tf.image.resize(X_val, (224, 224))
+        X_test = tf.image.resize(X_test, (224, 224))
 
         X_train = tf.image.grayscale_to_rgb(X_train)
         X_val = tf.image.grayscale_to_rgb(X_val)
