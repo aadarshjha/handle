@@ -443,7 +443,7 @@ def execute_micro_macro_metrics(
 
     # micro averaging:
     micro_precision = precision_score(
-        np.concatenate(targets_cache),
+        np.argmax(np.concatenate(targets_cache), axis=1),
         np.concatenate(predictions_cache),
         average="weighted",
     )
