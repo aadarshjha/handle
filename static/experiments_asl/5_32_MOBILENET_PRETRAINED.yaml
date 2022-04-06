@@ -1,10 +1,10 @@
 # set up the hyperparams with YAML
-EXPERIMENT_NAME: '5_32_MOBILENET_PRETRAINED'
+EXPERIMENT_NAME: '5_32_MOBILENET_PRETRAINED_FINAL'
 CONFIG: 
-  NUM_FOLDS: 5
-  EPOCHS: 10
+  NUM_FOLDS: 2
+  EPOCHS: 15
   BATCH_SIZE: 32
   VERBOSE: 'false'
   OPTIMIZER: 'adam'
-  LOSS: 'sparse_categorical_crossentropy'
+  LOSS: 'categorical_crossentropy'
   MODE: 'MOBILENET_PRETRAINED'

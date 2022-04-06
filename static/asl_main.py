@@ -9,6 +9,7 @@ import cv2
 import sys
 import yaml
 import pandas as pd
+import gc
 from sklearn.model_selection import KFold
 from sklearn.metrics import (
     accuracy_score,
@@ -42,6 +43,8 @@ from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
 from keras import backend as K
 
+tf.config.run_functions_eagerly(False)  # or True
+
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 gpus = tf.config.experimental.list_physical_devices("GPU")
 tf.config.experimental.set_memory_growth(gpus[0], True)
@@ -54,14 +57,21 @@ PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
 # custom plotting
 from plot import *
 
-dim = 120
+dim = 90
 
-loss_fn = "categorical_crossentropy"
-optimizer_algorithm = optimizers.RMSprop(learning_rate=1e-4)
-monitor_metric = ["accuracy"]
+
+# Reset Keras Session
+def reset_keras():
+    sess = K.get_session()
+    K.clear_session()
+    sess.close()
+    sess = K.get_session()
 
 
 def CNN_Model(
+    loss_fn,
+    optimizer_algorithm,
+    monitor_metric,
     input_shape=(
         300,
         300,
@@ -112,7 +122,7 @@ def CNN_Model(
     return model
 
 
-def create_resnet50(input_shape, n_out):
+def create_resnet50(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
 
     base_model = ResNet50(
         weights="imagenet", include_top=False, input_shape=input_shape
@@ -145,7 +155,7 @@ def create_resnet50(input_shape, n_out):
     return model
 
 
-def create_mobilenet(input_shape, n_out):
+def create_mobilenet(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
     base_model = MobileNet(input_shape=input_shape, include_top=False, weights=None)
     base_model.trainable = False
     model = Sequential(
@@ -162,7 +172,9 @@ def create_mobilenet(input_shape, n_out):
     return model
 
 
-def create_mobilenet_pretrained(input_shape, n_out):
+def create_mobilenet_pretrained(
+    input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric
+):
 
     base_model = MobileNet(
         input_shape=input_shape, include_top=False, weights="imagenet"
@@ -182,7 +194,9 @@ def create_mobilenet_pretrained(input_shape, n_out):
     return model
 
 
-def create_densenet_pretrained(input_shape, n_out):
+def create_densenet_pretrained(
+    input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric
+):
     OldModel = DenseNet121(
         include_top=False, input_shape=input_shape, weights="imagenet"
     )
@@ -205,9 +219,9 @@ def create_densenet_pretrained(input_shape, n_out):
     model.add(Dense(n_out, activation="softmax"))
 
     model.compile(
-        optimizer=optimizers.Adam(),
-        loss="categorical_crossentropy",
-        metrics=["accuracy"],
+        optimizer=optimizer_algorithm,
+        loss=loss_fn,
+        metrics=monitor_metric,
     )
 
     return model
@@ -270,10 +284,13 @@ def augment_data(train_df, test_df):
     return X, y, datagen
 
 
-def create_model(mode):
+def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
     model = None
     if mode == "CNN":
         model = CNN_Model(
+            loss_fn,
+            optimizer_algorithm,
+            monitor_metric,
             (
                 dim,
                 dim,
@@ -282,15 +299,27 @@ def create_model(mode):
             n_out=24,
         )
     elif mode == "RESNET_PRETRAINED":
-        model = create_resnet50((dim, dim, 3), 24)
+        model = create_resnet50(
+            (dim, dim, 3), 24, loss_fn, optimizer_algorithm, monitor_metric
+        )
     elif mode == "MOBILENET_PRETRAINED":
-        model = create_mobilenet_pretrained((dim, dim, 3), 24)
+        model = create_mobilenet_pretrained(
+            (dim, dim, 3), 24, loss_fn, optimizer_algorithm, monitor_metric
+        )
     elif mode == "DENSENET_PRETRAINED":
-        model = create_densenet_pretrained((dim, dim, 3), 24)
+        model = create_densenet_pretrained(
+            (dim, dim, 3), 24, loss_fn, optimizer_algorithm, monitor_metric
+        )
     else:
         raise Exception("Invalid model type")
 
     return model
+
+
+# def init_weight(model, weights):
+#     ## we can uncomment the line below to reshufle the weights themselves so they are not exactly the same between folds
+#     # weights = [np.random.permutation(x.flat).reshape(x.shape) for x in weights]
+#     model.set_weights(weights)
 
 
 def execute_training(
@@ -298,13 +327,13 @@ def execute_training(
     y,
     datagen,
     mode,
-    experiment_name="exper1",
-    num_folds=5,
-    epochs=10,
-    batch_size=32,
-    verbose=False,
-    optimizer="adam",
-    loss="categorical_crossentropy",
+    num_folds,
+    epochs,
+    batch_size,
+    experiment_name,
+    verbose,
+    optimizer,
+    loss,
 ):
 
     kfold = KFold(n_splits=num_folds, shuffle=True)
@@ -327,10 +356,14 @@ def execute_training(
     accuracy_history = []
     cfx_history = []
 
+    loss_fn = loss
+    optimizer_algorithm = optimizer
+    monitor_metric = ["accuracy"]
+
     # train across folds
     for train, test in kfold.split(X, y):
 
-        model = create_model(mode)
+        model = create_model(mode, loss_fn, optimizer_algorithm, monitor_metric)
 
         print("For Fold: " + str(fold_no))
         X_val, X_test, y_val, y_test = train_test_split(
@@ -358,7 +391,7 @@ def execute_training(
             validation_data=(X_val, y_val),
         )
 
-        scores = model.evaluate(X_test, y_test, verbose=verbose)
+        scores = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=verbose)
 
         # save the predictions from the model.evaluate
         y_prob = model.predict(X_test)
@@ -414,6 +447,15 @@ def execute_training(
 
         model_cache.append(model)
         K.clear_session()
+
+        del X_train
+        del X_val
+        del X_test
+        # del model
+        del history
+
+        gc.collect()
+        reset_keras()
         fold_no += 1
 
     return (
@@ -556,23 +598,23 @@ if __name__ == "__main__":
         y,
         datagen,
         hyperparameters["CONFIG"]["MODE"],
-        hyperparameters["EXPERIMENT_NAME"],
         hyperparameters["CONFIG"]["NUM_FOLDS"],
         hyperparameters["CONFIG"]["EPOCHS"],
         hyperparameters["CONFIG"]["BATCH_SIZE"],
+        hyperparameters["EXPERIMENT_NAME"],
         hyperparameters["CONFIG"]["VERBOSE"],
         hyperparameters["CONFIG"]["OPTIMIZER"],
         hyperparameters["CONFIG"]["LOSS"],
     )
 
-    # plot_training_validation(
-    #     train_loss,
-    #     train_acc,
-    #     val_loss,
-    #     val_acc,
-    #     hyperparameters["EXPERIMENT_NAME"],
-    #     PREFIX,
-    # )
+    plot_training_validation(
+        train_loss,
+        train_acc,
+        val_loss,
+        val_acc,
+        hyperparameters["EXPERIMENT_NAME"],
+        PREFIX,
+    )
 
     execute_micro_macro_metrics(
         model_cache,
