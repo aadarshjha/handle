@@ -35,10 +35,8 @@ PREFIX = "../../drive/MyDrive/handleData/"
 # custom plotting
 from plot import *
 
-
 dim_x = 90
 dim_y = 90
-
 
 # collect the data
 def read_data():
@@ -105,7 +103,7 @@ def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
 
     model.add(Flatten())
     model.add(Dense(128, activation="relu"))
-    model.add(Dense(10, activation="softmax"))
+    model.add(Dense(n_out, activation="softmax"))
 
     model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
 
