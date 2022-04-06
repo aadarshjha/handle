@@ -70,6 +70,7 @@ def augment_data(imagepaths):
 
         # Processing label in image path
         category = path.split("/")[3]
+
         label = int(
             category.split("_")[0][1]
         )  # We need to convert 10_down to 00_down, or else it crashes
@@ -91,7 +92,7 @@ def augment_data(imagepaths):
     return X, y
 
 
-def create_model(mode="CNN"):
+def create_model(mode):
 
     model = None
     if mode == "CNN":
@@ -132,14 +133,14 @@ def create_model(mode="CNN"):
 def execute_training(
     X,
     y,
-    experiment_name="exper1",
-    num_folds=5,
-    epochs=10,
-    batch_size=32,
-    verbose=False,
-    optimizer="adam",
-    loss="sparse_categorical_crossentropy",
-    mode="CNN",
+    mode,
+    num_folds,
+    epochs,
+    batch_size,
+    experiment_name,
+    verbose,
+    optimizer,
+    loss,
 ):
 
     kfold = KFold(n_splits=num_folds, shuffle=True)
@@ -165,7 +166,7 @@ def execute_training(
     # train across folds
     for train, test in kfold.split(X, y):
 
-        model = create_model()
+        model = create_model(mode)
         model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
 
         print("For Fold: " + str(fold_no))
@@ -357,6 +358,7 @@ if __name__ == "__main__":
     # if X_augmented.npy is in the current directory
     # and the file is not empty, skip this step
     if not os.path.exists("./X_augmented.npy"):
+        print("Loading data...")
         # read the data
         imagepaths = read_data()
 
@@ -364,6 +366,7 @@ if __name__ == "__main__":
         X, y = augment_data(imagepaths)
     else:
         # load the data
+        print("Loading pre-saved data...")
         X = np.load("./X_augmented.npy")
         y = np.load("./y_augmented.npy")
 
@@ -384,14 +387,14 @@ if __name__ == "__main__":
     ) = execute_training(
         X,
         y,
-        hyperparameters["EXPERIMENT_NAME"],
+        hyperparameters["CONFIG"]["MODE"],
         hyperparameters["CONFIG"]["NUM_FOLDS"],
         hyperparameters["CONFIG"]["EPOCHS"],
         hyperparameters["CONFIG"]["BATCH_SIZE"],
+        hyperparameters["EXPERIMENT_NAME"],
         hyperparameters["CONFIG"]["VERBOSE"],
         hyperparameters["CONFIG"]["OPTIMIZER"],
         hyperparameters["CONFIG"]["LOSS"],
-        hyperparameters["CONFIG"]["MODE"],
     )
 
     plot_training_validation(

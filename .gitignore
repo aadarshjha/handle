@@ -21,3 +21,4 @@ dynamic/ipn/*.log
 dynamic/kinetics/*.log
 dynamic/timesformer/*.log
 dynamic/__pycache__
+static/*.npy
