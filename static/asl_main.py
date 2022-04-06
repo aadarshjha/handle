@@ -201,7 +201,7 @@ def create_vgg16(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metri
 
     old_model.trainable = False
 
-    model = Sequential([old_model, Dense(n_out, activation="softmax")])
+    model = Sequential([old_model, Dense(n_out, activation="sigmoid")])
 
     model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
     return model
