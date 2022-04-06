@@ -182,6 +182,10 @@ class Inference:
                 print("Error reading config file")
                 exit(1)
 
+            config_dict["device"] = torch.device(
+                "cuda:0" if torch.cuda.is_available() else "cpu"
+            )
+
             config = Config(config_dict)
             model, _ = load_cnn_lstm(config, device=config.device)
 

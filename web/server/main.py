@@ -40,7 +40,15 @@ def dynamic_index():
                 }
             )
         elif mode == "lstm":
-            pass
+            clip = inferenceClass.preProcess(frames)
+            inference = inferenceClass.inference(clip)
+            print(inference)
+            return json.dumps(
+                {
+                    # "EgoGesture": {"prediction": inference[0]},
+                    # "IPN": {"prediction": inference[1]},
+                }
+            )
         elif mode == "timesformer":
             pass
         else:
