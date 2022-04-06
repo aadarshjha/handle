@@ -248,7 +248,8 @@ def create_model(mode):
         # print a summary of the model
         model.summary()
     elif mode == "MOBILENET":
-        model = create_mobilenet((32, 32, 1), 24)
+
+        model = create_mobilenet((32, 32, 3), 24)
     elif mode == "MOBILENET_PRETRAINED":
         model = create_mobilenet_pretrained((28, 28, 1), 24)
     elif mode == "DENSENET":
