@@ -1,0 +1,10 @@
+# set up the hyperparams with YAML
+EXPERIMENT_NAME: '5_32_VGG_PRETRAINED_FINAL'
+CONFIG: 
+  NUM_FOLDS: 2
+  EPOCHS: 1
+  BATCH_SIZE: 32
+  VERBOSE: 'false'
+  OPTIMIZER: 'adam'
+  LOSS: 'categorical_crossentropy'
+  MODE: 'VGG_PRETRAINED'

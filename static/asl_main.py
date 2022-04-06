@@ -41,6 +41,8 @@ from keras import Input, Model
 from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
+from keras.applications.vgg16 import VGG16
+
 from keras import backend as K
 
 tf.config.run_functions_eagerly(False)  # or True
@@ -194,6 +196,18 @@ def create_mobilenet_pretrained(
     return model
 
 
+def create_vgg16(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
+    model = VGG16(input_shape=input_shape, include_top=False, weights=None)
+
+    # 2nd layer as Dense
+    model.add(Dense(n_out, activation="softmax"))
+
+    # Say not to train first layer (ResNet) model as it is already trained
+    model.layers[0].trainable = False
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+    return model
+
+
 def create_densenet_pretrained(
     input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric
 ):
@@ -308,6 +322,10 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
         )
     elif mode == "DENSENET_PRETRAINED":
         model = create_densenet_pretrained(
+            (dim, dim, 3), 24, loss_fn, optimizer_algorithm, monitor_metric
+        )
+    elif mode == "VGG_PRETRAINED":
+        model = create_vgg16(
             (dim, dim, 3), 24, loss_fn, optimizer_algorithm, monitor_metric
         )
     else:
