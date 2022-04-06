@@ -446,16 +446,6 @@ def execute_training(
         print("\n")
 
         model_cache.append(model)
-        K.clear_session()
-
-        del X_train
-        del X_val
-        del X_test
-        # del model
-        del history
-
-        gc.collect()
-        reset_keras()
         fold_no += 1
 
     return (
