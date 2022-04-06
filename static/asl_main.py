@@ -333,6 +333,7 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
 
     return model
 
+
 def execute_training(
     X,
     y,
