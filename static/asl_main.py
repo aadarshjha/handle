@@ -25,9 +25,16 @@ import json
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
+from tensorflow.keras import optimizers
+from tensorflow.keras.layers import (
+    Dense,
+    BatchNormalization,
+    Dropout,
+    MaxPool2D,
+    Conv2D,
+    Flatten,
+)
 from sklearn.metrics import classification_report, confusion_matrix
-
 
 # os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 # gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -40,6 +47,62 @@ PREFIX = "../data/asl-mnist/"
 
 # custom plotting
 from plot import *
+
+
+loss_fn = "categorical_crossentropy"
+optimizer_algorithm = optimizers.RMSprop(learning_rate=1e-4)
+monitor_metric = ["accuracy"]
+
+
+def CNN_Model(
+    input_shape=(
+        300,
+        300,
+        3,
+    ),
+    n_out=24,
+):
+    model = Sequential()
+
+    # Convolutional layer 1
+    model.add(
+        Conv2D(
+            filters=8,
+            kernel_size=(5, 5),
+            padding="Same",
+            activation="relu",
+            input_shape=input_shape,
+        )
+    )
+    model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    # Convolutional Layer 2
+    model.add(Conv2D(filters=32, kernel_size=(3, 3), padding="Same", activation="relu"))
+    model.add(MaxPool2D(pool_size=(2, 2), strides=(2, 2)))
+    model.add(Dropout(0.25))
+
+    # Convolutional Layer 3
+    model.add(Conv2D(filters=16, kernel_size=(3, 3), padding="Same", activation="relu"))
+    model.add(MaxPool2D(pool_size=(2, 2), strides=(2, 2)))
+    model.add(Dropout(0.25))
+
+    # Convolutional Layer 4
+    model.add(Conv2D(filters=16, kernel_size=(3, 3), padding="Same", activation="relu"))
+    model.add(MaxPool2D(pool_size=(2, 2), strides=(2, 2)))
+    model.add(Dropout(0.25))
+
+    # Fully Connected Layers
+    model.add(Flatten())
+    model.add(Dense(512, activation="relu"))
+    model.add(Dropout(0.25))
+    model.add(Dense(128, activation="relu"))
+    model.add(Dropout(0.5))
+    model.add(Dense(10, activation="softmax"))
+
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+
+    return model
 
 
 def read_data():
@@ -115,37 +178,9 @@ def augment_data(train_df, test_df):
 
 
 def create_model(mode):
-
-    print(mode)
-
     model = None
     if mode == "CNN":
-        model = Sequential()
-        model.add(
-            Conv2D(
-                75,
-                (3, 3),
-                strides=1,
-                padding="same",
-                activation="relu",
-                input_shape=(28, 28, 1),
-            )
-        )
-        model.add(BatchNormalization())
-        model.add(MaxPooling2D((2, 2), strides=2, padding="same"))
-        model.add(Conv2D(50, (3, 3), strides=1, padding="same", activation="relu"))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
-        model.add(MaxPooling2D((2, 2), strides=2, padding="same"))
-        model.add(Conv2D(25, (3, 3), strides=1, padding="same", activation="relu"))
-        model.add(BatchNormalization())
-        model.add(MaxPooling2D((2, 2), strides=2, padding="same"))
-        model.add(Flatten())
-        model.add(Dense(units=512, activation="relu"))
-        model.add(Dropout(0.3))
-        model.add(Dense(units=24, activation="softmax"))
-    elif mode == "CNN_PRETRAINED":
-        pass
+        model = CNN_Model()
     elif mode == "RESNET":
         model = keras.applications.resnet.ResNet50(
             include_top=False, weights=None, input_shape=(28, 28, 1)
@@ -218,9 +253,6 @@ def execute_training(
     for train, test in kfold.split(X, y):
 
         model = create_model(mode)
-        model.compile(
-            optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
-        )
 
         print("For Fold: " + str(fold_no))
         X_val, X_test, y_val, y_test = train_test_split(
@@ -231,11 +263,18 @@ def execute_training(
         print("Validation data: ", len(X_val))
         print("Test data: ", len(X_test))
 
+        X_train = X[train]
+        y_train = y[train]
+
+        X_train = np.stack((X_train[:, :, :, 0],) * 3, axis=3)
+        X_val = np.stack((X_val[:, :, :, 0],) * 3, axis=3)
+        X_test = np.stack((X_test[:, :, :, 0],) * 3, axis=3)
+
         # fit the training data for the datagen
         datagen.fit(X[train])
 
         history = model.fit(
-            datagen.flow(X[train], y[train], batch_size=batch_size),
+            datagen.flow(X_train, y_train, batch_size=batch_size),
             epochs=epochs,
             verbose=verbose,
             validation_data=(X_val, y_val),
