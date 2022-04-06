@@ -40,6 +40,7 @@ from keras import Input, Model
 from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
+from keras import backend as K
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -48,7 +49,7 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 DRIVE = False
 
-# PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
+PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
 
 # custom plotting
 from plot import *
@@ -412,7 +413,7 @@ def execute_training(
         print("\n")
 
         model_cache.append(model)
-
+        K.clear_session()
         fold_no += 1
 
     return (
