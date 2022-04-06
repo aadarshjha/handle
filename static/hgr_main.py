@@ -129,6 +129,39 @@ def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
     return model
 
 
+def create_densenet_pretrained(
+    input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric
+):
+    OldModel = DenseNet121(
+        include_top=False, input_shape=input_shape, weights="imagenet"
+    )
+
+    for layer in OldModel.layers[:149]:
+        layer.trainable = False
+    for layer in OldModel.layers[149:]:
+        layer.trainable = True
+
+    model = Sequential()
+    model.add(OldModel)
+    model.add(Flatten())
+    model.add(BatchNormalization())
+    model.add(Dense(128, activation="relu"))
+    model.add(Dropout(0.7))
+    model.add(BatchNormalization())
+    model.add(Dense(64, activation="relu"))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(n_out, activation="softmax"))
+
+    model.compile(
+        optimizer=optimizer_algorithm,
+        loss=loss_fn,
+        metrics=monitor_metric,
+    )
+
+    return model
+
+
 def create_vgg16(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
     old_model = VGG16(
         input_shape=input_shape, include_top=False, weights="imagenet", pooling="avg"
@@ -186,8 +219,12 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
         )
 
     elif mode == "DENSENET_PRETRAINED":
-        model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
+        model = create_densenet_pretrained(
+            loss_fn=loss_fn,
+            optimizer_algorithm=optimizer_algorithm,
+            monitor_metric=monitor_metric,
+            input_shape=(dim_y, dim_x, 3),
+            n_out=10,
         )
     elif mode == "VGG_PRETRAINED":
         model = create_vgg16(
