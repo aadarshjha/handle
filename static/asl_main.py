@@ -54,6 +54,27 @@ optimizer_algorithm = optimizers.RMSprop(learning_rate=1e-4)
 monitor_metric = ["accuracy"]
 
 
+# def create_mobilenet(input_shape, n_out):
+
+#     base_model = MobileNet(
+#         input_shape=input_shape, include_top=False, weights="imagenet"
+#     )
+#     base_model.trainable = False
+#     model = Sequential(
+#         [
+#             base_model,
+#             GlobalAveragePooling2D(),
+#             Dense(20, activation="relu"),
+#             Dropout(0.4),
+#             Dense(10, activation="relu"),
+#             Dropout(0.3),
+#             Dense(n_out, activation="sigmoid"),
+#         ]
+#     )
+#     model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+#     return model
+
+
 def CNN_Model(
     input_shape=(
         300,
@@ -98,7 +119,7 @@ def CNN_Model(
     model.add(Dropout(0.25))
     model.add(Dense(128, activation="relu"))
     model.add(Dropout(0.5))
-    model.add(Dense(10, activation="softmax"))
+    model.add(Dense(n_out, activation="softmax"))
 
     model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
 
@@ -141,31 +162,16 @@ def augment_data(train_df, test_df):
     x_train = x_train.reshape(-1, 28, 28, 1)
     x_test = x_test.reshape(-1, 28, 28, 1)
 
-    # X_test = []
-
-    # for element in x_train:
-    #     print(element[0])
-    #     print(element.shape)
-    #     break
-    # return None
-
-    # print(len(x_train))
-    # print(x_train[0].shape)
-
     # data augmentation
     datagen = ImageDataGenerator(
-        featurewise_center=False,  # set input mean to 0 over the dataset
-        samplewise_center=False,  # set each sample mean to 0
-        featurewise_std_normalization=False,  # divide inputs by std of the dataset
-        samplewise_std_normalization=False,  # divide each input by its std
-        zca_whitening=False,  # apply ZCA whitening
-        rotation_range=10,  # randomly rotate images in the range (degrees, 0 to 180)
-        zoom_range=0.1,  # Randomly zoom image
-        width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-        height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
-        horizontal_flip=False,  # randomly flip images
+        fill_mode="nearest",
+        rotation_range=10,
+        zoom_range=0.1,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        horizontal_flip=False,
         vertical_flip=False,
-    )  # randomly flip images
+    )
 
     # combine the x_trrarin and x_test
     X = np.concatenate((x_train, x_test))
@@ -180,7 +186,14 @@ def augment_data(train_df, test_df):
 def create_model(mode):
     model = None
     if mode == "CNN":
-        model = CNN_Model()
+        model = CNN_Model(
+            (
+                28,
+                28,
+                3,
+            ),
+            n_out=24,
+        )
     elif mode == "RESNET":
         model = keras.applications.resnet.ResNet50(
             include_top=False, weights=None, input_shape=(28, 28, 1)
@@ -259,10 +272,6 @@ def execute_training(
             X[test], y[test], test_size=0.5, random_state=42
         )
 
-        print("Training data: ", len(X[train]))
-        print("Validation data: ", len(X_val))
-        print("Test data: ", len(X_test))
-
         X_train = X[train]
         y_train = y[train]
 
@@ -279,7 +288,8 @@ def execute_training(
             verbose=verbose,
             validation_data=(X_val, y_val),
         )
-        scores = model.evaluate(X[test], y[test], verbose=verbose)
+
+        scores = model.evaluate(X_test, y_test, verbose=verbose)
 
         # save the predictions from the model.evaluate
         y_prob = model.predict(X_test)
