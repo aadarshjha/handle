@@ -28,15 +28,15 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras import optimizers
 from tensorflow.keras.layers import (
     Dense,
-    BatchNormalization,
     Dropout,
     MaxPool2D,
     Conv2D,
     Flatten,
 )
-from sklearn.metrics import classification_report, confusion_matrix
-
+from sklearn.metrics import confusion_matrix
+from keras import Input, Model
 from keras.applications.mobilenet import MobileNet
+from keras.applications.resnet import ResNet50
 
 # os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 # gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -56,24 +56,30 @@ optimizer_algorithm = optimizers.RMSprop(learning_rate=1e-4)
 monitor_metric = ["accuracy"]
 
 
-# def create_mobilenet(input_shape, n_out):
+# def create_resnet50(input_shape, n_out):
+#     input_tensor = Input(shape=input_shape)
+#     base_model = ResNet50(
+#         weights=None, include_top=False, input_tensor=input_tensor
+#     )
 
-#     base_model = MobileNet(
-#         input_shape=input_shape, include_top=False, weights="imagenet"
+#     x = GlobalAveragePooling2D()(base_model.output)
+#     x = Dropout(0.5)(x)
+#     x = Dense(2048, activation="relu")(x)
+#     x = Dropout(0.5)(x)
+#     final_output = Dense(n_out, activation="softmax", name="final_output")(x)
+#     model = Model(input_tensor, final_output)
+
+#     for layer in model.layers:
+#         layer.trainable = False
+
+#     for i in range(-5, 0):
+#         model.layers[i].trainable = True
+
+#     # optimizer = optimizers.Adam(lr=WARMUP_LEARNING_RATE)
+#     model.compile(
+#         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
 #     )
-#     base_model.trainable = False
-#     model = Sequential(
-#         [
-#             base_model,
-#             GlobalAveragePooling2D(),
-#             Dense(20, activation="relu"),
-#             Dropout(0.4),
-#             Dense(10, activation="relu"),
-#             Dropout(0.3),
-#             Dense(n_out, activation="sigmoid"),
-#         ]
-#     )
-#     model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+
 #     return model
 
 
@@ -128,18 +134,43 @@ def CNN_Model(
     return model
 
 
-def create_mobilenet(input_shape, n_out):
+def create_resnet50(input_shape, n_out):
+    input_tensor = Input(shape=input_shape)
+    base_model = ResNet50(
+        weights="imagenet", include_top=False, input_tensor=input_tensor
+    )
 
+    x = GlobalAveragePooling2D()(base_model.output)
+    x = Dropout(0.5)(x)
+    x = Dense(2048, activation="relu")(x)
+    x = Dropout(0.5)(x)
+    final_output = Dense(n_out, activation="softmax", name="final_output")(x)
+    model = Model(input_tensor, final_output)
+
+    for layer in model.layers:
+        layer.trainable = False
+
+    for i in range(-5, 0):
+        model.layers[i].trainable = True
+
+    # optimizer = optimizers.Adam(lr=WARMUP_LEARNING_RATE)
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
+
+    return model
+
+
+def create_mobilenet(input_shape, n_out):
     base_model = MobileNet(input_shape=input_shape, include_top=False, weights=None)
     base_model.trainable = False
     model = Sequential(
         [
             base_model,
             GlobalAveragePooling2D(),
-            Dense(20, activation="relu"),
-            Dropout(0.4),
-            Dense(10, activation="relu"),
-            Dropout(0.3),
+            Dense(1024, activation="relu"),
+            Dense(1024, activation="relu"),
+            Dense(512, activation="relu"),
             Dense(n_out, activation="sigmoid"),
         ]
     )
@@ -157,10 +188,9 @@ def create_mobilenet_pretrained(input_shape, n_out):
         [
             base_model,
             GlobalAveragePooling2D(),
-            Dense(20, activation="relu"),
-            Dropout(0.4),
-            Dense(10, activation="relu"),
-            Dropout(0.3),
+            Dense(1024, activation="relu"),
+            Dense(1024, activation="relu"),
+            Dense(512, activation="relu"),
             Dense(n_out, activation="sigmoid"),
         ]
     )
@@ -230,39 +260,30 @@ def create_model(mode):
     if mode == "CNN":
         model = CNN_Model(
             (
-                28,
-                28,
+                32,
+                32,
                 3,
             ),
             n_out=24,
         )
-    elif mode == "RESNET":
-        model = keras.applications.resnet.ResNet50(
-            include_top=False, weights=None, input_shape=(28, 28, 1)
-        )
-        model.summary()
+    # elif mode == "RESNET":
+    #     model = keras.applications.resnet.ResNet50(
+    #         include_top=False, weights=None, input_shape=(28, 28, 1)
+    #     )
     elif mode == "RESNET_PRETRAINED":
-        model = keras.applications.resnet.ResNet50(
-            include_top=False, weights="imagenet", input_shape=(28, 28, 1)
-        )
-        # print a summary of the model
-        model.summary()
+        model = create_resnet50((120, 120, 3), 24)
     elif mode == "MOBILENET":
-        model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights=None, input_shape=(28, 28, 1)
-        )
+        model = create_mobilenet((32, 32, 3), 24)
     elif mode == "MOBILENET_PRETRAINED":
-        model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights="imagenet", input_shape=(28, 28, 1)
-        )
-    elif mode == "DENSENET":
-        model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights=None, input_shape=(28, 28, 1)
-        )
-    elif mode == "DENSENET_PRETRAINED":
-        model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights="imagenet", input_shape=(28, 28, 1)
-        )
+        model = create_mobilenet_pretrained((32, 32, 3), 24)
+    # elif mode == "DENSENET":
+    #     model = keras.applications.densenet.DenseNet121(
+    #         include_top=False, weights=None, input_shape=(28, 28, 1)
+    #     )
+    # elif mode == "DENSENET_PRETRAINED":
+    #     model = keras.applications.densenet.DenseNet121(
+    #         include_top=False, weights="imagenet", input_shape=(28, 28, 1)
+    #     )
     else:
         # throw an error to the user
         raise Exception("Invalid model type")
@@ -317,12 +338,16 @@ def execute_training(
         X_train = X[train]
         y_train = y[train]
 
-        X_train = np.stack((X_train[:, :, :, 0],) * 3, axis=3)
-        X_val = np.stack((X_val[:, :, :, 0],) * 3, axis=3)
-        X_test = np.stack((X_test[:, :, :, 0],) * 3, axis=3)
+        X_train = tf.image.resize(X_train, (120, 120))
+        X_val = tf.image.resize(X_val, (120, 120))
+        X_test = tf.image.resize(X_test, (120, 120))
+
+        X_train = tf.image.grayscale_to_rgb(X_train)
+        X_val = tf.image.grayscale_to_rgb(X_val)
+        X_test = tf.image.grayscale_to_rgb(X_test)
 
         # fit the training data for the datagen
-        datagen.fit(X[train])
+        datagen.fit(X_train)
 
         history = model.fit(
             datagen.flow(X_train, y_train, batch_size=batch_size),
