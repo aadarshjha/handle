@@ -41,7 +41,7 @@ from keras import Input, Model
 from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
-from keras.applications import VGG16
+from keras.applications.vgg16 import VGG16
 
 from keras import backend as K
 
