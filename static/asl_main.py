@@ -333,13 +333,6 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
 
     return model
 
-
-# def init_weight(model, weights):
-#     ## we can uncomment the line below to reshufle the weights themselves so they are not exactly the same between folds
-#     # weights = [np.random.permutation(x.flat).reshape(x.shape) for x in weights]
-#     model.set_weights(weights)
-
-
 def execute_training(
     X,
     y,

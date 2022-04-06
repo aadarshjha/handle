@@ -36,8 +36,8 @@ PREFIX = "../../drive/MyDrive/handleData/"
 from plot import *
 
 
-dim_x = 320
-dim_y = 120
+dim_x = 90
+dim_y = 90
 
 
 # collect the data
@@ -92,23 +92,37 @@ def augment_data(imagepaths):
     return X, y
 
 
-def create_model(mode):
+def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
+    model = Sequential()
+    model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(dim_y, dim_x, 1)))
+    model.add(MaxPooling2D((2, 2)))
+
+    model.add(Conv2D(64, (3, 3), activation="relu"))
+    model.add(MaxPooling2D((2, 2)))
+
+    model.add(Conv2D(64, (3, 3), activation="relu"))
+    model.add(MaxPooling2D((2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(128, activation="relu"))
+    model.add(Dense(10, activation="softmax"))
+
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+
+    return model
+
+
+def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
 
     model = None
     if mode == "CNN":
-        model = Sequential()
-        model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(dim_y, dim_x, 1)))
-        model.add(MaxPooling2D((2, 2)))
-
-        model.add(Conv2D(64, (3, 3), activation="relu"))
-        model.add(MaxPooling2D((2, 2)))
-
-        model.add(Conv2D(64, (3, 3), activation="relu"))
-        model.add(MaxPooling2D((2, 2)))
-
-        model.add(Flatten())
-        model.add(Dense(128, activation="relu"))
-        model.add(Dense(10, activation="softmax"))
+        model = CNN_Model(
+            loss_fn=loss_fn,
+            optimizer_algorithm=optimizer_algorithm,
+            monitor_metric=monitor_metric,
+            input_shape=(dim_y, dim_x, 1),
+            n_out=10,
+        )
     elif mode == "RESNET_PRETRAINED":
         model = keras.applications.resnet.ResNet50(
             include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
@@ -163,16 +177,30 @@ def execute_training(
     accuracy_history = []
     cfx_history = []
 
+    loss_fn = loss
+    optimizer_algorithm = optimizer
+    monitor_metric = ["accuracy"]
+
     # train across folds
     for train, test in kfold.split(X, y):
 
-        model = create_model(mode)
-        model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
+        model = create_model(mode, loss_fn, optimizer_algorithm, monitor_metric)
 
         print("For Fold: " + str(fold_no))
         X_val, X_test, y_val, y_test = train_test_split(
             X[test], y[test], test_size=0.5, random_state=42
         )
+
+        X_train = X[train]
+        y_train = y[train]
+
+        X_train = tf.image.resize(X_train, (dim_x, dim_y))
+        X_val = tf.image.resize(X_val, (dim_x, dim_y))
+        X_test = tf.image.resize(X_test, (dim_x, dim_y))
+
+        X_train = tf.image.grayscale_to_rgb(X_train)
+        X_val = tf.image.grayscale_to_rgb(X_val)
+        X_test = tf.image.grayscale_to_rgb(X_test)
 
         history = model.fit(
             X[train],
@@ -370,52 +398,52 @@ if __name__ == "__main__":
         X = np.load("./X_augmented.npy")
         y = np.load("./y_augmented.npy")
 
-    print(X.shape)
-    print(X[0].shape)
+        print(X.shape)
+        print(X[0].shape)
 
-    # execute the training pipeline
-    (
-        model_cache,
-        train_loss,
-        train_acc,
-        val_loss,
-        val_acc,
-        predictions_cache,
-        targets_cache,
-        precision_history,
-        recall_history,
-        f1_history,
-        accuracy_history,
-        cfx_history,
-    ) = execute_training(
-        X,
-        y,
-        hyperparameters["CONFIG"]["MODE"],
-        hyperparameters["CONFIG"]["NUM_FOLDS"],
-        hyperparameters["CONFIG"]["EPOCHS"],
-        hyperparameters["CONFIG"]["BATCH_SIZE"],
-        hyperparameters["EXPERIMENT_NAME"],
-        hyperparameters["CONFIG"]["VERBOSE"],
-        hyperparameters["CONFIG"]["OPTIMIZER"],
-        hyperparameters["CONFIG"]["LOSS"],
-    )
+        # execute the training pipeline
+        (
+            model_cache,
+            train_loss,
+            train_acc,
+            val_loss,
+            val_acc,
+            predictions_cache,
+            targets_cache,
+            precision_history,
+            recall_history,
+            f1_history,
+            accuracy_history,
+            cfx_history,
+        ) = execute_training(
+            X,
+            y,
+            hyperparameters["CONFIG"]["MODE"],
+            hyperparameters["CONFIG"]["NUM_FOLDS"],
+            hyperparameters["CONFIG"]["EPOCHS"],
+            hyperparameters["CONFIG"]["BATCH_SIZE"],
+            hyperparameters["EXPERIMENT_NAME"],
+            hyperparameters["CONFIG"]["VERBOSE"],
+            hyperparameters["CONFIG"]["OPTIMIZER"],
+            hyperparameters["CONFIG"]["LOSS"],
+        )
 
-    plot_training_validation(
-        train_loss,
-        train_acc,
-        val_loss,
-        val_acc,
-        hyperparameters["EXPERIMENT_NAME"],
-        PREFIX,
-    )
-    execute_micro_macro_metrics(
-        model_cache,
-        predictions_cache,
-        targets_cache,
-        precision_history,
-        recall_history,
-        f1_history,
-        accuracy_history,
-        cfx_history,
-        hyperparameters["EXPERIMENT_NAME"],
-    )
+        plot_training_validation(
+            train_loss,
+            train_acc,
+            val_loss,
+            val_acc,
+            hyperparameters["EXPERIMENT_NAME"],
+            PREFIX,
+        )
+        execute_micro_macro_metrics(
+            model_cache,
+            predictions_cache,
+            targets_cache,
+            precision_history,
+            recall_history,
+            f1_history,
+            accuracy_history,
+            cfx_history,
+            hyperparameters["EXPERIMENT_NAME"],
+        )
