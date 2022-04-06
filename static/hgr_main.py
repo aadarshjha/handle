@@ -94,7 +94,7 @@ def augment_data(imagepaths):
 
 def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
     model = Sequential()
-    model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(dim_y, dim_x, 1)))
+    model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(dim_y, dim_x, 3)))
     model.add(MaxPooling2D((2, 2)))
 
     model.add(Conv2D(64, (3, 3), activation="relu"))
@@ -203,14 +203,14 @@ def execute_training(
         X_test = tf.image.grayscale_to_rgb(X_test)
 
         history = model.fit(
-            X[train],
-            y[train],
+            X_train,
+            y_train,
             batch_size=batch_size,
             epochs=epochs,
-            verbose=verbose,
+            verbose=1,
             validation_data=(X_val, y_val),
         )
-        scores = model.evaluate(X[test], y[test], verbose=verbose)
+        scores = model.evaluate(X_test, y_test, verbose=verbose)
 
         # save the predictions from the model.evaluate
         y_prob = model.predict(X_test)
@@ -395,8 +395,8 @@ if __name__ == "__main__":
     else:
         # load the data
         print("Loading pre-saved data...")
-        X = np.load("./X_augmented.npy")
-        y = np.load("./y_augmented.npy")
+        X = np.load("../../drive/MyDrive/X_augmented.npy")
+        y = np.load("../../drive/MyDrive/y_augmented.npy")
 
         print(X.shape)
         print(X[0].shape)
