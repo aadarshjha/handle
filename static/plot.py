@@ -49,7 +49,7 @@ def plot_training_validation(
     axs[1, 1].set_xlabel("Epoch")
     axs[1, 1].set_ylabel("Loss")
 
-    remove the subplot at the bottom right
+    # remove the subplot at the bottom right
     fig.delaxes(axs[1, 2])
 
     # increase the spacing between subplots
@@ -109,7 +109,7 @@ def plot_training_validation(
     axs[1, 1].set_xlabel("Epoch")
     axs[1, 1].set_xlabel("Accuracy")
 
-    remove the subplot at the bottom right
+    # remove the subplot at the bottom right
     fig.delaxes(axs[1, 2])
 
     # increase the spacing between subplots
