@@ -1,5 +1,6 @@
 import os
 from pickle import NONE
+from telnetlib import SE
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
@@ -108,29 +109,23 @@ def CNN_Model(
 
 
 def create_resnet50(input_shape, n_out):
-    input_tensor = Input(shape=input_shape)
+
     base_model = ResNet50(
-        weights="imagenet", include_top=False, input_tensor=input_tensor
+        weights="imagenet", include_top=False, input_shape=input_shape
     )
 
-    x = GlobalAveragePooling2D()(base_model.output)
-    x = Dropout(0.5)(x)
-    x = Dense(2048, activation="relu")(x)
-    x = Dropout(0.5)(x)
-    final_output = Dense(n_out, activation="softmax", name="final_output")(x)
-    model = Model(input_tensor, final_output)
-
-    for layer in model.layers:
-        layer.trainable = False
-
-    for i in range(-5, 0):
-        model.layers[i].trainable = True
-
-    # optimizer = optimizers.Adam(lr=WARMUP_LEARNING_RATE)
-    model.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    model = Sequential(
+        [
+            base_model,
+            GlobalAveragePooling2D(),
+            Dropout(0.5),
+            Dense(2048, activation="relu"),
+            Dropout(0.5),
+            Dense(n_out, activation="softmax"),
+        ]
     )
 
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
     return model
 
 
@@ -233,8 +228,8 @@ def create_model(mode):
     if mode == "CNN":
         model = CNN_Model(
             (
-                32,
-                32,
+                120,
+                120,
                 3,
             ),
             n_out=24,
@@ -245,10 +240,10 @@ def create_model(mode):
     #     )
     elif mode == "RESNET_PRETRAINED":
         model = create_resnet50((120, 120, 3), 24)
-    elif mode == "MOBILENET":
-        model = create_mobilenet((32, 32, 3), 24)
+    # elif mode == "MOBILENET":
+    #     model = create_mobilenet((120, 120, 3), 24)
     elif mode == "MOBILENET_PRETRAINED":
-        model = create_mobilenet_pretrained((32, 32, 3), 24)
+        model = create_mobilenet_pretrained((120, 120, 3), 24)
     # elif mode == "DENSENET":
     #     model = keras.applications.densenet.DenseNet121(
     #         include_top=False, weights=None, input_shape=(28, 28, 1)
@@ -325,7 +320,7 @@ def execute_training(
         history = model.fit(
             datagen.flow(X_train, y_train, batch_size=batch_size),
             epochs=epochs,
-            verbose=verbose,
+            verbose=1,
             validation_data=(X_val, y_val),
         )
 
