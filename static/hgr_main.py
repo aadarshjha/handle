@@ -43,10 +43,10 @@ from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
 from keras.applications.vgg16 import VGG16
 
-# os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
-# gpus = tf.config.experimental.list_physical_devices("GPU")
-# tf.config.experimental.set_memory_growth(gpus[0], True)
-# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+gpus = tf.config.experimental.list_physical_devices("GPU")
+tf.config.experimental.set_memory_growth(gpus[0], True)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 PREFIX = "../../drive/MyDrive/handleData/"
 # PREFIX = "../leapGestRecog/"
@@ -130,7 +130,9 @@ def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
 
 
 def create_mobilenet(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
-    base_model = MobileNet(input_shape=input_shape, include_top=False, weights=None)
+    base_model = MobileNet(
+        input_shape=input_shape, include_top=False, weights="imagenet"
+    )
     base_model.trainable = False
     model = Sequential(
         [
