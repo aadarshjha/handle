@@ -61,7 +61,6 @@ from plot import *
 
 dim = 90
 
-
 # Reset Keras Session
 def reset_keras():
     sess = K.get_session()

@@ -22,15 +22,23 @@ from keras.layers import Dense, Flatten
 import json
 from sklearn.model_selection import train_test_split
 
-os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
-gpus = tf.config.experimental.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(gpus[0], True)
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+from PIL import Image
+
+# os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+# gpus = tf.config.experimental.list_physical_devices("GPU")
+# tf.config.experimental.set_memory_growth(gpus[0], True)
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 PREFIX = "../../drive/MyDrive/handleData/"
+# PREFIX = "../leapGestRecog/"
 
 # custom plotting
 from plot import *
+
+
+dim_X = 320
+dim_Y = 120
+
 
 # collect the data
 def read_data():
@@ -53,11 +61,11 @@ def augment_data(imagepaths):
 
     # Loops through imagepaths to load images and labels into arrays
     for path in imagepaths:
-        img = cv2.imread(path)  # Reads image and returns np.array
-        img = cv2.cvtColor(
-            img, cv2.COLOR_BGR2GRAY
-        )  # Converts into the corret colorspace (GRAY)
-        img = cv2.resize(img, (320, 120))  # Reduce image size so training can be faster
+
+        # opene image with PIL
+        img = Image.open(path).convert("L")
+        img = img.resize((320, 120))
+        img = np.array(img)
         X.append(img)
 
         # Processing label in image path
@@ -67,12 +75,18 @@ def augment_data(imagepaths):
         )  # We need to convert 10_down to 00_down, or else it crashes
         y.append(label)
 
-    X = np.array(X, dtype="uint8")
+    X = np.array(X, dtype="float32")
     X = X.reshape(len(imagepaths), 120, 320, 1)
+    print(X.shape)
     y = np.array(y)
 
     print("Images loaded: ", len(X))
     print("Labels loaded: ", len(y))
+
+    # cache X and y
+    print("Caching data...")
+    np.save("X_augmented.npy", X)
+    np.save("y_augmented.npy", y)
 
     return X, y
 
@@ -94,32 +108,20 @@ def create_model(mode="CNN"):
         model.add(Flatten())
         model.add(Dense(128, activation="relu"))
         model.add(Dense(10, activation="softmax"))
-    elif mode == "CNN_PRETRAINED":
-        pass
-    elif mode == "RESNET":
-        model = keras.applications.resnet.ResNet50(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
-        )
     elif mode == "RESNET_PRETRAINED":
         model = keras.applications.resnet.ResNet50(
             include_top=False, weights="imagenet", input_shape=(120, 320, 1)
-        )
-    elif mode == "MOBILENET":
-        model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
         )
     elif mode == "MOBILENET_PRETRAINED":
         model = keras.applications.mobilenet.MobileNet(
             include_top=False, weights="imagenet", input_shape=(120, 320, 1)
         )
-    elif mode == "DENSENET":
-        model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
-        )
     elif mode == "DENSENET_PRETRAINED":
         model = keras.applications.densenet.DenseNet121(
             include_top=False, weights="imagenet", input_shape=(120, 320, 1)
         )
+    elif mode == "VGG16_PRETRAINED":
+        pass
     else:
         # throw an error to the user
         raise Exception("Invalid model type")
@@ -347,11 +349,23 @@ if __name__ == "__main__":
     if not os.path.exists(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"]):
         os.makedirs(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"])
 
-    # read the data
-    imagepaths = read_data()
+    # taking this precaution becuase the data takes a while to load.
 
-    # finalize data
-    X, y = augment_data(imagepaths)
+    X = None
+    y = None
+
+    # if X_augmented.npy is in the current directory
+    # and the file is not empty, skip this step
+    if not os.path.exists("./X_augmented.npy"):
+        # read the data
+        imagepaths = read_data()
+
+        # finalize data
+        X, y = augment_data(imagepaths)
+    else:
+        # load the data
+        X = np.load("./X_augmented.npy")
+        y = np.load("./y_augmented.npy")
 
     # execute the training pipeline
     (
