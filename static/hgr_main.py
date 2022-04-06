@@ -189,7 +189,7 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
         model = keras.applications.densenet.DenseNet121(
             include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
         )
-    elif mode == "VGG16_PRETRAINED":
+    elif mode == "VGG_PRETRAINED":
         model = create_vgg16(
             loss_fn=loss_fn,
             optimizer_algorithm=optimizer_algorithm,
