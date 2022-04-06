@@ -230,8 +230,8 @@ def create_model(mode):
     if mode == "CNN":
         model = CNN_Model(
             (
-                28,
-                28,
+                32,
+                32,
                 3,
             ),
             n_out=24,
@@ -248,13 +248,9 @@ def create_model(mode):
         # print a summary of the model
         model.summary()
     elif mode == "MOBILENET":
-        model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights=None, input_shape=(28, 28, 1)
-        )
+        model = create_mobilenet((32, 32, 1), 24)
     elif mode == "MOBILENET_PRETRAINED":
-        model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights="imagenet", input_shape=(28, 28, 1)
-        )
+        model = create_mobilenet_pretrained((28, 28, 1), 24)
     elif mode == "DENSENET":
         model = keras.applications.densenet.DenseNet121(
             include_top=False, weights=None, input_shape=(28, 28, 1)
@@ -317,12 +313,16 @@ def execute_training(
         X_train = X[train]
         y_train = y[train]
 
-        X_train = np.stack((X_train[:, :, :, 0],) * 3, axis=3)
-        X_val = np.stack((X_val[:, :, :, 0],) * 3, axis=3)
-        X_test = np.stack((X_test[:, :, :, 0],) * 3, axis=3)
+        X_train = tf.image.resize(X_train, (32, 32))
+        X_val = tf.image.resize(X_val, (32, 32))
+        X_test = tf.image.resize(X_test, (32, 32))
+
+        X_train = tf.image.grayscale_to_rgb(X_train)
+        X_val = tf.image.grayscale_to_rgb(X_val)
+        X_test = tf.image.grayscale_to_rgb(X_test)
 
         # fit the training data for the datagen
-        datagen.fit(X[train])
+        datagen.fit(X_train)
 
         history = model.fit(
             datagen.flow(X_train, y_train, batch_size=batch_size),
