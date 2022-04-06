@@ -41,18 +41,19 @@ from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
 
-# os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
-# gpus = tf.config.experimental.list_physical_devices("GPU")
-# tf.config.experimental.set_memory_growth(gpus[0], True)
-# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+gpus = tf.config.experimental.list_physical_devices("GPU")
+tf.config.experimental.set_memory_growth(gpus[0], True)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 DRIVE = False
 
-PREFIX = "../data/asl-mnist/"
+# PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
 
 # custom plotting
 from plot import *
 
+dim = 120
 
 loss_fn = "categorical_crossentropy"
 optimizer_algorithm = optimizers.RMSprop(learning_rate=1e-4)
@@ -115,19 +116,31 @@ def create_resnet50(input_shape, n_out):
     base_model = ResNet50(
         weights="imagenet", include_top=False, input_shape=input_shape
     )
-    base_model.trainable = False
-    model = Sequential(
-        [
-            base_model,
-            GlobalAveragePooling2D(),
-            Dropout(0.5),
-            Dense(2048, activation="relu"),
-            Dropout(0.5),
-            Dense(n_out, activation="softmax"),
-        ]
-    )
 
-    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+    for layer in base_model.layers[:143]:
+        layer.trainable = False
+
+    model = Sequential()
+    model.add(base_model)
+    model.add(Flatten())
+    model.add(BatchNormalization())
+    model.add(Dense(256, activation="relu"))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(128, activation="relu"))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(64, activation="relu"))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(64, activation="relu"))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(n_out, activation="softmax"))
+
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
     return model
 
 
@@ -182,14 +195,12 @@ def create_densenet_pretrained(input_shape, n_out):
     model.add(OldModel)
     model.add(Flatten())
     model.add(BatchNormalization())
-    model.add(Dense(256, activation="relu"))
+    model.add(Dense(128, activation="relu"))
     model.add(Dropout(0.7))
     model.add(BatchNormalization())
-    model.add(Dense(128, activation="relu"))
+    model.add(Dense(64, activation="relu"))
     model.add(Dropout(0.5))
     model.add(BatchNormalization())
-    model.add(Dense(64, activation="relu"))
-    model.add(Dropout(0.3))
     model.add(Dense(n_out, activation="softmax"))
 
     model.compile(
@@ -263,30 +274,19 @@ def create_model(mode):
     if mode == "CNN":
         model = CNN_Model(
             (
-                120,
-                120,
+                dim,
+                dim,
                 3,
             ),
             n_out=24,
         )
-    # elif mode == "RESNET":
-    #     model = keras.applications.resnet.ResNet50(
-    #         include_top=False, weights=None, input_shape=(28, 28, 1)
-    #     )
     elif mode == "RESNET_PRETRAINED":
-        model = create_resnet50((120, 120, 3), 24)
-    # elif mode == "MOBILENET":
-    #     model = create_mobilenet((120, 120, 3), 24)
+        model = create_resnet50((dim, dim, 3), 24)
     elif mode == "MOBILENET_PRETRAINED":
-        model = create_mobilenet_pretrained((120, 120, 3), 24)
-    # elif mode == "DENSENET":
-    #     model = keras.applications.densenet.DenseNet121(
-    #         include_top=False, weights=None, input_shape=(28, 28, 1)
-    #     )
+        model = create_mobilenet_pretrained((dim, dim, 3), 24)
     elif mode == "DENSENET_PRETRAINED":
-        model = create_densenet_pretrained((224, 224, 3), 24)
+        model = create_densenet_pretrained((dim, dim, 3), 24)
     else:
-        # throw an error to the user
         raise Exception("Invalid model type")
 
     return model
@@ -339,9 +339,9 @@ def execute_training(
         X_train = X[train]
         y_train = y[train]
 
-        X_train = tf.image.resize(X_train, (224, 224))
-        X_val = tf.image.resize(X_val, (224, 224))
-        X_test = tf.image.resize(X_test, (224, 224))
+        X_train = tf.image.resize(X_train, (dim, dim))
+        X_val = tf.image.resize(X_val, (dim, dim))
+        X_test = tf.image.resize(X_test, (dim, dim))
 
         X_train = tf.image.grayscale_to_rgb(X_train)
         X_val = tf.image.grayscale_to_rgb(X_val)
