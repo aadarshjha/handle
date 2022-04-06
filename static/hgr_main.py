@@ -36,8 +36,8 @@ PREFIX = "../../drive/MyDrive/handleData/"
 from plot import *
 
 
-dim_X = 320
-dim_Y = 120
+dim_x = 320
+dim_y = 120
 
 
 # collect the data
@@ -64,7 +64,7 @@ def augment_data(imagepaths):
 
         # opene image with PIL
         img = Image.open(path).convert("L")
-        img = img.resize((320, 120))
+        img = img.resize((dim_x, dim_y))
         img = np.array(img)
         X.append(img)
 
@@ -77,7 +77,7 @@ def augment_data(imagepaths):
         y.append(label)
 
     X = np.array(X, dtype="float32")
-    X = X.reshape(len(imagepaths), 120, 320, 1)
+    X = X.reshape(len(imagepaths), dim_y, dim_x, 1)
     print(X.shape)
     y = np.array(y)
 
@@ -97,7 +97,7 @@ def create_model(mode):
     model = None
     if mode == "CNN":
         model = Sequential()
-        model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(120, 320, 1)))
+        model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(dim_y, dim_x, 1)))
         model.add(MaxPooling2D((2, 2)))
 
         model.add(Conv2D(64, (3, 3), activation="relu"))
@@ -111,15 +111,15 @@ def create_model(mode):
         model.add(Dense(10, activation="softmax"))
     elif mode == "RESNET_PRETRAINED":
         model = keras.applications.resnet.ResNet50(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
+            include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
         )
     elif mode == "MOBILENET_PRETRAINED":
         model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
+            include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
         )
     elif mode == "DENSENET_PRETRAINED":
         model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
+            include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
         )
     elif mode == "VGG16_PRETRAINED":
         pass
@@ -369,6 +369,9 @@ if __name__ == "__main__":
         print("Loading pre-saved data...")
         X = np.load("./X_augmented.npy")
         y = np.load("./y_augmented.npy")
+
+    print(X.shape)
+    print(X[0].shape)
 
     # execute the training pipeline
     (
