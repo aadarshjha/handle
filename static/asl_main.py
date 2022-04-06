@@ -113,7 +113,7 @@ def create_resnet50(input_shape, n_out):
     base_model = ResNet50(
         weights="imagenet", include_top=False, input_shape=input_shape
     )
-
+    base_model.trainable = False
     model = Sequential(
         [
             base_model,
