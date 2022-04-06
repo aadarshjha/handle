@@ -56,33 +56,6 @@ optimizer_algorithm = optimizers.RMSprop(learning_rate=1e-4)
 monitor_metric = ["accuracy"]
 
 
-# def create_resnet50(input_shape, n_out):
-#     input_tensor = Input(shape=input_shape)
-#     base_model = ResNet50(
-#         weights=None, include_top=False, input_tensor=input_tensor
-#     )
-
-#     x = GlobalAveragePooling2D()(base_model.output)
-#     x = Dropout(0.5)(x)
-#     x = Dense(2048, activation="relu")(x)
-#     x = Dropout(0.5)(x)
-#     final_output = Dense(n_out, activation="softmax", name="final_output")(x)
-#     model = Model(input_tensor, final_output)
-
-#     for layer in model.layers:
-#         layer.trainable = False
-
-#     for i in range(-5, 0):
-#         model.layers[i].trainable = True
-
-#     # optimizer = optimizers.Adam(lr=WARMUP_LEARNING_RATE)
-#     model.compile(
-#         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
-#     )
-
-#     return model
-
-
 def CNN_Model(
     input_shape=(
         300,
