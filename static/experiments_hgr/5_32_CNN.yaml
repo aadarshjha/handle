@@ -8,6 +8,3 @@ CONFIG:
   OPTIMIZER: 'adam'
   LOSS: 'sparse_categorical_crossentropy'
   MODE: 'CNN'
-
-
-
