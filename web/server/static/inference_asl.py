@@ -51,7 +51,7 @@ class InferenceASL:
             return None
 
         # predict the image
-        prediction_asl = model_asl.predict(asl_image.reshape(1, 28, 28, 1))
+        prediction_asl = model_asl.predict(asl_image.reshape(1, 90, 90, 3))
         prediction_asl = np.argmax(prediction_asl, axis=1)
         prediction_asl = labels[str(prediction_asl[0])]
 
@@ -59,8 +59,10 @@ class InferenceASL:
 
     def augment_single_image(self):
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        image = cv2.resize(gray, (28, 28))
-        return image
+        gray = np.expand_dims(gray, axis=2)
+        gray = np.concatenate((gray, gray, gray), axis=2)
+        gray = cv2.resize(gray, (90, 90))
+        return gray
 
     def convert_to_b64(self, img):
         # convert a array to base64

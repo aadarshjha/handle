@@ -29,8 +29,6 @@ class InferenceHGR:
 
     def preProcess(self):
         augmented_image = self.augment_single_image()
-        print("FINAL")
-        print(augmented_image.shape)
         hgr_image = augmented_image
 
         model = None
@@ -56,6 +54,7 @@ class InferenceHGR:
         hgr_image = hgr_image.reshape(1, 90, 90, 3)
         prediction_hgr = model_hgr.predict(hgr_image)
         prediction_hgr = np.argmax(prediction_hgr, axis=1)
+        print(prediction_hgr)
         prediction_hgr = labels[str(prediction_hgr[0])]
 
         return prediction_hgr
