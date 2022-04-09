@@ -29,6 +29,8 @@ class InferenceHGR:
 
     def preProcess(self):
         augmented_image = self.augment_single_image()
+        print("FINAL")
+        print(augmented_image.shape)
         hgr_image = augmented_image
 
         model = None
@@ -50,7 +52,9 @@ class InferenceHGR:
             print("Error: model not found")
             return None
 
-        prediction_hgr = model_hgr.predict(hgr_image.reshape(1, 120, 320, 1))
+        # batch the image to shape (None, 90, 90, 3)
+        hgr_image = hgr_image.reshape(1, 90, 90, 3)
+        prediction_hgr = model_hgr.predict(hgr_image)
         prediction_hgr = np.argmax(prediction_hgr, axis=1)
         prediction_hgr = labels[str(prediction_hgr[0])]
 
@@ -58,8 +62,10 @@ class InferenceHGR:
 
     def augment_single_image(self):
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        img_hgr = cv2.resize(gray, (320, 120))
-        return img_hgr
+        gray = np.expand_dims(gray, axis=2)
+        gray = np.concatenate((gray, gray, gray), axis=2)
+        gray = cv2.resize(gray, (90, 90))
+        return gray
 
     def convert_to_b64(self, img):
         # convert a array to base64

@@ -78,9 +78,9 @@ def static_index():
         augmented_single_image_hgr = augmented_image_hgr.augment_single_image()
 
         # convert augmented_single_image to base64
-        augmented_single_image_b64_hgr = augmented_image_hgr.convert_to_b64(
-            augmented_single_image_hgr
-        )
+        # augmented_single_image_b64_hgr = augmented_image_hgr.convert_to_b64(
+        #     augmented_single_image_hgr
+        # )
 
         augmented_image_asl = InferenceASL(fetched_image, model, mode)
         augmented_image_asl.decode()
@@ -91,16 +91,18 @@ def static_index():
             augmented_single_image_asl
         )
 
+        print(augmented_image_hgr.preProcess())
+
         return json.dumps(
             {
-                "HGR": {
-                    "image": augmented_single_image_b64_hgr.decode("utf-8"),
-                    "prediction": augmented_image_hgr.preProcess(),
-                },
-                "ASL": {
-                    "image": augmented_single_image_b64_asl.decode("utf-8"),
-                    "prediction": augmented_image_asl.preProcess(),
-                },
+                # "HGR": {
+                #     # "image": augmented_single_image_b64_hgr.decode("utf-8"),
+                #     "prediction": augmented_image_hgr.preProcess(),
+                # },
+                # "ASL": {
+                #     # "image": augmented_single_image_b64_asl.decode("utf-8"),
+                #     "prediction": augmented_image_asl.preProcess(),
+                # },
             }
         )
 
