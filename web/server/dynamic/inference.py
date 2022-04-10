@@ -216,7 +216,7 @@ class Inference:
             )
 
             config = Config(config_dict)
-            model, _ = load_cnn_lstm(config, device=config.device)
+            model, _ = load_timesformer(config, device=config.device)
 
             # pass in clip to model
             model.eval()
@@ -229,6 +229,7 @@ class Inference:
                 _, pred = output.topk(1, 1)
                 idx = pred.squeeze().cpu().numpy()
 
+            print(prediction_list)
             prediction_list.append(classes[idx])
             return prediction_list
 

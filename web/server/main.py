@@ -93,9 +93,6 @@ def static_index():
         augmented_image_hgr.preProcess()
         augmented_image_asl.preProcess()
 
-        # print(augmented_image_hgr.preProcess())
-        # print(augmented_image_asl.preProcess())
-
         return json.dumps(
             {
                 "HGR": {
