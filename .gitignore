@@ -22,3 +22,6 @@ dynamic/kinetics/*.log
 dynamic/timesformer/*.log
 dynamic/__pycache__
 static/*.npy
+web/server/out.mp4 
+web/server/temp_out.webm
+web/server/video.txt
