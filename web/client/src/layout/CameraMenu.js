@@ -129,11 +129,8 @@ function CameraMenu({
 
     const typeOfModels = [
       "cnn",
-      "densenet",
       "densenet_pretrained",
-      "resnet",
-      "resnet_pretrained",
-      "mobilenet",
+      "vgg_pretrained",
       "mobilenet_pretrained",
       "resnext",
       "lstm",
@@ -310,17 +307,11 @@ function CameraMenu({
                     <Radio.Button onChange={updateOptions} value="cnn">
                       CNN
                     </Radio.Button>
-                    <Radio.Button onChange={updateOptions} value="densenet">
-                      DenseNet
-                    </Radio.Button>
                     <Radio.Button
                       onChange={updateOptions}
                       value="densenet_pretrained"
                     >
                       DenseNet Pretrained
-                    </Radio.Button>
-                    <Radio.Button onChange={updateOptions} value="mobilenet">
-                      MobileNet
                     </Radio.Button>
                     <Radio.Button
                       onChange={updateOptions}
@@ -328,14 +319,11 @@ function CameraMenu({
                     >
                       MobileNet Pretrained
                     </Radio.Button>
-                    <Radio.Button onChange={updateOptions} value="resnet">
-                      ResNet
-                    </Radio.Button>
                     <Radio.Button
                       onChange={updateOptions}
-                      value="resnet_pretrained"
+                      value="vgg_pretrained"
                     >
-                      ResNet Pretrained
+                      VGG Pretrained
                     </Radio.Button>
                   </Radio.Group>
                 </Form.Item>
