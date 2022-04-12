@@ -37,6 +37,8 @@ def dynamic_index():
                 {
                     "EgoGesture": {"prediction": inference[0]},
                     "IPN": {"prediction": inference[1]},
+                    "Jester": {"prediction": inference[2]},
+                    "Kinetics": {"prediction": inference[3]},
                 }
             )
         elif mode == "lstm":

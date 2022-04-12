@@ -171,7 +171,50 @@ class Inference:
                 idx = pred.squeeze().cpu().numpy()
 
             prediction_list.append(classes[idx])
-            print(prediction_list)
+
+            try:
+                with open("./dynamic/configs/jester_config.yaml", "r") as f:
+                    user_config = yaml.safe_load(f)
+                    config_dict.update(user_config)
+            except Exception:
+                print("Error reading config file")
+                exit(1)
+
+            config = Config(config_dict)
+            model, _ = load_resnext101(config, device=config.device)
+
+            # pass in clip to model
+            model.eval()
+
+            with torch.no_grad():
+                output = model(clip)
+                _, pred = output.topk(1, 1)
+                idx = pred.squeeze().cpu().numpy()
+
+            prediction_list.append(classes[idx])
+
+            try:
+                with open("./dynamic/configs/kinetics_config.yaml", "r") as f:
+                    user_config = yaml.safe_load(f)
+                    config_dict.update(user_config)
+            except Exception:
+                print("Error reading config file")
+                exit(1)
+
+            config = Config(config_dict)
+            model, _ = load_resnext101(config, device=config.device)
+
+            # pass in clip to model
+            model.eval()
+
+            with torch.no_grad():
+                output = model(clip)
+                _, pred = output.topk(1, 1)
+                idx = pred.squeeze().cpu().numpy()
+
+            prediction_list.append(classes[idx])
+
+            # print(prediction_list)
             return prediction_list
         elif self.mode == "lstm":
             try:
