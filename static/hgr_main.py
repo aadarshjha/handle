@@ -1,6 +1,4 @@
 import os
-from pickle import NONE
-from telnetlib import SE
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
@@ -8,7 +6,6 @@ import matplotlib.pyplot as plt
 import sys
 import yaml
 import pandas as pd
-import gc
 from sklearn.model_selection import KFold
 from sklearn.metrics import (
     accuracy_score,
@@ -20,7 +17,6 @@ from sklearn.metrics import (
 from PIL import Image
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Dense, Flatten, GlobalAveragePooling2D
 import json
 from sklearn.model_selection import train_test_split

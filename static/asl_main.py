@@ -22,7 +22,6 @@ import json
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.models import Sequential
-from tensorflow.keras import optimizers
 from tensorflow.keras.layers import (
     Dense,
     Dropout,
