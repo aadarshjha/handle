@@ -42,10 +42,12 @@ from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
 from keras.applications.vgg16 import VGG16
+from keras.utils.vis_utils import plot_model
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 gpus = tf.config.experimental.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(gpus[0], True)
+if gpus:
+    tf.config.experimental.set_memory_growth(gpus[0], True)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 PREFIX = "../../drive/MyDrive/handleData/"
@@ -464,86 +466,82 @@ def extract_hyperparameters(filename):
 
 
 if __name__ == "__main__":
+    # extract file name from command line input
+    filename = sys.argv[1]
+    hyperparameters = extract_hyperparameters(filename)
 
-    # print a summary of all the models 
-    
+    if not os.path.exists(PREFIX + "models/" + hyperparameters["EXPERIMENT_NAME"]):
+        os.makedirs(PREFIX + "models/" + hyperparameters["EXPERIMENT_NAME"])
 
-    # # extract file name from command line input
-    # filename = sys.argv[1]
-    # hyperparameters = extract_hyperparameters(filename)
+    if not os.path.exists(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"]):
+        os.makedirs(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"])
 
-    # if not os.path.exists(PREFIX + "models/" + hyperparameters["EXPERIMENT_NAME"]):
-    #     os.makedirs(PREFIX + "models/" + hyperparameters["EXPERIMENT_NAME"])
+    # taking this precaution becuase the data takes a while to load.
 
-    # if not os.path.exists(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"]):
-    #     os.makedirs(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"])
+    X = None
+    y = None
 
-    # # taking this precaution becuase the data takes a while to load.
+    # if X_augmented.npy is in the current directory
+    # and the file is not empty, skip this step
+    if not os.path.exists("./X_augmented.npy"):
+        print("Loading data...")
+        # read the data
+        imagepaths = read_data()
 
-    # X = None
-    # y = None
+        # finalize data
+        X, y = augment_data(imagepaths)
+    else:
+        # load the data
+        print("Loading pre-saved data...")
+        X = np.load("../../drive/MyDrive/X_augmented.npy")
+        y = np.load("../../drive/MyDrive/y_augmented.npy")
 
-    # # if X_augmented.npy is in the current directory
-    # # and the file is not empty, skip this step
-    # if not os.path.exists("./X_augmented.npy"):
-    #     print("Loading data...")
-    #     # read the data
-    #     imagepaths = read_data()
+        print(X.shape)
+        print(X[0].shape)
 
-    #     # finalize data
-    #     X, y = augment_data(imagepaths)
-    # else:
-    #     # load the data
-    #     print("Loading pre-saved data...")
-    #     X = np.load("../../drive/MyDrive/X_augmented.npy")
-    #     y = np.load("../../drive/MyDrive/y_augmented.npy")
+        # execute the training pipeline
+        (
+            model_cache,
+            train_loss,
+            train_acc,
+            val_loss,
+            val_acc,
+            predictions_cache,
+            targets_cache,
+            precision_history,
+            recall_history,
+            f1_history,
+            accuracy_history,
+            cfx_history,
+        ) = execute_training(
+            X,
+            y,
+            hyperparameters["CONFIG"]["MODE"],
+            hyperparameters["CONFIG"]["NUM_FOLDS"],
+            hyperparameters["CONFIG"]["EPOCHS"],
+            hyperparameters["CONFIG"]["BATCH_SIZE"],
+            hyperparameters["EXPERIMENT_NAME"],
+            hyperparameters["CONFIG"]["VERBOSE"],
+            hyperparameters["CONFIG"]["OPTIMIZER"],
+            hyperparameters["CONFIG"]["LOSS"],
+        )
 
-    #     print(X.shape)
-    #     print(X[0].shape)
-
-    #     # execute the training pipeline
-    #     (
-    #         model_cache,
-    #         train_loss,
-    #         train_acc,
-    #         val_loss,
-    #         val_acc,
-    #         predictions_cache,
-    #         targets_cache,
-    #         precision_history,
-    #         recall_history,
-    #         f1_history,
-    #         accuracy_history,
-    #         cfx_history,
-    #     ) = execute_training(
-    #         X,
-    #         y,
-    #         hyperparameters["CONFIG"]["MODE"],
-    #         hyperparameters["CONFIG"]["NUM_FOLDS"],
-    #         hyperparameters["CONFIG"]["EPOCHS"],
-    #         hyperparameters["CONFIG"]["BATCH_SIZE"],
-    #         hyperparameters["EXPERIMENT_NAME"],
-    #         hyperparameters["CONFIG"]["VERBOSE"],
-    #         hyperparameters["CONFIG"]["OPTIMIZER"],
-    #         hyperparameters["CONFIG"]["LOSS"],
-    #     )
-
-    #     plot_training_validation(
-    #         train_loss,
-    #         train_acc,
-    #         val_loss,
-    #         val_acc,
-    #         hyperparameters["EXPERIMENT_NAME"],
-    #         PREFIX,
-    #     )
-    #     execute_micro_macro_metrics(
-    #         model_cache,
-    #         predictions_cache,
-    #         targets_cache,
-    #         precision_history,
-    #         recall_history,
-    #         f1_history,
-    #         accuracy_history,
-    #         cfx_history,
-    #         hyperparameters["EXPERIMENT_NAME"],
-    #     )
+        plot_training_validation(
+            train_loss,
+            train_acc,
+            val_loss,
+            val_acc,
+            hyperparameters["EXPERIMENT_NAME"],
+            PREFIX,
+        )
+        execute_micro_macro_metrics(
+            model_cache,
+            predictions_cache,
+            targets_cache,
+            precision_history,
+            recall_history,
+            f1_history,
+            accuracy_history,
+            cfx_history,
+            hyperparameters["EXPERIMENT_NAME"],
+        )
