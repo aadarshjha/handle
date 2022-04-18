@@ -7,6 +7,7 @@ import torch
 import cv2
 import scipy.ndimage
 from PIL import Image, ImageOps
+
 try:
     import accimage
 except ImportError:
@@ -14,6 +15,7 @@ except ImportError:
 
 # Use data agumentations made in IPN and Jester to get better results
 # Code from IPN Dataset source
+
 
 class Compose(object):
     """Composes several transforms together.
@@ -62,22 +64,21 @@ class ToTensor(object):
             return img.float().div(self.norm_value)
 
         if accimage is not None and isinstance(pic, accimage.Image):
-            nppic = np.zeros(
-                [pic.channels, pic.height, pic.width], dtype=np.float32)
+            nppic = np.zeros([pic.channels, pic.height, pic.width], dtype=np.float32)
             pic.copyto(nppic)
             return torch.from_numpy(nppic)
 
         # handle PIL Image
-        if pic.mode == 'I':
+        if pic.mode == "I":
             img = torch.from_numpy(np.array(pic, np.int32, copy=False))
-        elif pic.mode == 'I;16':
+        elif pic.mode == "I;16":
             img = torch.from_numpy(np.array(pic, np.int16, copy=False))
         else:
             img = torch.ByteTensor(torch.ByteStorage.from_buffer(pic.tobytes()))
         # PIL image mode: 1, L, P, I, F, RGB, YCbCr, RGBA, CMYK
-        if pic.mode == 'YCbCr':
+        if pic.mode == "YCbCr":
             nchannel = 3
-        elif pic.mode == 'I;16':
+        elif pic.mode == "I;16":
             nchannel = 1
         else:
             nchannel = len(pic.mode)
@@ -138,9 +139,9 @@ class Scale(object):
     """
 
     def __init__(self, size, interpolation=Image.BILINEAR):
-        assert isinstance(size,
-                          int) or (isinstance(size, collections.Iterable) and
-                                   len(size) == 2)
+        assert isinstance(size, int) or (
+            isinstance(size, collections.Iterable) and len(size) == 2
+        )
         self.size = size
         self.interpolation = interpolation
 
@@ -193,8 +194,8 @@ class CenterCrop(object):
         """
         w, h = img.size
         th, tw = self.size
-        x1 = int(round((w - tw) / 2.))
-        y1 = int(round((h - th) / 2.))
+        x1 = int(round((w - tw) / 2.0))
+        y1 = int(round((h - th) / 2.0))
         return img.crop((x1, y1, x1 + tw, y1 + th))
 
     def randomize_parameters(self):
@@ -202,7 +203,6 @@ class CenterCrop(object):
 
 
 class CornerCrop(object):
-
     def __init__(self, size, crop_position=None):
         self.size = size
         if crop_position is None:
@@ -210,35 +210,35 @@ class CornerCrop(object):
         else:
             self.randomize = False
         self.crop_position = crop_position
-        self.crop_positions = ['c', 'tl', 'tr', 'bl', 'br']
+        self.crop_positions = ["c", "tl", "tr", "bl", "br"]
 
     def __call__(self, img):
         image_width = img.size[0]
         image_height = img.size[1]
 
-        if self.crop_position == 'c':
+        if self.crop_position == "c":
             th, tw = (self.size, self.size)
-            x1 = int(round((image_width - tw) / 2.))
-            y1 = int(round((image_height - th) / 2.))
+            x1 = int(round((image_width - tw) / 2.0))
+            y1 = int(round((image_height - th) / 2.0))
             x2 = x1 + tw
             y2 = y1 + th
-        elif self.crop_position == 'tl':
+        elif self.crop_position == "tl":
             x1 = 0
             y1 = 0
             x2 = x1 + self.size
             y2 = y1 + self.size
-        elif self.crop_position == 'tr':
+        elif self.crop_position == "tr":
             x1 = image_width - self.size
             y1 = 0
             x2 = x1 + self.size
             y2 = y1 + self.size
-        elif self.crop_position == 'bl':
-            x1 = int(round((image_width - self.size) / 4.))
+        elif self.crop_position == "bl":
+            x1 = int(round((image_width - self.size) / 4.0))
             y1 = 0
             x2 = x1 + self.size
             y2 = y1 + self.size
-        elif self.crop_position == 'br':
-            x1 = (image_width - self.size) - int(round((image_width - self.size) / 4.))
+        elif self.crop_position == "br":
+            x1 = (image_width - self.size) - int(round((image_width - self.size) / 4.0))
             y1 = 0
             x2 = x1 + self.size
             y2 = y1 + self.size
@@ -249,9 +249,9 @@ class CornerCrop(object):
 
     def randomize_parameters(self):
         if self.randomize:
-            self.crop_position = self.crop_positions[random.randint(
-                0,
-                len(self.crop_positions) - 1)]
+            self.crop_position = self.crop_positions[
+                random.randint(0, len(self.crop_positions) - 1)
+            ]
         else:
             pass
 
@@ -285,11 +285,13 @@ class MultiScaleCornerCrop(object):
         interpolation: Default: PIL.Image.BILINEAR
     """
 
-    def __init__(self,
-                 scales,
-                 size,
-                 interpolation=Image.BILINEAR,
-                 crop_positions=['c', 'tl', 'tr', 'bl', 'br']):
+    def __init__(
+        self,
+        scales,
+        size,
+        interpolation=Image.BILINEAR,
+        crop_positions=["c", "tl", "tr", "bl", "br"],
+    ):
         self.scales = scales
         self.size = size
         self.interpolation = interpolation
@@ -303,7 +305,7 @@ class MultiScaleCornerCrop(object):
         image_width = img.size[0]
         image_height = img.size[1]
 
-        if self.crop_position == 'c':
+        if self.crop_position == "c":
             center_x = image_width // 2
             center_y = image_height // 2
             box_half = crop_size // 2
@@ -311,22 +313,22 @@ class MultiScaleCornerCrop(object):
             y1 = center_y - box_half
             x2 = center_x + box_half
             y2 = center_y + box_half
-        elif self.crop_position == 'tl':
+        elif self.crop_position == "tl":
             x1 = 0
             y1 = 0
             x2 = crop_size
             y2 = crop_size
-        elif self.crop_position == 'tr':
+        elif self.crop_position == "tr":
             x1 = image_width - crop_size
             y1 = 0
             x2 = image_width
             y2 = crop_size
-        elif self.crop_position == 'bl':
+        elif self.crop_position == "bl":
             x1 = 0
             y1 = image_height - crop_size
             x2 = crop_size
             y2 = image_height
-        elif self.crop_position == 'br':
+        elif self.crop_position == "br":
             x1 = image_width - crop_size
             y1 = image_height - crop_size
             x2 = image_width
@@ -338,13 +340,12 @@ class MultiScaleCornerCrop(object):
 
     def randomize_parameters(self):
         self.scale = self.scales[random.randint(0, len(self.scales) - 1)]
-        self.crop_position = self.crop_positions[random.randint(
-            0,
-            len(self.scales) - 1)]
+        self.crop_position = self.crop_positions[
+            random.randint(0, len(self.scales) - 1)
+        ]
 
 
 class MultiScaleRandomCrop(object):
-
     def __init__(self, scales, size, interpolation=Image.BILINEAR):
         self.scales = scales
         self.size = size
@@ -370,8 +371,9 @@ class MultiScaleRandomCrop(object):
         self.scale = self.scales[random.randint(0, len(self.scales) - 1)]
         self.tl_x = random.random()
         self.tl_y = random.random()
-class SpatialElasticDisplacement(object):
 
+
+class SpatialElasticDisplacement(object):
     def __init__(self, sigma=2.0, alpha=1.0, order=0, cval=0, mode="constant"):
         self.alpha = alpha
         self.sigma = sigma
@@ -383,27 +385,32 @@ class SpatialElasticDisplacement(object):
         if self.p < 0.50:
             is_L = False
             is_PIL = isinstance(img, Image.Image)
-            
+
             if is_PIL:
                 img = np.asarray(img, dtype=np.uint8)
             if len(img.shape) == 2:
                 is_L = True
-                img = np.reshape(img, img.shape + (1,))  
+                img = np.reshape(img, img.shape + (1,))
 
             image = img
             image_first_channel = np.squeeze(image[..., 0])
-            indices_x, indices_y = self._generate_indices(image_first_channel.shape, alpha=self.alpha, sigma=self.sigma)
-            ret_image = (self._map_coordinates(
+            indices_x, indices_y = self._generate_indices(
+                image_first_channel.shape, alpha=self.alpha, sigma=self.sigma
+            )
+            ret_image = self._map_coordinates(
                 image,
                 indices_x,
                 indices_y,
                 order=self.order,
                 cval=self.cval,
-                mode=self.mode))
+                mode=self.mode,
+            )
 
-            if  is_PIL:
+            if is_PIL:
                 if is_L:
-                    return Image.fromarray(ret_image.reshape(ret_image.shape[:2]), mode= 'L')
+                    return Image.fromarray(
+                        ret_image.reshape(ret_image.shape[:2]), mode="L"
+                    )
                 else:
                     return Image.fromarray(ret_image)
             else:
@@ -412,35 +419,42 @@ class SpatialElasticDisplacement(object):
             return img
 
     def _generate_indices(self, shape, alpha, sigma):
-        assert (len(shape) == 2),"shape: Should be of size 2!"
-        dx = scipy.ndimage.gaussian_filter((np.random.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0) * alpha
-        dy = scipy.ndimage.gaussian_filter((np.random.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0) * alpha
+        assert len(shape) == 2, "shape: Should be of size 2!"
+        dx = (
+            scipy.ndimage.gaussian_filter(
+                (np.random.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
+            )
+            * alpha
+        )
+        dy = (
+            scipy.ndimage.gaussian_filter(
+                (np.random.rand(*shape) * 2 - 1), sigma, mode="constant", cval=0
+            )
+            * alpha
+        )
 
-        x, y = np.meshgrid(np.arange(shape[0]), np.arange(shape[1]), indexing='ij')
-        return np.reshape(x+dx, (-1, 1)), np.reshape(y+dy, (-1, 1))
+        x, y = np.meshgrid(np.arange(shape[0]), np.arange(shape[1]), indexing="ij")
+        return np.reshape(x + dx, (-1, 1)), np.reshape(y + dy, (-1, 1))
 
-    def _map_coordinates(self, image, indices_x, indices_y, order=1, cval=0, mode="constant"):
-        assert (len(image.shape) == 3),"image.shape: Should be of size 3!"
+    def _map_coordinates(
+        self, image, indices_x, indices_y, order=1, cval=0, mode="constant"
+    ):
+        assert len(image.shape) == 3, "image.shape: Should be of size 3!"
         result = np.copy(image)
         height, width = image.shape[0:2]
         for c in range(image.shape[2]):
             remapped_flat = scipy.ndimage.interpolation.map_coordinates(
-                image[..., c],
-                (indices_x, indices_y),
-                order=order,
-                cval=cval,
-                mode=mode
+                image[..., c], (indices_x, indices_y), order=order, cval=cval, mode=mode
             )
             remapped = remapped_flat.reshape((height, width))
             result[..., c] = remapped
         return result
 
     def randomize_parameters(self):
-       self.p = random.random()
+        self.p = random.random()
 
 
 class RandomRotate(object):
-
     def __init__(self):
         self.interpolation = Image.BILINEAR
 
@@ -455,7 +469,6 @@ class RandomRotate(object):
 
 
 class Gaussian_blur(object):
-
     def __init__(self, radius=0.0):
         self.radius = radius
 
@@ -500,7 +513,6 @@ class SaltImage(object):
 
 
 class Dropout(object):
-
     def __init__(self, ratio=100):
         self.ratio = ratio
 
@@ -527,8 +539,7 @@ class Dropout(object):
         self.ratio = random.randint(10, 25)
 
 
-class MultiplyValues():
-
+class MultiplyValues:
     def __init__(self, value=0.2, per_channel=False):
         self.value = value
         self.per_channel = per_channel
@@ -552,8 +563,8 @@ class MultiplyValues():
     def randomize_parameters(self):
         self.sample = random.uniform(1.0 - self.value, 1.0 + self.value)
 
-class LoopPadding(object):
 
+class LoopPadding(object):
     def __init__(self, size):
         self.size = size
 
@@ -582,7 +593,7 @@ class TemporalBeginCrop(object):
         self.size = size
 
     def __call__(self, frame_indices):
-        out = frame_indices[:self.size]
+        out = frame_indices[: self.size]
 
         for index in out:
             if len(out) >= self.size:
@@ -606,7 +617,7 @@ class TemporalEndCrop(object):
         self.size = size
 
     def __call__(self, frame_indices):
-        out = frame_indices[-self.size:]
+        out = frame_indices[-self.size :]
 
         for index in out:
             if len(out) >= self.size:
@@ -683,7 +694,6 @@ class TemporalCenterCropPCA(object):
         return out
 
 
-
 class TemporalRandomCrop(object):
     """Temporally crop the given frame indices at a random location.
 
@@ -718,6 +728,7 @@ class TemporalRandomCrop(object):
 
         return out
 
+
 class TemporalUniformCrop(object):
     """Temporally crop the given frame indices at a center.
 
@@ -728,8 +739,9 @@ class TemporalUniformCrop(object):
         size (int): Desired output size of the crop.
     """
 
-    def __init__(self,  skip):
+    def __init__(self, skip):
         self.skip = skip
+
     def __call__(self, frame_indices):
         """
         Args:
@@ -739,8 +751,8 @@ class TemporalUniformCrop(object):
         """
         out = [frame_indices[i] for i in range(0, len(frame_indices), self.skip)]
 
-
         return out
+
 
 class TemporalPadRandomCrop(object):
     """Temporally crop the given frame indices at a random location.

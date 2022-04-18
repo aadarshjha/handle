@@ -3,6 +3,7 @@
 
 import csv
 
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
 
@@ -21,10 +22,11 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
+
 class Logger(object):
     def __init__(self, path, header):
-        self.log_file = open(path, 'w')
-        self.logger = csv.writer(self.log_file, delimiter='\t')
+        self.log_file = open(path, "w")
+        self.logger = csv.writer(self.log_file, delimiter="\t")
 
         self.logger.writerow(header)
         self.header = header
