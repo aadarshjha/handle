@@ -117,39 +117,6 @@ def CNN_Model(
     return model
 
 
-def create_resnet50(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
-
-    base_model = ResNet50(
-        weights="imagenet", include_top=False, input_shape=input_shape
-    )
-
-    for layer in base_model.layers[:143]:
-        layer.trainable = False
-
-    model = Sequential()
-    model.add(base_model)
-    model.add(Flatten())
-    model.add(BatchNormalization())
-    model.add(Dense(256, activation="relu"))
-    model.add(Dropout(0.5))
-    model.add(BatchNormalization())
-    model.add(Dense(128, activation="relu"))
-    model.add(Dropout(0.5))
-    model.add(BatchNormalization())
-    model.add(Dense(64, activation="relu"))
-    model.add(Dropout(0.5))
-    model.add(BatchNormalization())
-    model.add(Dense(64, activation="relu"))
-    model.add(Dropout(0.5))
-    model.add(BatchNormalization())
-    model.add(Dense(n_out, activation="softmax"))
-
-    model.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
-    )
-    return model
-
-
 def create_mobilenet(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
     base_model = MobileNet(input_shape=input_shape, include_top=False, weights=None)
     base_model.trainable = False
@@ -305,10 +272,6 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
                 3,
             ),
             n_out=24,
-        )
-    elif mode == "RESNET_PRETRAINED":
-        model = create_resnet50(
-            (dim, dim, 3), 24, loss_fn, optimizer_algorithm, monitor_metric
         )
     elif mode == "MOBILENET_PRETRAINED":
         model = create_mobilenet_pretrained(

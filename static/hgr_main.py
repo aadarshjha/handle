@@ -33,7 +33,6 @@ from tensorflow.keras.layers import (
 from sklearn.metrics import confusion_matrix
 from keras import Input, Model
 from keras.applications.mobilenet import MobileNet
-from keras.applications.resnet import ResNet50
 from keras.applications.densenet import DenseNet121
 from keras.applications.vgg16 import VGG16
 from keras.utils.vis_utils import plot_model
@@ -200,10 +199,6 @@ def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
             monitor_metric=monitor_metric,
             input_shape=(dim_y, dim_x, 3),
             n_out=10,
-        )
-    elif mode == "RESNET_PRETRAINED":
-        model = keras.applications.resnet.ResNet50(
-            include_top=False, weights="imagenet", input_shape=(dim_y, dim_x, 1)
         )
     elif mode == "MOBILENET_PRETRAINED":
         model = create_mobilenet(
