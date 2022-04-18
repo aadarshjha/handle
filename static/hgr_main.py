@@ -5,7 +5,6 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
-import cv2
 import sys
 import yaml
 import pandas as pd
@@ -31,7 +30,6 @@ from tensorflow.keras import optimizers
 from tensorflow.keras.layers import (
     Dense,
     Dropout,
-    MaxPool2D,
     Conv2D,
     BatchNormalization,
     Flatten,
