@@ -43,12 +43,14 @@ tf.config.run_functions_eagerly(False)  # or True
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 gpus = tf.config.experimental.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(gpus[0], True)
+if gpus:
+    tf.config.experimental.set_memory_growth(gpus[0], True)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 DRIVE = False
 
-PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
+# PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
+PREFIX = "../data/asl-mnist/"
 
 # custom plotting
 from plot import *
@@ -117,23 +119,6 @@ def CNN_Model(
     return model
 
 
-def create_mobilenet(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
-    base_model = MobileNet(input_shape=input_shape, include_top=False, weights=None)
-    base_model.trainable = False
-    model = Sequential(
-        [
-            base_model,
-            GlobalAveragePooling2D(),
-            Dense(1024, activation="relu"),
-            Dense(1024, activation="relu"),
-            Dense(512, activation="relu"),
-            Dense(n_out, activation="sigmoid"),
-        ]
-    )
-    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
-    return model
-
-
 def create_mobilenet_pretrained(
     input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric
 ):
@@ -160,11 +145,8 @@ def create_vgg16(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metri
     old_model = VGG16(
         input_shape=input_shape, include_top=False, weights="imagenet", pooling="avg"
     )
-
     old_model.trainable = False
-
     model = Sequential([old_model, Dense(n_out, activation="sigmoid")])
-
     model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
     return model
 
@@ -329,8 +311,12 @@ def execute_training(
     optimizer_algorithm = optimizer
     monitor_metric = ["accuracy"]
 
+    print(len(X))
+
     # train across folds
     for train, test in kfold.split(X, y):
+
+        print("Fold: ", fold_no)
 
         model = create_model(mode, loss_fn, optimizer_algorithm, monitor_metric)
 
@@ -341,6 +327,11 @@ def execute_training(
 
         X_train = X[train]
         y_train = y[train]
+
+        # print the precentages of the X_train out of X
+        print("Percentage of X_train: " + str(len(X_train) / len(X)))
+        print("Percentage of X_val: " + str(len(X_val) / len(X)))
+        print("Percentage of X_test: " + str(len(X_test) / len(X)))
 
         X_train = tf.image.resize(X_train, (dim, dim))
         X_val = tf.image.resize(X_val, (dim, dim))
