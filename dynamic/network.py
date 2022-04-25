@@ -266,8 +266,11 @@ def load_timesformer(config, device):
         num_classes=3,
         num_frames=config.sample_duration,
         attention_type="divided_space_time",
-        pretrained_model="D:\Projects\ML\models\stformer.pyth",
     )
+
+    pretrain_dict = torch.load(config.pretrain_path)
+    model.load_state_dict(pretrain_dict, strict=False)
+    
     model = model.to(device)
 
     for param in model.parameters():

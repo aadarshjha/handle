@@ -1,12 +1,12 @@
-video_path: 'D:\Projects\ML\MiniIPN'
-annotation_path: 'D:\Projects\ML\MiniIPN/mini_ipn.json'
+video_path: 'MiniIPN'
+annotation_path: 'MiniIPN/mini_ipn.json'
 result_path: 'kinetics/'
-save_name: 'kinetics_resnext-101'
+save_name: 'kinetics_model_resnext-101'
 sample_size: 112
 sample_duration: 32
 batch_size: 8
 n_epochs: 5
-pretrain_path: 'D:\Projects\ML\models\kinetics_resnext_101_RGB_16_best.pth'
+pretrain_path: 'pretrained_models\kinetics_resnext_101_RGB_16_best.pth'
 pretrain_dataset: 'kinetics'
 n_threads: 8
 model: 'resnext'

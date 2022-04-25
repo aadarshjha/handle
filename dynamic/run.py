@@ -7,7 +7,7 @@ import shutil
 from torch import nn
 from torch import optim
 from torch.optim import lr_scheduler
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
 import warnings
 import copy
@@ -104,7 +104,7 @@ def run():
         config.result_path, f"train_%s.log" % (config.save_name)
     )
     train_logger = Logger(
-        train_log_pth, ["epoch", "loss", "acc", "precision", "recall"]
+        train_log_pth, ["epoch", "loss", "acc", "precision", "recall", "bacc"]
     )
 
     print("Loading validation data...")
@@ -114,6 +114,11 @@ def run():
         train_params.val_spatial_transform,
         train_params.val_temporal_transform,
     )
+
+    split_1_ct = int(0.5 * len(val_data))
+    split_2_ct = len(val_data) - split_1_ct
+    val_data, test_data = random_split(val_data, [split_1_ct, split_2_ct], generator=torch.Generator().manual_seed(42))
+
     val_loader = torch.utils.data.DataLoader(
         val_data,
         batch_size=config.batch_size,
@@ -122,7 +127,18 @@ def run():
         pin_memory=True,
     )
     val_log_pth = os.path.join(config.result_path, f"val_%s.log" % (config.save_name))
-    val_logger = Logger(val_log_pth, ["epoch", "loss", "acc", "precision", "recall"])
+    val_logger = Logger(val_log_pth, ["epoch", "loss", "acc", "precision", "recall", "bacc"])
+
+    
+    test_loader = torch.utils.data.DataLoader(
+        test_data,
+        batch_size=config.batch_size,
+        shuffle=False,
+        num_workers=config.n_threads,
+        pin_memory=True,
+    )
+    test_log_pth = os.path.join(config.result_path, f"test_%s.log" % (config.save_name))
+    test_logger = Logger(test_log_pth, ["loss", "acc", "precision", "recall", "bacc"])
 
     if train_params.optimizer_type == "SGD":
         print("Using SGD optimizer...")
@@ -160,6 +176,9 @@ def run():
             save_model(model, save_pth)
 
         print(f"\nBest model so far: Validation Acc: {best_acc}\n")
+
+
+    test_model(test_loader, model, device, criterion, test_logger)
 
     return 0
 

@@ -1,12 +1,12 @@
-video_path: 'IPN_hand/dataset/HandGestures/IPN_dataset'
-annotation_path: 'IPN_hand/annotation_ipnGesture/mini_ipn.json'
-result_path: 'testing/'
-save_name: 'test_model_resnext-101'
+video_path: 'MiniIPN'
+annotation_path: 'MiniIPN/mini_ipn.json'
+result_path: 'jester/'
+save_name: 'jester_model_resnext-101'
 sample_size: 112
 sample_duration: 32
 batch_size: 8
 n_epochs: 5
-pretrain_path: 'models/jester_resnext_101_RGB_32.pth'
+pretrain_path: 'pretrained_models/jester_resnext_101_RGB_32.pth'
 pretrain_dataset: 'jester'
 n_threads: 8
 model: 'resnext'

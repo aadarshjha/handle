@@ -1,5 +1,5 @@
-video_path: 'D:\Projects\ML\MiniIPN'
-annotation_path: 'D:\Projects\ML\MiniIPN\mini_ipn.json'
+video_path: 'MiniIPN'
+annotation_path: 'MiniIPN/mini_ipn.json'
 result_path: 'cnn_lstm\'
 save_name: 'cnn_lstm'
 sample_size: 112
