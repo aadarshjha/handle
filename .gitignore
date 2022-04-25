@@ -20,6 +20,7 @@ dynamic/egogesture/*.log
 dynamic/ipn/*.log
 dynamic/kinetics/*.log
 dynamic/timesformer/*.log
+dynamic/jester/*.log
 dynamic/__pycache__
 static/*.npy
 web/server/out.mp4 
