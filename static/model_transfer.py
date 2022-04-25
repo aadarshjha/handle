@@ -1,5 +1,6 @@
 import os
 from pickle import NONE
+from telnetlib import SE
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
@@ -8,8 +9,8 @@ import cv2
 import sys
 import yaml
 import pandas as pd
+import gc
 from sklearn.model_selection import KFold
-from PIL import Image
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
@@ -17,22 +18,56 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
+from PIL import Image
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Dense, Flatten
+from keras.layers import Dense, Flatten, GlobalAveragePooling2D
 import json
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
-from sklearn.metrics import classification_report, confusion_matrix
-from keras.models import load_model
+from tensorflow.keras import optimizers
+from tensorflow.keras.layers import (
+    Dense,
+    Dropout,
+    MaxPool2D,
+    Conv2D,
+    BatchNormalization,
+    Flatten,
+)
+from sklearn.metrics import confusion_matrix
+from keras import Input, Model
+from keras.applications.mobilenet import MobileNet
+from keras.applications.resnet import ResNet50
+from keras.applications.densenet import DenseNet121
+from keras.applications.vgg16 import VGG16
+
+from keras import backend as K
+
+tf.config.run_functions_eagerly(False)  # or True
+
+# os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+# gpus = tf.config.experimental.list_physical_devices("GPU")
+# tf.config.experimental.set_memory_growth(gpus[0], True)
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+DRIVE = False
+
+# PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
+PREFIX = "../data/asl-mnist/"
 
 # custom plotting
 from plot import *
 
-PREFIX = "../../drive/MyDrive/aslData/asl-mnist/"
+dim = 90
+
+# Reset Keras Session
+def reset_keras():
+    sess = K.get_session()
+    K.clear_session()
+    sess.close()
+    sess = K.get_session()
 
 
 def read_data():
@@ -44,13 +79,6 @@ def read_data():
     )
 
     return train_df, test_df
-
-
-def extract_hyperparameters(filename):
-    hyperparams = None
-    with open("experiments_hgr{}.yaml".format(filename), "r") as f:
-        hyperparameters = yaml.load(f, Loader=yaml.FullLoader)
-    return hyperparameters
 
 
 def augment_data(train_df, test_df):
@@ -67,53 +95,72 @@ def augment_data(train_df, test_df):
     x_train = train_df.values
     x_test = test_df.values
 
-    X_net = []
-    y_net = []
+    label_binarizer = LabelBinarizer()
+    y_train = label_binarizer.fit_transform(y_train)
+    y_test = label_binarizer.fit_transform(y_test)
 
-    for row in x_train:
-        img = row.reshape(28, 28)
-        img = img / 255.0
-        img = Image.fromarray(img)
-        img = img.resize((120, 320))
-        # convert img to numpy array
-        img = np.array(img)
-        X_net.append(img)
+    x_train = x_train / 255
+    x_test = x_test / 255
 
-    for row in x_test:
-        img = row.reshape(28, 28)
-        img = img / 255.0
-        img = Image.fromarray(img)
-        img = img.resize((120, 320))
-        img = np.array(img)
-        X_net.append(img)
+    # Reshaping the data from 1-D to 3-D as required through input by CNN's
+    x_train = x_train.reshape(-1, 28, 28, 1)
+    x_test = x_test.reshape(-1, 28, 28, 1)
 
-    X = X_net
+    # combine the x_trrarin and x_test
+    X = np.concatenate((x_train, x_test))
+    y = np.concatenate((y_train, y_test))
 
-    # convert X to a numpy array
-    X = np.array(X)
-
-    # reshape every element in X to (320, 120, 1)
-    X = X.reshape(X.shape[0], 120, 320, 1)
-    y_net = np.concatenate((y_train, y_test))
-    y = y_net
-
-    y = np.array(y)
+    print("Images loaded: ", len(X))
+    print("Labels loaded: ", len(y))
 
     return X, y
+
+
+def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
+    model = None
+
+    # load the weights of a ./hgr_domain.h5
+    base_model = tf.keras.models.load_model("./hgr_domain.h5")
+    # freeze all layers except for the classifier
+    for layer in base_model.layers[:-1]:
+        layer.trainable = False
+
+    # add a new classifier layer
+    model = Sequential(
+        [
+            base_model,
+            Flatten(),
+            BatchNormalization(),
+            Dense(256, activation="relu"),
+            Dropout(0.5),
+            BatchNormalization(),
+            Dense(128, activation="relu"),
+            Dropout(0.5),
+            BatchNormalization(),
+            Dense(64, activation="relu"),
+            Dropout(0.5),
+            BatchNormalization(),
+            Dense(24, activation="softmax"),
+        ]
+    )
+    # compile the model
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
+    return model
 
 
 def execute_training(
     X,
     y,
-    model,
-    experiment_name="exper1",
-    num_folds=5,
-    epochs=10,
-    batch_size=32,
-    verbose=False,
-    optimizer="adam",
-    loss="sparse_categorical_crossentropy",
-    mode="CNN",
+    mode,
+    num_folds,
+    epochs,
+    batch_size,
+    experiment_name,
+    verbose,
+    optimizer,
+    loss,
 ):
 
     kfold = KFold(n_splits=num_folds, shuffle=True)
@@ -136,42 +183,61 @@ def execute_training(
     accuracy_history = []
     cfx_history = []
 
+    loss_fn = loss
+    optimizer_algorithm = optimizer
+    monitor_metric = ["accuracy"]
+
     # train across folds
     for train, test in kfold.split(X, y):
 
-        model = model
-        model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
+        model = create_model(mode, loss_fn, optimizer_algorithm, monitor_metric)
 
         print("For Fold: " + str(fold_no))
         X_val, X_test, y_val, y_test = train_test_split(
             X[test], y[test], test_size=0.5, random_state=42
         )
 
+        X_train = X[train]
+        y_train = y[train]
+
+        X_train = tf.image.resize(X_train, (dim, dim))
+        X_val = tf.image.resize(X_val, (dim, dim))
+        X_test = tf.image.resize(X_test, (dim, dim))
+
+        X_train = tf.image.grayscale_to_rgb(X_train)
+        X_val = tf.image.grayscale_to_rgb(X_val)
+        X_test = tf.image.grayscale_to_rgb(X_test)
+
         history = model.fit(
-            X[train],
-            y[train],
+            X_train,
+            y_train,
             batch_size=batch_size,
             epochs=epochs,
-            verbose=verbose,
+            verbose=1,
             validation_data=(X_val, y_val),
         )
-        scores = model.evaluate(X[test], y[test], verbose=verbose)
+
+        scores = model.evaluate(X_test, y_test, batch_size=batch_size, verbose=verbose)
 
         # save the predictions from the model.evaluate
         y_prob = model.predict(X_test)
         predictions = y_prob.argmax(axis=-1)
 
         # compute the precision, recall, f1 score, and accuracy
-        precision = precision_score(y_test, predictions, average="weighted")
-        recall = recall_score(y_test, predictions, average="weighted")
-        f1 = f1_score(y_test, predictions, average="weighted")
-        accuracy = accuracy_score(y_test, predictions)
+        precision = precision_score(
+            np.argmax(y_test, axis=1), predictions, average="weighted"
+        )
+        recall = recall_score(
+            np.argmax(y_test, axis=1), predictions, average="weighted"
+        )
+        f1 = f1_score(np.argmax(y_test, axis=1), predictions, average="weighted")
+        accuracy = accuracy_score(np.argmax(y_test, axis=1), predictions)
 
         # cache the target values
         targets_cache.append(y_test)
 
         # create a confusion matrix
-        cfx = confusion_matrix(y_test, predictions)
+        cfx = confusion_matrix(np.argmax(y_test, axis=1), predictions)
         cfx_history.append(cfx)
 
         # cache the above
@@ -206,7 +272,6 @@ def execute_training(
         print("\n")
 
         model_cache.append(model)
-
         fold_no += 1
 
     return (
@@ -223,13 +288,6 @@ def execute_training(
         accuracy_history,
         cfx_history,
     )
-
-
-def extract_hyperparameters(filename):
-    hyperparams = None
-    with open("experiments_hgr/{}.yaml".format(filename), "r") as f:
-        hyperparameters = yaml.load(f, Loader=yaml.FullLoader)
-    return hyperparameters
 
 
 def execute_micro_macro_metrics(
@@ -269,29 +327,30 @@ def execute_micro_macro_metrics(
     }
 
     # micro averaging:
-
     micro_precision = precision_score(
-        np.concatenate(targets_cache),
+        np.argmax(np.concatenate(targets_cache), axis=1),
         np.concatenate(predictions_cache),
         average="weighted",
     )
     micro_recall = recall_score(
-        np.concatenate(targets_cache),
+        np.argmax(np.concatenate(targets_cache), axis=1),
         np.concatenate(predictions_cache),
         average="weighted",
     )
     micro_f1 = f1_score(
-        np.concatenate(targets_cache),
+        np.argmax(np.concatenate(targets_cache), axis=1),
         np.concatenate(predictions_cache),
         average="weighted",
     )
     micro_accuracy = accuracy_score(
-        np.concatenate(targets_cache), np.concatenate(predictions_cache)
+        np.argmax(np.concatenate(targets_cache), axis=1),
+        np.concatenate(predictions_cache),
     )
 
     # confusion matrix for micro averaging:
     cfx_micro = confusion_matrix(
-        np.concatenate(targets_cache), np.concatenate(predictions_cache)
+        np.argmax(np.concatenate(targets_cache), axis=1),
+        np.concatenate(predictions_cache),
     )
     cfx_micro_json = json.dumps(cfx_micro.tolist())
 
@@ -311,6 +370,13 @@ def execute_micro_macro_metrics(
         json.dump(JSON_data, outfile)
 
 
+def extract_hyperparameters(filename):
+    hyperparams = None
+    with open("experiments_asl/{}.yaml".format(filename), "r") as f:
+        hyperparameters = yaml.load(f, Loader=yaml.FullLoader)
+    return hyperparameters
+
+
 if __name__ == "__main__":
 
     # extract file name from command line input
@@ -323,15 +389,11 @@ if __name__ == "__main__":
     if not os.path.exists(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"]):
         os.makedirs(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"])
 
+    # read the data
     imagepaths = read_data()
+
+    # finalize data
     X, y = augment_data(imagepaths[0], imagepaths[1])
-
-    model = load_model("./hgr_resnet.h5")
-    # freeze all layers of the model except for the last one
-    for layer in model.layers[:-1]:
-        layer.trainable = False
-
-    # edit the last layer
 
     # execute the training pipeline
     (
@@ -350,15 +412,14 @@ if __name__ == "__main__":
     ) = execute_training(
         X,
         y,
-        model,
-        hyperparameters["EXPERIMENT_NAME"],
+        hyperparameters["CONFIG"]["MODE"],
         hyperparameters["CONFIG"]["NUM_FOLDS"],
         hyperparameters["CONFIG"]["EPOCHS"],
         hyperparameters["CONFIG"]["BATCH_SIZE"],
+        hyperparameters["EXPERIMENT_NAME"],
         hyperparameters["CONFIG"]["VERBOSE"],
         hyperparameters["CONFIG"]["OPTIMIZER"],
         hyperparameters["CONFIG"]["LOSS"],
-        hyperparameters["CONFIG"]["MODE"],
     )
 
     plot_training_validation(

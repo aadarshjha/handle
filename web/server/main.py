@@ -37,20 +37,28 @@ def dynamic_index():
                 {
                     "EgoGesture": {"prediction": inference[0]},
                     "IPN": {"prediction": inference[1]},
+                    "Jester": {"prediction": inference[2]},
+                    "Kinetics": {"prediction": inference[3]},
                 }
             )
         elif mode == "lstm":
             clip = inferenceClass.preProcess(frames)
             inference = inferenceClass.inference(clip)
-            print(inference)
+
             return json.dumps(
                 {
-                    # "EgoGesture": {"prediction": inference[0]},
-                    # "IPN": {"prediction": inference[1]},
+                    "ImageNet": {"prediction": inference[0]},
                 }
             )
         elif mode == "timesformer":
-            pass
+            clip = inferenceClass.preProcess(frames)
+            inference = inferenceClass.inference(clip)
+            print(inference)
+            return json.dumps(
+                {
+                    "Kinetics": {"prediction": inference[0]},
+                }
+            )
         else:
             return json.dumps({"Error": "Model Not Found"})
 
@@ -82,6 +90,8 @@ def static_index():
         augmented_single_image_b64_asl = augmented_image_asl.convert_to_b64(
             augmented_single_image_asl
         )
+        augmented_image_hgr.preProcess()
+        augmented_image_asl.preProcess()
 
         return json.dumps(
             {

@@ -1,10 +1,8 @@
 import os
-from pickle import NONE
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
-import cv2
 import sys
 import yaml
 import pandas as pd
@@ -16,21 +14,43 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
+from PIL import Image
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.layers import Dense, Flatten
+from keras.layers import Dense, Flatten, GlobalAveragePooling2D
 import json
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelBinarizer
+from tensorflow.keras.models import Sequential
+from tensorflow.keras import optimizers
+from tensorflow.keras.layers import (
+    Dense,
+    Dropout,
+    Conv2D,
+    BatchNormalization,
+    Flatten,
+)
+from sklearn.metrics import confusion_matrix
+from keras import Input, Model
+from keras.applications.mobilenet import MobileNet
+from keras.applications.densenet import DenseNet121
+from keras.applications.vgg16 import VGG16
+from keras.utils.vis_utils import plot_model
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 gpus = tf.config.experimental.list_physical_devices("GPU")
-tf.config.experimental.set_memory_growth(gpus[0], True)
+if gpus:
+    tf.config.experimental.set_memory_growth(gpus[0], True)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 PREFIX = "../../drive/MyDrive/handleData/"
+# PREFIX = "../leapGestRecog/"
 
 # custom plotting
 from plot import *
+
+dim_x = 90
+dim_y = 90
 
 # collect the data
 def read_data():
@@ -53,72 +73,157 @@ def augment_data(imagepaths):
 
     # Loops through imagepaths to load images and labels into arrays
     for path in imagepaths:
-        img = cv2.imread(path)  # Reads image and returns np.array
-        img = cv2.cvtColor(
-            img, cv2.COLOR_BGR2GRAY
-        )  # Converts into the corret colorspace (GRAY)
-        img = cv2.resize(img, (320, 120))  # Reduce image size so training can be faster
+
+        # opene image with PIL
+        img = Image.open(path).convert("L")
+        img = img.resize((dim_x, dim_y))
+        img = np.array(img)
         X.append(img)
 
         # Processing label in image path
         category = path.split("/")[3]
+
         label = int(
             category.split("_")[0][1]
         )  # We need to convert 10_down to 00_down, or else it crashes
         y.append(label)
 
-    X = np.array(X, dtype="uint8")
-    X = X.reshape(len(imagepaths), 120, 320, 1)
+    X = np.array(X, dtype="float32")
+    X = X.reshape(len(imagepaths), dim_y, dim_x, 1)
+    print(X.shape)
     y = np.array(y)
 
     print("Images loaded: ", len(X))
     print("Labels loaded: ", len(y))
 
+    # cache X and y
+    print("Caching data...")
+    np.save("X_augmented.npy", X)
+    np.save("y_augmented.npy", y)
+
     return X, y
 
 
-def create_model(mode="CNN"):
+def CNN_Model(loss_fn, optimizer_algorithm, monitor_metric, input_shape, n_out):
+    model = Sequential()
+    model.add(Conv2D(32, (5, 5), activation="relu", input_shape=input_shape))
+    model.add(MaxPooling2D((2, 2)))
+
+    model.add(Conv2D(64, (3, 3), activation="relu"))
+    model.add(MaxPooling2D((2, 2)))
+
+    model.add(Conv2D(64, (3, 3), activation="relu"))
+    model.add(MaxPooling2D((2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(128, activation="relu"))
+    model.add(Dense(n_out, activation="softmax"))
+
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+
+    return model
+
+
+def create_densenet_pretrained(
+    input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric
+):
+    OldModel = DenseNet121(
+        include_top=False, input_shape=input_shape, weights="imagenet"
+    )
+
+    for layer in OldModel.layers[:149]:
+        layer.trainable = False
+    for layer in OldModel.layers[149:]:
+        layer.trainable = True
+
+    model = Sequential()
+    model.add(OldModel)
+    model.add(Flatten())
+    model.add(BatchNormalization())
+    model.add(Dense(128, activation="relu"))
+    model.add(Dropout(0.7))
+    model.add(BatchNormalization())
+    model.add(Dense(64, activation="relu"))
+    model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(n_out, activation="softmax"))
+
+    model.compile(
+        optimizer=optimizer_algorithm,
+        loss=loss_fn,
+        metrics=monitor_metric,
+    )
+
+    return model
+
+
+def create_vgg16(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
+    old_model = VGG16(
+        input_shape=input_shape, include_top=False, weights="imagenet", pooling="avg"
+    )
+
+    old_model.trainable = False
+
+    model = Sequential([old_model, Dense(n_out, activation="sigmoid")])
+
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+    return model
+
+
+def create_mobilenet(input_shape, n_out, loss_fn, optimizer_algorithm, monitor_metric):
+    base_model = MobileNet(
+        input_shape=input_shape, include_top=False, weights="imagenet"
+    )
+    base_model.trainable = False
+    model = Sequential(
+        [
+            base_model,
+            GlobalAveragePooling2D(),
+            Dense(1024, activation="relu"),
+            Dense(1024, activation="relu"),
+            Dense(512, activation="relu"),
+            Dense(n_out, activation="sigmoid"),
+        ]
+    )
+    model.compile(loss=loss_fn, optimizer=optimizer_algorithm, metrics=monitor_metric)
+    return model
+
+
+def create_model(mode, loss_fn, optimizer_algorithm, monitor_metric):
 
     model = None
     if mode == "CNN":
-        model = Sequential()
-        model.add(Conv2D(32, (5, 5), activation="relu", input_shape=(120, 320, 1)))
-        model.add(MaxPooling2D((2, 2)))
-
-        model.add(Conv2D(64, (3, 3), activation="relu"))
-        model.add(MaxPooling2D((2, 2)))
-
-        model.add(Conv2D(64, (3, 3), activation="relu"))
-        model.add(MaxPooling2D((2, 2)))
-
-        model.add(Flatten())
-        model.add(Dense(128, activation="relu"))
-        model.add(Dense(10, activation="softmax"))
-    elif mode == "CNN_PRETRAINED":
-        pass
-    elif mode == "RESNET":
-        model = keras.applications.resnet.ResNet50(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
-        )
-    elif mode == "RESNET_PRETRAINED":
-        model = keras.applications.resnet.ResNet50(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
-        )
-    elif mode == "MOBILENET":
-        model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
+        model = CNN_Model(
+            loss_fn=loss_fn,
+            optimizer_algorithm=optimizer_algorithm,
+            monitor_metric=monitor_metric,
+            input_shape=(dim_y, dim_x, 3),
+            n_out=10,
         )
     elif mode == "MOBILENET_PRETRAINED":
-        model = keras.applications.mobilenet.MobileNet(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
+        model = create_mobilenet(
+            loss_fn=loss_fn,
+            optimizer_algorithm=optimizer_algorithm,
+            monitor_metric=monitor_metric,
+            input_shape=(dim_y, dim_x, 3),
+            n_out=10,
         )
-    elif mode == "DENSENET":
-        model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights=None, input_shape=(120, 320, 1)
-        )
+
     elif mode == "DENSENET_PRETRAINED":
-        model = keras.applications.densenet.DenseNet121(
-            include_top=False, weights="imagenet", input_shape=(120, 320, 1)
+        model = create_densenet_pretrained(
+            loss_fn=loss_fn,
+            optimizer_algorithm=optimizer_algorithm,
+            monitor_metric=monitor_metric,
+            input_shape=(dim_y, dim_x, 3),
+            n_out=10,
+        )
+    elif mode == "VGG_PRETRAINED":
+        model = create_vgg16(
+            loss_fn=loss_fn,
+            optimizer_algorithm=optimizer_algorithm,
+            monitor_metric=monitor_metric,
+            input_shape=(dim_y, dim_x, 3),
+            n_out=10,
         )
     else:
         # throw an error to the user
@@ -130,14 +235,14 @@ def create_model(mode="CNN"):
 def execute_training(
     X,
     y,
-    experiment_name="exper1",
-    num_folds=5,
-    epochs=10,
-    batch_size=32,
-    verbose=False,
-    optimizer="adam",
-    loss="sparse_categorical_crossentropy",
-    mode="CNN",
+    mode,
+    num_folds,
+    epochs,
+    batch_size,
+    experiment_name,
+    verbose,
+    optimizer,
+    loss,
 ):
 
     kfold = KFold(n_splits=num_folds, shuffle=True)
@@ -160,26 +265,40 @@ def execute_training(
     accuracy_history = []
     cfx_history = []
 
+    loss_fn = loss
+    optimizer_algorithm = optimizer
+    monitor_metric = ["accuracy"]
+
     # train across folds
     for train, test in kfold.split(X, y):
 
-        model = create_model()
-        model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
+        model = create_model(mode, loss_fn, optimizer_algorithm, monitor_metric)
 
         print("For Fold: " + str(fold_no))
         X_val, X_test, y_val, y_test = train_test_split(
             X[test], y[test], test_size=0.5, random_state=42
         )
 
+        X_train = X[train]
+        y_train = y[train]
+
+        X_train = tf.image.resize(X_train, (dim_x, dim_y))
+        X_val = tf.image.resize(X_val, (dim_x, dim_y))
+        X_test = tf.image.resize(X_test, (dim_x, dim_y))
+
+        X_train = tf.image.grayscale_to_rgb(X_train)
+        X_val = tf.image.grayscale_to_rgb(X_val)
+        X_test = tf.image.grayscale_to_rgb(X_test)
+
         history = model.fit(
-            X[train],
-            y[train],
+            X_train,
+            y_train,
             batch_size=batch_size,
             epochs=epochs,
-            verbose=verbose,
+            verbose=1,
             validation_data=(X_val, y_val),
         )
-        scores = model.evaluate(X[test], y[test], verbose=verbose)
+        scores = model.evaluate(X_test, y_test, verbose=verbose)
 
         # save the predictions from the model.evaluate
         y_prob = model.predict(X_test)
@@ -336,7 +455,6 @@ def extract_hyperparameters(filename):
 
 
 if __name__ == "__main__":
-
     # extract file name from command line input
     filename = sys.argv[1]
     hyperparameters = extract_hyperparameters(filename)
@@ -347,55 +465,72 @@ if __name__ == "__main__":
     if not os.path.exists(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"]):
         os.makedirs(PREFIX + "logs/" + hyperparameters["EXPERIMENT_NAME"])
 
-    # read the data
-    imagepaths = read_data()
+    # taking this precaution becuase the data takes a while to load.
 
-    # finalize data
-    X, y = augment_data(imagepaths)
+    X = None
+    y = None
 
-    # execute the training pipeline
-    (
-        model_cache,
-        train_loss,
-        train_acc,
-        val_loss,
-        val_acc,
-        predictions_cache,
-        targets_cache,
-        precision_history,
-        recall_history,
-        f1_history,
-        accuracy_history,
-        cfx_history,
-    ) = execute_training(
-        X,
-        y,
-        hyperparameters["EXPERIMENT_NAME"],
-        hyperparameters["CONFIG"]["NUM_FOLDS"],
-        hyperparameters["CONFIG"]["EPOCHS"],
-        hyperparameters["CONFIG"]["BATCH_SIZE"],
-        hyperparameters["CONFIG"]["VERBOSE"],
-        hyperparameters["CONFIG"]["OPTIMIZER"],
-        hyperparameters["CONFIG"]["LOSS"],
-        hyperparameters["CONFIG"]["MODE"],
-    )
+    # if X_augmented.npy is in the current directory
+    # and the file is not empty, skip this step
+    if not os.path.exists("./X_augmented.npy"):
+        print("Loading data...")
+        # read the data
+        imagepaths = read_data()
 
-    plot_training_validation(
-        train_loss,
-        train_acc,
-        val_loss,
-        val_acc,
-        hyperparameters["EXPERIMENT_NAME"],
-        PREFIX,
-    )
-    execute_micro_macro_metrics(
-        model_cache,
-        predictions_cache,
-        targets_cache,
-        precision_history,
-        recall_history,
-        f1_history,
-        accuracy_history,
-        cfx_history,
-        hyperparameters["EXPERIMENT_NAME"],
-    )
+        # finalize data
+        X, y = augment_data(imagepaths)
+    else:
+        # load the data
+        print("Loading pre-saved data...")
+        X = np.load("../../drive/MyDrive/X_augmented.npy")
+        y = np.load("../../drive/MyDrive/y_augmented.npy")
+
+        print(X.shape)
+        print(X[0].shape)
+
+        # execute the training pipeline
+        (
+            model_cache,
+            train_loss,
+            train_acc,
+            val_loss,
+            val_acc,
+            predictions_cache,
+            targets_cache,
+            precision_history,
+            recall_history,
+            f1_history,
+            accuracy_history,
+            cfx_history,
+        ) = execute_training(
+            X,
+            y,
+            hyperparameters["CONFIG"]["MODE"],
+            hyperparameters["CONFIG"]["NUM_FOLDS"],
+            hyperparameters["CONFIG"]["EPOCHS"],
+            hyperparameters["CONFIG"]["BATCH_SIZE"],
+            hyperparameters["EXPERIMENT_NAME"],
+            hyperparameters["CONFIG"]["VERBOSE"],
+            hyperparameters["CONFIG"]["OPTIMIZER"],
+            hyperparameters["CONFIG"]["LOSS"],
+        )
+
+        plot_training_validation(
+            train_loss,
+            train_acc,
+            val_loss,
+            val_acc,
+            hyperparameters["EXPERIMENT_NAME"],
+            PREFIX,
+        )
+        execute_micro_macro_metrics(
+            model_cache,
+            predictions_cache,
+            targets_cache,
+            precision_history,
+            recall_history,
+            f1_history,
+            accuracy_history,
+            cfx_history,
+            hyperparameters["EXPERIMENT_NAME"],
+        )
