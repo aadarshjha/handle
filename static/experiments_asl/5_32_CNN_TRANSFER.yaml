@@ -1,7 +1,7 @@
 # set up the hyperparams with YAML
 EXPERIMENT_NAME: '5_32_CNN_TRANSFER'
 CONFIG: 
-  NUM_FOLDS: 5
+  NUM_FOLDS: 3
   EPOCHS: 10
   BATCH_SIZE: 32
   VERBOSE: 'false'

@@ -5,7 +5,6 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
-import cv2
 import sys
 import yaml
 import pandas as pd
@@ -20,9 +19,7 @@ from sklearn.metrics import (
 )
 from PIL import Image
 from keras.models import Sequential
-from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Dense, Flatten, GlobalAveragePooling2D
+from keras.layers import Dense, Flatten
 import json
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
@@ -38,10 +35,6 @@ from tensorflow.keras.layers import (
 )
 from sklearn.metrics import confusion_matrix
 from keras import Input, Model
-from keras.applications.mobilenet import MobileNet
-from keras.applications.resnet import ResNet50
-from keras.applications.densenet import DenseNet121
-from keras.applications.vgg16 import VGG16
 
 from keras import backend as K
 
@@ -191,7 +184,6 @@ def execute_training(
     for train, test in kfold.split(X, y):
 
         model = create_model(mode, loss_fn, optimizer_algorithm, monitor_metric)
-
         print("For Fold: " + str(fold_no))
         X_val, X_test, y_val, y_test = train_test_split(
             X[test], y[test], test_size=0.5, random_state=42
@@ -199,6 +191,13 @@ def execute_training(
 
         X_train = X[train]
         y_train = y[train]
+
+        # percent of total data that X train, x val, x test
+        print("Split information")
+
+        print(len(X_train) / len(X))
+        print(len(X_val) / len(X))
+        print(len(X_test) / len(X))
 
         X_train = tf.image.resize(X_train, (dim, dim))
         X_val = tf.image.resize(X_val, (dim, dim))
